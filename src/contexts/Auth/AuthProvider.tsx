@@ -25,8 +25,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     postForgotPassword(email);
   };
 
-  const resetPassword = ({ password }: IResetPassword) => {
-    postResetPassword({ password });
+  const resetPassword = ({ password, token }: IResetPassword) => {
+    postResetPassword({ token, password });
   };
 
   return (
