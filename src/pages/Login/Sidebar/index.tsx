@@ -7,17 +7,18 @@ import {
   SidebarTitleText,
 } from "./style";
 
+import woman from "../../../assets/images/woman.jpg";
+import twoWoman from "../../../assets/images/two-woman.png";
+import usaFlag from "../../../assets/images/usa-flag.jpg";
+import logoCl from "../../../assets/images/logo-black.png";
+
 const Sidebar = () => {
   const [indexImg, setIndexImg] = useState(0);
   const [indexAlt, setIndexAlt] = useState(0);
   const [indexText, setIndexText] = useState(0);
   const [isAnimating, setIsAnimating] = useState(true);
 
-  const images = [
-    "src/assets/images/woman.jpg",
-    "src/assets/images/two-woman.png",
-    "src/assets/images/usa-flag.jpg",
-  ];
+  const images = [woman, twoWoman, usaFlag];
 
   const altImg = [
     "Mulher sorrindo",
@@ -56,10 +57,7 @@ const Sidebar = () => {
     <>
       <SidebarStyle className={isAnimating ? "fade-in" : "fade-out"}>
         <SidebarTitle>
-          <img
-            src="src/assets/images/logo-black.png"
-            alt="Logo Lara Charantola"
-          />
+          <img src={logoCl} alt="Logo Lara Charantola" />
           <SidebarTitleText>
             <h5>Lara Charantola: Aulas e Traduções</h5>
             <p>Professora online | Teacher | Tradutora</p>
