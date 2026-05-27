@@ -5,7 +5,7 @@ import {
   postForgotPassword,
   postLogin,
   postResetPassword,
-} from "./services/auth";
+} from "../../services/auth";
 
 export interface AuthProviderProps {
   children: React.ReactNode;

@@ -10,9 +10,9 @@ import { Field, InputField } from "./style";
 //feedback é um objeto opcional que recebe uma função para passar o se deu erro, sucesso ou aviso
 //disabled é uma propriedade opcional que, se verdadeira, desabilita o input
 
-export interface feedbackTypes {
+export type feedbackTypes = {
   type: "danger" | "success" | "warning";
-}
+};
 
 interface InputProps {
   label: string;
@@ -22,7 +22,7 @@ interface InputProps {
   iconRight?: React.ReactNode;
   value?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  feedback?: feedbackTypes;
+  feedback?: "danger" | "success" | "warning";
   helpText?: string;
   disabled?: boolean;
   required?: boolean;
@@ -42,7 +42,7 @@ const Input = ({
   iconRight,
 }: InputProps) => {
   return (
-    <Field $feedback={feedback?.type}>
+    <Field $feedback={feedback}>
       <label>{label}</label>
       <InputField>
         {iconLeft}

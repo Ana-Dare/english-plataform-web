@@ -1,5 +1,5 @@
-import { FormHeader, FormWrapper } from "../../Login/Form/style";
-import Input from "../../../components/Form/Input";
+import { FormHeader, FormWrapper } from "../../../components/Form/style";
+import Input from "../../../components/Form/components/Input";
 import Button from "../../../components/Button";
 import { useState } from "react";
 import { Lock } from "lucide-react";

@@ -1,16 +1,16 @@
-import Button from "../../../../components/Button";
-import Input from "../../../../components/Form/Input";
-import { Container, FormHeader, FormWrapper } from "../style";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
-import useLogin from "../../../../contexts/Auth/hooks/useLogin";
 import { useNavigate } from "react-router-dom";
+import useLogin from "../../../contexts/Auth/hooks/useLogin";
+import { Container, FormHeader, FormWrapper } from "../style";
+import Input from "../components/Input";
+import Button from "../../Button";
 
 const FormLogin = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isVisiblePassword, setIsVisiblePassword] = useState<boolean>(false);
-  const { login, setTypeOfForm } = useLogin();
+  const { login } = useLogin();
   const navigate = useNavigate();
 
   const clearForm = () => {
@@ -67,7 +67,7 @@ const FormLogin = () => {
             )
           }
         />
-        <p className="link" onClick={() => setTypeOfForm("forgot-password")}>
+        <p className="link" onClick={() => navigate("/forgot-password")}>
           Esqueceu sua senha?
         </p>
         <Button

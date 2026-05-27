@@ -7,10 +7,10 @@ import {
   SidebarTitleText,
 } from "./style";
 
-import woman from "../../../assets/images/woman.jpg";
-import twoWoman from "../../../assets/images/two-woman.png";
-import usaFlag from "../../../assets/images/usa-flag.jpg";
-import logoCl from "../../../assets/images/logo-black.png";
+import woman from "../../assets/images/woman.jpg";
+import twoWoman from "../../assets/images/two-woman.png";
+import usaFlag from "../../assets/images/usa-flag.jpg";
+import logoCl from "../../assets/images/logo-black.png";
 
 const Sidebar = () => {
   const [indexImg, setIndexImg] = useState(0);

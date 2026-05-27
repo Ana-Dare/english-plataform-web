@@ -18,9 +18,10 @@ export const Field = styled.div<FieldProps>`
 
   p {
     font-size: 0.875rem;
+    font-weight: 700;
     color: ${(props) =>
       props.$feedback === "danger"
-        ? props.theme.colors.danger
+        ? "#991B1B"
         : props.$feedback === "success"
           ? props.theme.colors.success
           : props.$feedback === "warning"
@@ -57,6 +58,19 @@ export const InputField = styled.div`
     }
     &::placeholder {
       color: ${(props) => props.theme.colors.white};
+    }
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-text-fill-color: #fff !important;
+      transition: background-color 5000s ease-in-out 0s;
+      box-shadow: 0 0 0px 1000px "#C9A227" inset !important;
+      font-size: 1 !important;
+    }
+    &:-webkit-autofill::placeholder {
+      color: #fff;
     }
   }
 `;
