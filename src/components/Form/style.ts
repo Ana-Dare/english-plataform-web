@@ -8,6 +8,12 @@ export const Container = styled.div`
   width: 55%;
   padding: 2rem;
   font-family: "Rubik", sans-serif;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 1.5rem;
+    min-height: 100vh;
+  }
 `;
 
 export const FormWrapper = styled.div`
@@ -28,7 +34,12 @@ export const FormWrapper = styled.div`
   max-width: 640px;
   height: fit-content;
 
-  .link {
+  <<<<<<< HEAD ======= @media (max-width: 768px) {
+    padding: 2rem 1.5rem;
+    border-radius: 40px 24px 24px 24px;
+  }
+
+  >>>>>>>baf0919 (feat: criaçaõ dashboard professora) .link {
     color: ${({ theme }) => theme.colors.white};
     font-weight: 500;
     text-decoration: none;

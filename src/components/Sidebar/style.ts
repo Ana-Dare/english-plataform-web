@@ -15,6 +15,10 @@ export const SidebarStyle = styled.div`
   height: 100%;
   font-family: "Rubik", sans-serif;
 
+  @media (max-width: 768px) {
+    display: none;
+  }
+
   .fade-in,
   .fade-out {
     transition: opacity 0.8s ease;
@@ -37,7 +41,7 @@ export const SidebarImage = styled.div`
   height: 100%;
   height: 100%;
   border-radius: 0 9.375rem 9.375rem 0;
-  background-color: red;
+  background-color: #1e3a8a;
   background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5));
 
   &::before {

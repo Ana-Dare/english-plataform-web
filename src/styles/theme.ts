@@ -8,7 +8,7 @@ export const mainTheme = {
     border: "#e2e8f0",
     blue: "#1e3a8a",
     gold: "#C9A227",
-    danger: "#970e0e",
+    danger: "#EAE0D5",
     success: "#045421",
   },
   spacings: {
