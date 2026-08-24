@@ -1,15 +1,24 @@
-import React, { useState, useRef } from 'react';
-import { X, UploadCloud } from 'lucide-react';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
+import React, { useState, useRef } from "react";
+import { X, UploadCloud } from "lucide-react";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 import {
-  ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
-  FieldGroup, CloseBtn, PrimaryBtn, SecondaryBtn, DropzoneContainer, RichTextWrapper
-} from './style';
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  FieldGroup,
+  CloseBtn,
+  PrimaryBtn,
+  SecondaryBtn,
+  DropzoneContainer,
+  RichTextWrapper,
+} from "./style";
 
 export interface MaterialData {
   title: string;
-  type: 'pdf' | 'video' | 'link';
+  type: "pdf" | "video" | "link";
   url: string;
   description: string;
 }
@@ -19,13 +28,16 @@ interface AddMaterialModalProps {
   onSave: (data: MaterialData) => void;
 }
 
-const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) => {
-  const [title, setTitle] = useState('');
-  const [type, setType] = useState<'pdf' | 'video' | 'link'>('pdf');
-  const [url, setUrl] = useState('');
-  const [description, setDescription] = useState('');
+const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
+  onClose,
+  onSave,
+}) => {
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState<"pdf" | "video" | "link">("pdf");
+  const [url, setUrl] = useState("");
+  const [description, setDescription] = useState("");
 
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,7 +56,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       setFileName(file.name);
-      setUrl(URL.createObjectURL(file)); 
+      setUrl(URL.createObjectURL(file));
     }
   };
 
@@ -52,13 +64,13 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) 
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setFileName(file.name);
-      setUrl(URL.createObjectURL(file)); 
+      setUrl(URL.createObjectURL(file));
     }
   };
 
   const handleSave = () => {
     if (!title.trim()) {
-      alert('Por favor, informe o título do material.');
+      alert("Por favor, informe o título do material.");
       return;
     }
     onSave({ title, type, url, description });
@@ -69,42 +81,47 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) 
       <ModalContent $expanded>
         <ModalHeader>
           <h3>Adicionar Material</h3>
-          <CloseBtn onClick={onClose}><X size={20} /></CloseBtn>
+          <CloseBtn onClick={onClose}>
+            <X size={20} />
+          </CloseBtn>
         </ModalHeader>
         <ModalBody>
           <FieldGroup>
             <label>Título do Material</label>
-            <input 
-              type="text" 
-              placeholder="Ex: Apostila Módulo 1" 
-              value={title} 
-              onChange={e => setTitle(e.target.value)} 
+            <input
+              type="text"
+              placeholder="Ex: Apostila Módulo 1"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </FieldGroup>
           <FieldGroup>
             <label>Tipo de Arquivo</label>
-            <select value={type} onChange={e => {
-              setType(e.target.value as 'pdf' | 'video' | 'link');
-              setUrl('');
-              setFileName('');
-            }}>
+            <select
+              value={type}
+              onChange={(e) => {
+                setType(e.target.value as "pdf" | "video" | "link");
+                setUrl("");
+                setFileName("");
+              }}
+            >
               <option value="pdf">Documento PDF</option>
               <option value="video">Vídeo (YouTube/Vimeo)</option>
               <option value="link">Link Externo</option>
             </select>
           </FieldGroup>
-          
-          {type === 'pdf' ? (
+
+          {type === "pdf" ? (
             <FieldGroup>
               <label>Arquivo</label>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                style={{ display: 'none' }} 
-                onChange={handleFileChange} 
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
                 accept=".pdf,.doc,.docx"
               />
-              <DropzoneContainer 
+              <DropzoneContainer
                 $isDragActive={isDragActive}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -113,10 +130,15 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) 
               >
                 <UploadCloud />
                 {fileName ? (
-                  <p>Arquivo selecionado: <strong>{fileName}</strong></p>
+                  <p>
+                    Arquivo selecionado: <strong>{fileName}</strong>
+                  </p>
                 ) : (
                   <>
-                    <p>Arraste seu arquivo para cá ou <strong>clique para buscar</strong></p>
+                    <p>
+                      Arraste seu arquivo para cá ou{" "}
+                      <strong>clique para buscar</strong>
+                    </p>
                     <span>Formatos suportados: PDF, DOC, DOCX</span>
                   </>
                 )}
@@ -125,11 +147,11 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) 
           ) : (
             <FieldGroup>
               <label>Link / URL</label>
-              <input 
-                type="url" 
-                placeholder="https://..." 
-                value={url} 
-                onChange={e => setUrl(e.target.value)} 
+              <input
+                type="url"
+                placeholder="https://..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
               />
             </FieldGroup>
           )}
@@ -137,10 +159,10 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({ onClose, onSave }) 
           <FieldGroup>
             <label>Descrição Avançada (Opcional)</label>
             <RichTextWrapper>
-              <ReactQuill 
-                theme="snow" 
-                value={description} 
-                onChange={setDescription} 
+              <ReactQuill
+                theme="snow"
+                value={description}
+                onChange={setDescription}
                 placeholder="Escreva detalhes adicionais ou instruções..."
               />
             </RichTextWrapper>

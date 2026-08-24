@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from "styled-components";
 
 export const Container = styled.div`
   display: flex;
@@ -8,8 +8,14 @@ export const Container = styled.div`
   height: 100%;
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -69,14 +75,14 @@ export const SearchWrapper = styled.div`
     outline: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #fdfdfd;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 
     &:focus {
       background: #fff;
       border-color: #1a3d6e;
       box-shadow: 0 4px 12px rgba(26, 61, 110, 0.15);
     }
-    
+
     &::placeholder {
       color: #aaa;
     }
@@ -129,7 +135,7 @@ export const ClassCard = styled.div`
   background: #fff;
   border-radius: 12px;
   border: 1px solid #eaeaea;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   overflow: hidden;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
@@ -138,7 +144,7 @@ export const ClassCard = styled.div`
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
     border-color: #d0d0d0;
   }
 `;
@@ -147,9 +153,12 @@ export const ClassCardHeader = styled.div<{ $level: string }>`
   padding: 1.5rem;
   background: ${({ $level }) => {
     switch ($level) {
-      case 'Advanced': return 'linear-gradient(135deg, #08142c 0%, #1a3d6e 100%)';
-      case 'Intermediate': return 'linear-gradient(135deg, #1a3d6e 0%, #2980b9 100%)';
-      default: return 'linear-gradient(135deg, #2980b9 0%, #3498db 100%)';
+      case "Advanced":
+        return "linear-gradient(135deg, #08142c 0%, #1a3d6e 100%)";
+      case "Intermediate":
+        return "linear-gradient(135deg, #1a3d6e 0%, #2980b9 100%)";
+      default:
+        return "linear-gradient(135deg, #2980b9 0%, #3498db 100%)";
     }
   }};
   color: #fff;
@@ -165,7 +174,7 @@ export const ClassCardHeader = styled.div<{ $level: string }>`
 `;
 
 export const LevelBadge = styled.span`
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -187,7 +196,7 @@ export const ClassCardInfo = styled.div`
   gap: 0.6rem;
   color: #555;
   font-size: 0.9rem;
-  
+
   svg {
     color: #888;
   }
@@ -198,7 +207,10 @@ export const StudentsPreview = styled.div`
   align-items: center;
 `;
 
-export const StudentAvatarSmall = styled.div<{ $color: string; $index: number }>`
+export const StudentAvatarSmall = styled.div<{
+  $color: string;
+  $index: number;
+}>`
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -210,7 +222,7 @@ export const StudentAvatarSmall = styled.div<{ $color: string; $index: number }>
   font-size: 0.75rem;
   font-weight: 700;
   border: 2px solid #fff;
-  margin-left: ${({ $index }) => $index > 0 ? '-10px' : '0'};
+  margin-left: ${({ $index }) => ($index > 0 ? "-10px" : "0")};
   position: relative;
   z-index: ${({ $index }) => 10 - $index};
 `;
@@ -237,7 +249,7 @@ export const MoreStudents = styled.div`
 export const DetailContainer = styled.div`
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -258,8 +270,8 @@ export const DetailBackBtn = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   border-radius: 6px;
   padding: 0.4rem 0.8rem;
@@ -271,7 +283,7 @@ export const DetailBackBtn = styled.button`
   align-self: flex-start;
 
   &:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
   }
 `;
 
@@ -302,8 +314,9 @@ export const TabBtn = styled.button<{ $active: boolean }>`
   padding: 1.2rem 0;
   font-size: 1rem;
   font-weight: 600;
-  color: ${({ $active }) => $active ? '#08142c' : '#777'};
-  border-bottom: 3px solid ${({ $active }) => $active ? '#08142c' : 'transparent'};
+  color: ${({ $active }) => ($active ? "#08142c" : "#777")};
+  border-bottom: 3px solid
+    ${({ $active }) => ($active ? "#08142c" : "transparent")};
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
@@ -330,7 +343,7 @@ export const PostCard = styled.div`
   border-radius: 10px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 `;
 
 export const PostHeader = styled.div`
@@ -419,7 +432,7 @@ export const MaterialCard = styled.div`
   flex-direction: column;
   gap: 1rem;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   cursor: pointer;
 
   &:hover {
@@ -438,18 +451,26 @@ export const MaterialIcon = styled.div<{ $type: string }>`
   justify-content: center;
   background: ${({ $type }) => {
     switch ($type) {
-      case 'pdf': return '#fce8e6';
-      case 'video': return '#fef7e0';
-      case 'link': return '#e8eaed';
-      default: return '#e8eef4';
+      case "pdf":
+        return "#fce8e6";
+      case "video":
+        return "#fef7e0";
+      case "link":
+        return "#e8eaed";
+      default:
+        return "#e8eef4";
     }
   }};
   color: ${({ $type }) => {
     switch ($type) {
-      case 'pdf': return '#d93025';
-      case 'video': return '#f9ab00';
-      case 'link': return '#5f6368';
-      default: return '#1a73e8';
+      case "pdf":
+        return "#d93025";
+      case "video":
+        return "#f9ab00";
+      case "link":
+        return "#5f6368";
+      default:
+        return "#1a73e8";
     }
   }};
 `;
@@ -508,7 +529,7 @@ export const AgendaDateBox = styled.div`
     color: #08142c;
     line-height: 1;
   }
-  
+
   span {
     font-size: 0.8rem;
     color: #666;
@@ -537,7 +558,10 @@ export const AgendaDetails = styled.div`
 
 export const ModalOverlay = styled.div`
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -551,17 +575,23 @@ export const ModalContent = styled.div<{ $expanded?: boolean }>`
   background: #fff;
   border-radius: 16px;
   width: 90%;
-  max-width: ${({ $expanded }) => $expanded ? '800px' : '600px'};
+  max-width: ${({ $expanded }) => ($expanded ? "800px" : "600px")};
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease-out;
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -609,7 +639,8 @@ export const FieldGroup = styled.div`
     color: #555;
   }
 
-  input, select {
+  input,
+  select {
     padding: 0.75rem 1rem;
     border: 1px solid #d0d0d0;
     border-radius: 8px;
@@ -630,7 +661,7 @@ export const StudentListSelect = styled.div`
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
-  
+
   &::-webkit-scrollbar {
     width: 6px;
   }
@@ -648,7 +679,7 @@ export const StudentSelectItem = styled.div<{ $selected: boolean }>`
   border-bottom: 1px solid #eaeaea;
   cursor: pointer;
   transition: all 0.2s;
-  background: ${({ $selected }) => $selected ? '#f0f4f8' : '#fff'};
+  background: ${({ $selected }) => ($selected ? "#f0f4f8" : "#fff")};
 
   &:hover {
     background: #f8f9fc;
@@ -664,16 +695,22 @@ export const StudentSelectInfo = styled.div`
   display: flex;
   flex-direction: column;
 
-  strong { font-size: 0.9rem; color: #1a1a1a; }
-  span { font-size: 0.75rem; color: #888; }
+  strong {
+    font-size: 0.9rem;
+    color: #1a1a1a;
+  }
+  span {
+    font-size: 0.75rem;
+    color: #888;
+  }
 `;
 
 export const CheckCircle = styled.div<{ $selected: boolean }>`
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid ${({ $selected }) => $selected ? '#08142c' : '#d0d0d0'};
-  background: ${({ $selected }) => $selected ? '#08142c' : 'transparent'};
+  border: 2px solid ${({ $selected }) => ($selected ? "#08142c" : "#d0d0d0")};
+  background: ${({ $selected }) => ($selected ? "#08142c" : "transparent")};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -733,8 +770,10 @@ export const SecondaryBtn = styled.button`
 `;
 
 export const DropzoneContainer = styled.div<{ $isDragActive?: boolean }>`
-  border: 2px dashed ${({ $isDragActive }) => $isDragActive ? '#08142c' : '#d0d0d0'};
-  background-color: ${({ $isDragActive }) => $isDragActive ? '#f0f4f8' : '#fafafa'};
+  border: 2px dashed
+    ${({ $isDragActive }) => ($isDragActive ? "#08142c" : "#d0d0d0")};
+  background-color: ${({ $isDragActive }) =>
+    $isDragActive ? "#f0f4f8" : "#fafafa"};
   border-radius: 12px;
   padding: 3rem 2rem;
   display: flex;
@@ -747,7 +786,7 @@ export const DropzoneContainer = styled.div<{ $isDragActive?: boolean }>`
   text-align: center;
 
   svg {
-    color: ${({ $isDragActive }) => $isDragActive ? '#08142c' : '#888'};
+    color: ${({ $isDragActive }) => ($isDragActive ? "#08142c" : "#888")};
     width: 48px;
     height: 48px;
     margin-bottom: 0.5rem;
@@ -775,14 +814,14 @@ export const RichTextWrapper = styled.div`
   .quill {
     background: #fff;
     border-radius: 8px;
-    
+
     .ql-toolbar {
       border: 1px solid #d0d0d0;
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
       background: #f8f9fc;
     }
-    
+
     .ql-container {
       border: 1px solid #d0d0d0;
       border-bottom-left-radius: 8px;
@@ -791,7 +830,7 @@ export const RichTextWrapper = styled.div`
       font-family: inherit;
       font-size: 0.95rem;
     }
-    
+
     .ql-editor {
       min-height: 150px;
     }

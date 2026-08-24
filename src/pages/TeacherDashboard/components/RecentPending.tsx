@@ -1,6 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
-import { AlertTriangle } from 'lucide-react';
+import styled from "styled-components";
+import { AlertTriangle } from "lucide-react";
 
 const PendingList = styled.div`
   display: flex;
@@ -34,7 +33,7 @@ const DotItem = styled.div`
   gap: 0.8rem;
 
   &::before {
-    content: '';
+    content: "";
     width: 4px;
     height: 4px;
     border-radius: 50%;
@@ -44,10 +43,10 @@ const DotItem = styled.div`
 
 const RecentPending = () => {
   const pendingTasks = [
-    '4 matrículas aguardando confirmação',
-    '3 alunos sem turma',
-    '14 atividades não corrigidas',
-    '2 faltas com atestado',
+    "4 matrículas aguardando confirmação",
+    "3 alunos sem turma",
+    "14 atividades não corrigidas",
+    "2 faltas com atestado",
   ];
 
   return (
@@ -55,7 +54,9 @@ const RecentPending = () => {
       {pendingTasks.map((task, idx) => (
         <PendingItem key={idx}>
           <DotItem>{task}</DotItem>
-          {idx < 2 && <AlertTriangle size={16} color="#3165e3" strokeWidth={2} />}
+          {idx < 2 && (
+            <AlertTriangle size={16} color="#3165e3" strokeWidth={2} />
+          )}
         </PendingItem>
       ))}
     </PendingList>

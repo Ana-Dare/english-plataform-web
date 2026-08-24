@@ -1,6 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
-import { ChevronDown } from 'lucide-react';
+import styled from "styled-components";
+import { ChevronDown } from "lucide-react";
 
 const AgendaContainer = styled.div`
   display: flex;
@@ -81,9 +80,9 @@ const ClassInfo = styled.div`
 
 const DailyAgenda = () => {
   const classes = [
-    { time: '14:00', name: 'Turma Beginner 1', students: '12 alunos' },
-    { time: '16:00', name: 'Aula VIP - Camila', students: '1 aluna' },
-    { time: '19:00', name: 'Turma Beginner 2', students: '9 alunos' },
+    { time: "14:00", name: "Turma Beginner 1", students: "12 alunos" },
+    { time: "16:00", name: "Aula VIP - Camila", students: "1 aluna" },
+    { time: "19:00", name: "Turma Beginner 2", students: "9 alunos" },
   ];
 
   return (
