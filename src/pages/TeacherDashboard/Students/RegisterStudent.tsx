@@ -22,22 +22,11 @@ import {
   RegisterFooter,
   DetailActionBtn,
 } from "./style";
+import type { RegisterStudentParams } from "../types";
 
 interface RegisterStudentProps {
   onBack: () => void;
-  onSave: (data: RegisterFormData) => void;
-}
-
-export interface RegisterFormData {
-  name: string;
-  cpf: string;
-  email: string;
-  phone: string;
-  birthDate: string;
-  plan: "VIP" | "Regular";
-  level: string;
-  turma: string;
-  observations: string;
+  onSave: (data: RegisterStudentParams) => void;
 }
 
 const formatCPF = (value: string) => {
@@ -61,16 +50,16 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
   onSave,
 }) => {
   const [step] = useState(1);
-  const [form, setForm] = useState<RegisterFormData>({
+  const [form, setForm] = useState<RegisterStudentParams>({
     name: "",
-    cpf: "",
+    cpf_hash: "",
     email: "",
     phone: "",
-    birthDate: "",
-    plan: "Regular",
-    level: "",
-    turma: "",
-    observations: "",
+    birthdate: "",
+    vip: 0,
+    level_id: 1,
+    notes: "",
+    active: 1,
   });
 
   const handleSubmit = () => {
@@ -122,9 +111,12 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
                 <RegisterInput
                   type="text"
                   placeholder="000.000.000-00"
-                  value={form.cpf}
+                  value={form.cpf_hash}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, cpf: formatCPF(e.target.value) }))
+                    setForm((f) => ({
+                      ...f,
+                      cpf_hash: formatCPF(e.target.value),
+                    }))
                   }
                 />
               </RegisterField>
@@ -161,9 +153,9 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
                 <RegisterLabel>Data de Nascimento</RegisterLabel>
                 <RegisterInput
                   type="date"
-                  value={form.birthDate}
+                  value={form.birthdate}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, birthDate: e.target.value }))
+                    setForm((f) => ({ ...f, birthdate: e.target.value }))
                   }
                 />
               </RegisterField>
@@ -179,11 +171,11 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
             </RegisterLabel>
             <PlanSelector>
               <PlanCard
-                $selected={form.plan === "Regular"}
+                $selected={form.vip === 0}
                 $type="Regular"
-                onClick={() => setForm((f) => ({ ...f, plan: "Regular" }))}
+                onClick={() => setForm((f) => ({ ...f, vip: 0 }))}
               >
-                <PlanCheck $selected={form.plan === "Regular"}>
+                <PlanCheck $selected={form.vip === 0}>
                   <Check size={12} />
                 </PlanCheck>
                 <h5>Regular</h5>
@@ -193,11 +185,11 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
                 </p>
               </PlanCard>
               <PlanCard
-                $selected={form.plan === "VIP"}
-                $type="VIP"
-                onClick={() => setForm((f) => ({ ...f, plan: "VIP" }))}
+                $selected={form.vip === 1}
+                $type={1}
+                onClick={() => setForm((f) => ({ ...f, vip: 1 }))}
               >
-                <PlanCheck $selected={form.plan === "VIP"}>
+                <PlanCheck $selected={form.vip === 1}>
                   <Check size={12} />
                 </PlanCheck>
                 <h5>VIP</h5>
@@ -212,18 +204,18 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
               <RegisterField>
                 <RegisterLabel>Nível</RegisterLabel>
                 <RegisterSelect
-                  value={form.level}
+                  value={form.level_id}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, level: e.target.value }))
+                    setForm((f) => ({
+                      ...f,
+                      level_id: Number(e.target.value),
+                    }))
                   }
                 >
-                  <option value="">Selecione o nível...</option>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
+                  <option value={1}>A1</option>
                 </RegisterSelect>
               </RegisterField>
-              <RegisterField>
+              {/* <RegisterField>
                 <RegisterLabel>Turma</RegisterLabel>
                 <RegisterSelect
                   value={form.turma}
@@ -231,7 +223,7 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
                     setForm((f) => ({ ...f, turma: e.target.value }))
                   }
                 >
-                  <option value="">Selecione a turma...</option>
+                  <option value="1">A1</option>
                   <option value="Turma Beginner 1">Turma Beginner 1</option>
                   <option value="Turma Beginner 2">Turma Beginner 2</option>
                   <option value="Turma Intermediate A">
@@ -243,7 +235,7 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
                   <option value="Turma Advanced">Turma Advanced</option>
                   <option value="Particular">Particular</option>
                 </RegisterSelect>
-              </RegisterField>
+              </RegisterField> */}
             </RegisterGrid>
           </RegisterSection>
           {/* Observações */}
@@ -251,9 +243,9 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
             <RegisterSectionTitle>Observações</RegisterSectionTitle>
             <RegisterTextarea
               placeholder="Informações adicionais sobre o aluno, objetivos, disponibilidade..."
-              value={form.observations}
+              value={form.notes}
               onChange={(e) =>
-                setForm((f) => ({ ...f, observations: e.target.value }))
+                setForm((f) => ({ ...f, notes: e.target.value }))
               }
             />
           </RegisterSection>

@@ -18,7 +18,7 @@ const ForgotPassword = () => {
           right: "1rem",
           cursor: "pointer",
         }}
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/login")}
       />
       <FormForgotPassword />
     </ForgotPasswordStyle>

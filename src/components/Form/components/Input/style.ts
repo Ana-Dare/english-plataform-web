@@ -16,7 +16,8 @@ export const Field = styled.div<FieldProps>`
     color: ${(props) => props.theme.colors.white};
   }
 
-  p {
+  p,
+  > span {
     font-size: 0.875rem;
     font-weight: 700;
     color: ${(props) =>
@@ -27,6 +28,17 @@ export const Field = styled.div<FieldProps>`
           : props.$feedback === "warning"
             ? props.theme.colors.gold
             : props.theme.colors.white};
+  }
+`;
+
+export const FeedbackMessage = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  line-height: 1.2;
+
+  svg {
+    flex-shrink: 0;
   }
 `;
 

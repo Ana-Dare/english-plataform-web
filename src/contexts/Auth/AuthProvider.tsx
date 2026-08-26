@@ -12,12 +12,19 @@ export interface AuthProviderProps {
 }
 
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const [typeOfForm, setTypeOfForm] = useState<"login" | "forgot-password">(
-    "login",
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() =>
+    Boolean(localStorage.getItem("@App:accessToken")),
   );
 
-  const login = ({ email: user, password }: ILogin) => {
-    postLogin({ email: user, password });
+  const login = async ({ email: user, password }: ILogin) => {
+    const data = await postLogin({ email: user, password });
+
+    if (data.accessToken) {
+      setIsAuthenticated(true);
+    }
+
+    //verificar role
+    //persistir isAuthenticated
   };
 
   const forgotPassword = ({ email }: IForgotPassword) => {
@@ -35,8 +42,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         login,
         forgotPassword,
         resetPassword,
-        typeOfForm,
-        setTypeOfForm,
+
+        isAuthenticated,
+        setIsAuthenticated,
       }}
     >
       {children}

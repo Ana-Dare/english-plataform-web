@@ -1,4 +1,4 @@
-import FormResetPassword from "./Form";
+import FormResetPassword from "../../components/Form/resetPassword";
 import { ResetPasswordStyle } from "./style";
 
 const ResetPassword = () => {

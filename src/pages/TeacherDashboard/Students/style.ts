@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled, { css } from "styled-components";
 
 export const Container = styled.div`
   display: flex;
@@ -29,7 +29,7 @@ export const SearchWrapper = styled.div`
   &:focus-within {
     border-color: #08142c;
   }
-  
+
   svg {
     color: #888;
     margin-right: 0.5rem;
@@ -40,10 +40,10 @@ export const SearchWrapper = styled.div`
     border: none;
     outline: none;
     font-size: 0.9rem;
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     width: 100%;
     color: #333;
-    
+
     &::placeholder {
       color: #999;
     }
@@ -69,7 +69,7 @@ export const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
+
   span {
     font-size: 0.85rem;
     color: #666;
@@ -77,7 +77,9 @@ export const PaginationContainer = styled.div`
   }
 
   @media (max-width: 480px) {
-    span { display: none; }
+    span {
+      display: none;
+    }
   }
 `;
 
@@ -98,7 +100,7 @@ export const IconButton = styled.button`
     background: #f5f5f5;
     border-color: #d0d0d0;
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -111,7 +113,7 @@ export const AddButton = styled.button`
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1.2rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -136,7 +138,7 @@ export const AddButton = styled.button`
 export const TableContainer = styled.div`
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   border: 1px solid #eaeaea;
   width: 100%;
@@ -172,7 +174,7 @@ export const Tr = styled.tr`
   &:nth-child(odd) {
     background-color: #fff9e6;
   }
-  
+
   &:nth-child(even) {
     background-color: #ffffff;
   }
@@ -207,7 +209,9 @@ export const Avatar = styled.div<{ $color: string }>`
   font-size: 0.85rem;
   color: #fff;
   flex-shrink: 0;
-  ${({ $color }) => css`background-color: ${$color};`}
+  ${({ $color }) => css`
+    background-color: ${$color};
+  `}
 `;
 
 export const StudentInfo = styled.div`
@@ -225,7 +229,7 @@ export const StudentInfo = styled.div`
   }
 `;
 
-export const PlanBadge = styled.span<{ $plan: 'VIP' | 'Regular' }>`
+export const PlanBadge = styled.span<{ $plan: 1 | 0 }>`
   font-size: 0.7rem;
   font-weight: 600;
   padding: 0.25rem 0.6rem;
@@ -235,7 +239,7 @@ export const PlanBadge = styled.span<{ $plan: 'VIP' | 'Regular' }>`
   display: inline-block;
 
   ${({ $plan }) =>
-    $plan === 'VIP'
+    $plan === 1
       ? css`
           background: #08142c;
           color: #a4c2f4; /* azul fraco */
@@ -248,8 +252,8 @@ export const PlanBadge = styled.span<{ $plan: 'VIP' | 'Regular' }>`
 `;
 
 export const StatusBadge = styled.span<{ $active: boolean }>`
-  background-color: ${({ $active }) => $active ? '#e6f4ea' : '#fce8e6'};
-  color: ${({ $active }) => $active ? '#1e8e3e' : '#d93025'};
+  background-color: ${({ $active }) => ($active ? "#e6f4ea" : "#fce8e6")};
+  color: ${({ $active }) => ($active ? "#1e8e3e" : "#d93025")};
   font-size: 0.73rem;
   font-weight: 600;
   padding: 0.25rem 0.6rem;
@@ -257,10 +261,14 @@ export const StatusBadge = styled.span<{ $active: boolean }>`
   display: inline-block;
 `;
 
-export const ActionIconBtn = styled.button<{ $danger?: boolean; $success?: boolean }>`
+export const ActionIconBtn = styled.button<{
+  $danger?: boolean;
+  $success?: boolean;
+}>`
   background: transparent;
   border: 1px solid transparent;
-  color: ${({ $danger, $success }) => $danger ? '#d93025' : $success ? '#1e8e3e' : '#555'};
+  color: ${({ $danger, $success }) =>
+    $danger ? "#d93025" : $success ? "#1e8e3e" : "#555"};
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 6px;
@@ -270,9 +278,12 @@ export const ActionIconBtn = styled.button<{ $danger?: boolean; $success?: boole
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${({ $danger, $success }) => $danger ? '#fce8e6' : $success ? '#e6f4ea' : '#f0f0f0'};
-    border-color: ${({ $danger, $success }) => $danger ? '#f5c6cb' : $success ? '#b2dfbc' : '#ddd'};
-    color: ${({ $danger, $success }) => $danger ? '#b31d13' : $success ? '#166d28' : '#333'};
+    background: ${({ $danger, $success }) =>
+      $danger ? "#fce8e6" : $success ? "#e6f4ea" : "#f0f0f0"};
+    border-color: ${({ $danger, $success }) =>
+      $danger ? "#f5c6cb" : $success ? "#b2dfbc" : "#ddd"};
+    color: ${({ $danger, $success }) =>
+      $danger ? "#b31d13" : $success ? "#166d28" : "#333"};
   }
 `;
 
@@ -286,14 +297,20 @@ export const ActionsWrapper = styled.div`
 export const DetailContainer = styled.div`
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #eaeaea;
   overflow: hidden;
   animation: fadeIn 0.3s ease;
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -313,8 +330,8 @@ export const DetailBackBtn = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   border-radius: 6px;
   padding: 0.4rem 0.8rem;
@@ -326,7 +343,7 @@ export const DetailBackBtn = styled.button`
   align-self: flex-start;
 
   &:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
   }
 `;
 
@@ -353,10 +370,16 @@ export const DetailAvatar = styled.div<{ $color: string }>`
   font-size: 1.6rem;
   color: #fff;
   flex-shrink: 0;
-  border: 3px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
   overflow: hidden;
-  ${({ $color }) => css`background-color: ${$color};`}
-  img { width: 100%; height: 100%; object-fit: cover; }
+  ${({ $color }) => css`
+    background-color: ${$color};
+  `}
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 export const DetailNameBlock = styled.div`
@@ -373,7 +396,7 @@ export const DetailNameBlock = styled.div`
   }
 
   span {
-    color: rgba(255,255,255,0.65);
+    color: rgba(255, 255, 255, 0.65);
     font-size: 0.88rem;
   }
 `;
@@ -382,8 +405,9 @@ export const DetailStatusBadge = styled.span<{ $active: boolean }>`
   display: inline-block;
   align-self: flex-start;
   margin-top: 0.3rem;
-  background-color: ${({ $active }) => $active ? 'rgba(30, 142, 62, 0.25)' : 'rgba(217, 48, 37, 0.25)'};
-  color: ${({ $active }) => $active ? '#7defa0' : '#ff9e99'};
+  background-color: ${({ $active }) =>
+    $active ? "rgba(30, 142, 62, 0.25)" : "rgba(217, 48, 37, 0.25)"};
+  color: ${({ $active }) => ($active ? "#7defa0" : "#ff9e99")};
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.3rem 0.8rem;
@@ -443,7 +467,9 @@ export const DetailField = styled.div`
   flex-direction: column;
   gap: 0.4rem;
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     padding: 0.8rem 1rem;
     border: 1px solid #d0d0d0;
     border-radius: 8px;
@@ -477,7 +503,7 @@ export const DetailFieldLabel = styled.span`
   align-items: center;
   gap: 0.35rem;
   margin-bottom: 0.1rem;
-  
+
   svg {
     color: #888;
   }
@@ -504,7 +530,9 @@ export const DetailActions = styled.div`
   }
 `;
 
-export const DetailActionBtn = styled.button<{ $variant: 'primary' | 'secondary' | 'danger' | 'success' }>`
+export const DetailActionBtn = styled.button<{
+  $variant: "primary" | "secondary" | "danger" | "success";
+}>`
   padding: 0.6rem 1.4rem;
   border-radius: 8px;
   font-weight: 600;
@@ -519,31 +547,39 @@ export const DetailActionBtn = styled.button<{ $variant: 'primary' | 'secondary'
 
   ${({ $variant }) => {
     switch ($variant) {
-      case 'primary':
+      case "primary":
         return css`
           background: #08142c;
           color: #fff;
-          &:hover { background: #1a3d6e; }
+          &:hover {
+            background: #1a3d6e;
+          }
         `;
-      case 'secondary':
+      case "secondary":
         return css`
           background: #f0f0f0;
           color: #333;
-          &:hover { background: #e0e0e0; }
+          &:hover {
+            background: #e0e0e0;
+          }
         `;
-      case 'danger':
+      case "danger":
         return css`
           background: transparent;
           color: #d93025;
           border: 1px solid #d93025;
-          &:hover { background: #fce8e6; }
+          &:hover {
+            background: #fce8e6;
+          }
         `;
-      case 'success':
+      case "success":
         return css`
           background: transparent;
           color: #1e8e3e;
           border: 1px solid #1e8e3e;
-          &:hover { background: #e6f4ea; }
+          &:hover {
+            background: #e6f4ea;
+          }
         `;
     }
   }}
@@ -559,13 +595,19 @@ export const DetailActionBtn = styled.button<{ $variant: 'primary' | 'secondary'
 export const RegisterContainer = styled.div`
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   border: 1px solid #eaeaea;
   overflow: hidden;
   animation: fadeIn 0.3s ease;
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -575,15 +617,29 @@ export const RegisterHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @media (max-width: 600px) { padding: 1.2rem 1rem; flex-direction: column; gap: 1rem; align-items: flex-start; }
+  @media (max-width: 600px) {
+    padding: 1.2rem 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 `;
 
 export const RegisterHeaderLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  h2 { margin: 0; color: #fff; font-size: 1.3rem; font-weight: 700; }
-  p { margin: 0; color: rgba(255,255,255,0.6); font-size: 0.82rem; }
+  h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.82rem;
+  }
 `;
 
 export const RegisterSteps = styled.div`
@@ -593,17 +649,22 @@ export const RegisterSteps = styled.div`
 `;
 
 export const StepDot = styled.div<{ $active: boolean; $done: boolean }>`
-  width: ${({ $active }) => $active ? '28px' : '10px'};
+  width: ${({ $active }) => ($active ? "28px" : "10px")};
   height: 10px;
   border-radius: 5px;
   transition: all 0.3s ease;
   ${({ $active, $done }) =>
     $active
-      ? css`background: #fff;`
+      ? css`
+          background: #fff;
+        `
       : $done
-        ? css`background: rgba(255,255,255,0.5);`
-        : css`background: rgba(255,255,255,0.2);`
-  }
+        ? css`
+            background: rgba(255, 255, 255, 0.5);
+          `
+        : css`
+            background: rgba(255, 255, 255, 0.2);
+          `}
 `;
 
 export const RegisterBody = styled.div`
@@ -611,7 +672,10 @@ export const RegisterBody = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  @media (max-width: 600px) { padding: 1.2rem; gap: 1.5rem; }
+  @media (max-width: 600px) {
+    padding: 1.2rem;
+    gap: 1.5rem;
+  }
 `;
 
 export const PhotoUploadSection = styled.div`
@@ -622,7 +686,10 @@ export const PhotoUploadSection = styled.div`
   background: #f8f9fc;
   border-radius: 12px;
   border: 1px dashed #d0d5dd;
-  @media (max-width: 600px) { flex-direction: column; text-align: center; }
+  @media (max-width: 600px) {
+    flex-direction: column;
+    text-align: center;
+  }
 `;
 
 export const PhotoPreview = styled.div<{ $hasImage: boolean }>`
@@ -634,22 +701,41 @@ export const PhotoPreview = styled.div<{ $hasImage: boolean }>`
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 3px dashed ${({ $hasImage }) => $hasImage ? '#08142c' : '#c0c5d0'};
-  background: ${({ $hasImage }) => $hasImage ? '#fff' : '#eef1f6'};
+  border: 3px dashed ${({ $hasImage }) => ($hasImage ? "#08142c" : "#c0c5d0")};
+  background: ${({ $hasImage }) => ($hasImage ? "#fff" : "#eef1f6")};
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
-  &:hover { border-color: #08142c; background: #e8ecf4; }
-  img { width: 100%; height: 100%; object-fit: cover; }
-  svg { color: #999; }
+  &:hover {
+    border-color: #08142c;
+    background: #e8ecf4;
+  }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  svg {
+    color: #999;
+  }
 `;
 
 export const PhotoUploadInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  h4 { margin: 0; font-size: 0.95rem; color: #08142c; font-weight: 600; }
-  p { margin: 0; font-size: 0.78rem; color: #888; line-height: 1.4; }
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #08142c;
+    font-weight: 600;
+  }
+  p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #888;
+    line-height: 1.4;
+  }
 `;
 
 export const PhotoUploadBtn = styled.button`
@@ -665,8 +751,12 @@ export const PhotoUploadBtn = styled.button`
   margin-top: 0.4rem;
   align-self: flex-start;
   transition: all 0.2s;
-  &:hover { background: #1a3d6e; }
-  @media (max-width: 600px) { align-self: center; }
+  &:hover {
+    background: #1a3d6e;
+  }
+  @media (max-width: 600px) {
+    align-self: center;
+  }
 `;
 
 export const RegisterSection = styled.div`
@@ -685,21 +775,28 @@ export const RegisterSectionTitle = styled.h4`
   gap: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #f0f0f0;
-  svg { color: #555; }
+  svg {
+    color: #555;
+  }
 `;
 
 export const RegisterGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.2rem;
-  @media (max-width: 600px) { grid-template-columns: 1fr; gap: 1rem; }
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 `;
 
 export const RegisterField = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  &.full-width { grid-column: 1 / -1; }
+  &.full-width {
+    grid-column: 1 / -1;
+  }
 `;
 
 export const RegisterLabel = styled.label`
@@ -711,8 +808,12 @@ export const RegisterLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  svg { color: #aaa; }
-  span { color: #d93025; }
+  svg {
+    color: #aaa;
+  }
+  span {
+    color: #d93025;
+  }
 `;
 
 export const RegisterInput = styled.input`
@@ -726,8 +827,13 @@ export const RegisterInput = styled.input`
   background: #fff;
   width: 100%;
   box-sizing: border-box;
-  &:focus { border-color: #08142c; box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08); }
-  &::placeholder { color: #aaa; }
+  &:focus {
+    border-color: #08142c;
+    box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08);
+  }
+  &::placeholder {
+    color: #aaa;
+  }
 `;
 
 export const RegisterSelect = styled.select`
@@ -742,7 +848,10 @@ export const RegisterSelect = styled.select`
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
-  &:focus { border-color: #08142c; box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08); }
+  &:focus {
+    border-color: #08142c;
+    box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08);
+  }
 `;
 
 export const RegisterTextarea = styled.textarea`
@@ -758,17 +867,27 @@ export const RegisterTextarea = styled.textarea`
   box-sizing: border-box;
   resize: vertical;
   min-height: 80px;
-  &:focus { border-color: #08142c; box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08); }
-  &::placeholder { color: #aaa; }
+  &:focus {
+    border-color: #08142c;
+    box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08);
+  }
+  &::placeholder {
+    color: #aaa;
+  }
 `;
 
 export const PlanSelector = styled.div`
   display: flex;
   gap: 1rem;
-  @media (max-width: 480px) { flex-direction: column; }
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
 `;
 
-export const PlanCard = styled.div<{ $selected: boolean; $type: 'Regular' | 'VIP' }>`
+export const PlanCard = styled.div<{
+  $selected: boolean;
+  $type: "Regular" | 1;
+}>`
   flex: 1;
   padding: 1.2rem;
   border-radius: 10px;
@@ -781,7 +900,7 @@ export const PlanCard = styled.div<{ $selected: boolean; $type: 'Regular' | 'VIP
 
   ${({ $selected, $type }) =>
     $selected
-      ? $type === 'VIP'
+      ? $type === 1
         ? css`
             background: #08142c; /* azul forte */
             border: 2px solid #08142c;
@@ -793,19 +912,30 @@ export const PlanCard = styled.div<{ $selected: boolean; $type: 'Regular' | 'VIP
             background: #f8f9fc;
             border: 2px solid #08142c;
             color: #08142c;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transform: translateY(-2px);
           `
       : css`
           background: #fff;
           border: 2px solid #e0e0e0;
           color: #555;
-          &:hover { border-color: #bbb; background: #fafafa; }
-        `
-  }
+          &:hover {
+            border-color: #bbb;
+            background: #fafafa;
+          }
+        `}
 
-  h5 { margin: 0; font-size: 1rem; font-weight: 700; }
-  p { margin: 0; font-size: 0.75rem; opacity: 0.8; line-height: 1.3; }
+  h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  p {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 0.8;
+    line-height: 1.3;
+  }
 `;
 
 export const PlanCheck = styled.div<{ $selected: boolean }>`
@@ -820,9 +950,14 @@ export const PlanCheck = styled.div<{ $selected: boolean }>`
   justify-content: center;
   ${({ $selected }) =>
     $selected
-      ? css`background: #fff; color: #08142c;`
-      : css`background: #e0e0e0; color: transparent;`
-  }
+      ? css`
+          background: #fff;
+          color: #08142c;
+        `
+      : css`
+          background: #e0e0e0;
+          color: transparent;
+        `}
 `;
 
 export const RegisterFooter = styled.div`
@@ -832,5 +967,8 @@ export const RegisterFooter = styled.div`
   padding: 1.5rem 2.5rem;
   border-top: 1px solid #eee;
   background: #fafafa;
-  @media (max-width: 600px) { padding: 1rem; flex-direction: column; }
+  @media (max-width: 600px) {
+    padding: 1rem;
+    flex-direction: column;
+  }
 `;

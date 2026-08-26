@@ -1,0 +1,20 @@
+{
+  "short_name": "Aulas e Traduções",
+  "name": "Aulas e Traduções",
+  "icons": [
+    {
+      "src": "/public/favicon.svg",
+      "sizes": "192x192",
+      "type": "svg"
+    },
+    {
+      "src": "/public/favicon.svg",
+      "sizes": "512x512",
+      "type": "svg"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "black",
+  "background_color": "white"
+}

@@ -1,5 +1,6 @@
-import React from "react";
-import { Field, InputField } from "./style";
+import React, { type InputHTMLAttributes } from "react";
+import { X } from "lucide-react";
+import { Field, FeedbackMessage, InputField } from "./style";
 
 //onChange função para guardar o valor digitado no useState
 //label é o texto que vai aparecer acima do input
@@ -14,7 +15,7 @@ export type feedbackTypes = {
   type: "danger" | "success" | "warning";
 };
 
-interface InputProps {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   type: string;
   placeholder: string;
@@ -26,6 +27,7 @@ interface InputProps {
   helpText?: string;
   disabled?: boolean;
   required?: boolean;
+  ref?: React.RefObject<HTMLInputElement | null>;
 }
 
 const Input = ({
@@ -40,9 +42,11 @@ const Input = ({
   disabled,
   required,
   iconRight,
+  ref,
+  ...rest
 }: InputProps) => {
   return (
-    <Field $feedback={feedback}>
+    <Field $feedback={feedback} {...rest}>
       <label>{label}</label>
       <InputField>
         {iconLeft}
@@ -53,11 +57,17 @@ const Input = ({
           onChange={onchange}
           disabled={disabled}
           required={required}
+          ref={ref}
         />
         {iconRight}
       </InputField>
 
-      {feedback && <p>{helpText}</p>}
+      {feedback && helpText && (
+        <FeedbackMessage>
+          {feedback === "danger" && <X size={14} strokeWidth={2.5} />}
+          <span>{helpText}</span>
+        </FeedbackMessage>
+      )}
     </Field>
   );
 };

@@ -1,4 +1,4 @@
-import type { ILoginResponse, IResetPassword } from "../interfaces/auth";
+import type { IResetPassword } from "../interfaces/auth";
 import type { ILogin } from "../contexts/Auth/AuthContext";
 import { api } from "./api";
 
@@ -14,7 +14,7 @@ interface IResponseLogin {
   };
 }
 
-export const postLogin = async (params: ILogin): Promise<ILoginResponse> => {
+export const postLogin = async (params: ILogin): Promise<IResponseLogin> => {
   const res = await api.post("/login", params);
   const data = res.data as IResponseLogin;
 
