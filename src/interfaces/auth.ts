@@ -16,5 +16,5 @@ export interface IForgotPassword {
 
 export interface IResetPassword {
   token: string | null;
-  password: string;
+  newPassword: string;
 }

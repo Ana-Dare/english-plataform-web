@@ -47,7 +47,7 @@ const calculateStrength = (password: string): StatusPassword | null => {
 };
 
 const FormResetPassword = () => {
-  const [password, setPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [isVisiblePassword, setIsVisiblePassword] = useState<boolean>(false);
   const [isVisiblePasswordConfirm, setIsVisiblePasswordConfirm] =
@@ -61,25 +61,28 @@ const FormResetPassword = () => {
 
   const token = searchParams.get("token");
 
-  const statusPassword = useMemo(() => calculateStrength(password), [password]);
+  const statusPassword = useMemo(
+    () => calculateStrength(newPassword),
+    [newPassword],
+  );
   const activeIndex = statusPassword
     ? STRENGTH_LEVELS.indexOf(statusPassword)
     : -1;
-  const showCheck = password.length > 0;
+  const showCheck = newPassword.length > 0;
 
   const clearForm = () => {
-    setPassword("");
+    setNewPassword("");
     setConfirmPassword("");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError(null);
 
-    if (!password || !confirmPassword) {
+    if (!newPassword || !confirmPassword) {
       setError("Preencha todos os campos");
       return;
     }
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setError("As senhas não coincidem");
       return;
     }
@@ -93,7 +96,7 @@ const FormResetPassword = () => {
     }
 
     try {
-      resetPassword({ token, password });
+      await resetPassword({ token, newPassword });
       clearForm();
       navigate("/login");
     } catch (err) {
@@ -110,8 +113,8 @@ const FormResetPassword = () => {
       <Input
         label="Nova senha"
         ref={inputRef}
-        value={password}
-        onChange={(e) => setPassword(e.currentTarget.value)}
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.currentTarget.value)}
         placeholder="Digite sua nova senha"
         type={isVisiblePassword ? "text" : "password"}
         iconLeft={<Lock size={18} color="#fff" />}

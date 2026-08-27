@@ -1,13 +1,17 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const HeaderContainer = styled.header`
   position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 24px;
   height: 100%;
   width: 100%;
+  background: linear-gradient(180deg, #0a1628 0%, #0e1f3d 50%, #0a1628 100%);
+  background-size: 100% 100vh;
+  background-position: top;
+  color: #fff;
+  padding: 0 2rem;
 `;
 
 export const HeaderContent = styled.div`
@@ -16,6 +20,7 @@ export const HeaderContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #fff;
 
   .mobile-menu-btn {
     display: none;
@@ -28,7 +33,7 @@ export const HeaderContent = styled.div`
 export const Greeting = styled.h2`
   margin: 0;
   font-size: 1.2rem;
-  color: #333;
+  color: #fff;
   font-weight: 500;
 
   @media (max-width: 768px) {
@@ -38,7 +43,7 @@ export const Greeting = styled.h2`
 
 export const NotificationIcon = styled.div`
   cursor: pointer;
-  color: #666;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,8 +54,7 @@ export const NotificationIcon = styled.div`
   transition: background-color 0.2s;
 
   &:hover {
-    color: #333;
-    background-color: #f5f5f5;
+    color: #f5f5f5;
   }
 `;
 
@@ -62,10 +66,6 @@ export const ProfileSection = styled.div`
   padding: 4px 8px;
   border-radius: 24px;
   transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
 `;
 
 export const Avatar = styled.div`
@@ -81,7 +81,7 @@ export const Avatar = styled.div`
 `;
 
 export const DropdownIcon = styled.div`
-  color: #666;
+  color: #fff;
   display: flex;
   align-items: center;
 `;
@@ -97,11 +97,15 @@ export const DropdownContainer = styled.div`
   border: 1px solid #f0f0f0;
   z-index: 1000;
   overflow: hidden;
+  padding: 1rem;
+  width: fit-content;
+  max-width:;
 `;
 
 export const ProfileDropdown = styled(DropdownContainer)`
-  width: 280px;
-  
+  max-width: 20rem;
+  width: fit-content;
+
   @media (max-width: 480px) {
     width: calc(100vw - 32px);
     right: 16px;
@@ -135,8 +139,8 @@ export const LogoutButton = styled.button`
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
   background: transparent;
   border: none;
   color: #333;
@@ -153,7 +157,7 @@ export const LogoutButton = styled.button`
   svg {
     color: #666;
   }
-  
+
   &:hover svg {
     color: #d4af37;
   }
@@ -198,16 +202,16 @@ export const ToggleSwitch = styled.div<{ $active: boolean }>`
   .switch {
     width: 32px;
     height: 18px;
-    background-color: ${({ $active }) => ($active ? '#2563eb' : '#ccc')};
+    background-color: ${({ $active }) => ($active ? "#2563eb" : "#ccc")};
     border-radius: 12px;
     position: relative;
     transition: background-color 0.2s;
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 2px;
-      left: ${({ $active }) => ($active ? '16px' : '2px')};
+      left: ${({ $active }) => ($active ? "16px" : "2px")};
       width: 14px;
       height: 14px;
       background-color: white;
@@ -225,13 +229,13 @@ export const NotifList = styled.div`
 export const NotifItem = styled.div<{ $unread: boolean }>`
   padding: 16px 20px;
   border-bottom: 1px solid #f9f9f9;
-  background-color: ${({ $unread }) => ($unread ? '#fdf8e1' : '#ffffff')};
+  background-color: ${({ $unread }) => ($unread ? "#fdf8e1" : "#ffffff")};
   transition: background-color 0.2s;
   cursor: pointer;
   position: relative;
 
   &:hover {
-    background-color: ${({ $unread }) => ($unread ? '#fcedb3' : '#f5f5f5')};
+    background-color: ${({ $unread }) => ($unread ? "#fcedb3" : "#f5f5f5")};
   }
 
   .title-row {
@@ -272,6 +276,6 @@ export const NotifItem = styled.div<{ $unread: boolean }>`
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: ${({ $unread }) => ($unread ? '#2563eb' : 'transparent')};
+    background-color: ${({ $unread }) => ($unread ? "#2563eb" : "transparent")};
   }
 `;

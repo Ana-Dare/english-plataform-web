@@ -32,8 +32,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     postForgotPassword(email);
   };
 
-  const resetPassword = ({ password, token }: IResetPassword) => {
-    postResetPassword({ token, password });
+  const resetPassword = async ({
+    newPassword: password,
+    token,
+  }: IResetPassword): Promise<void> => {
+    await postResetPassword({ token, newPassword: password });
   };
 
   return (

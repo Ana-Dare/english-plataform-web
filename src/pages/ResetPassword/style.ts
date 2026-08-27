@@ -2,14 +2,15 @@ import styled from "styled-components";
 
 export const ResetPasswordStyle = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
+  flex-direction: row;
+  width: 100%;
   height: 100vh;
-  //background-image: url("/src/assets/images/sunset-room.png");
-  filter: drop-shadow(4px 4px 8px hsla(0, 9%, 94%, 0.5));
-  transition: filter 0.3s ease;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    gap: 0;
+  }
 `;

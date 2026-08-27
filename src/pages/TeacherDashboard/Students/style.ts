@@ -1,10 +1,43 @@
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
+`;
+
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+export const Loading = styled.div`
+  align-items: center;
+  background: transparent;
+  display: flex;
+  height: 100%;
+  flex: 1;
+  justify-content: center;
+  width: 100%;
+
+  + i {
+    margin-right: 8px;
+  }
+
+  &:before {
+    animation: 1.5s linear infinite ${spin};
+    border-radius: 50%;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #343a40;
+    content: "";
+    display: block;
+    height: 1.5rem;
+    width: 1.5rem;
+    will-change: transform;
+    transition: all 0.2s ease;
+  }
 `;
 
 export const HeaderActions = styled.div`
@@ -172,15 +205,15 @@ export const Tr = styled.tr`
 
   /* Alternating row colors */
   &:nth-child(odd) {
-    background-color: #fff9e6;
+    background-color: #fff;
   }
 
   &:nth-child(even) {
-    background-color: #ffffff;
+    background-color: #e9ecef;
   }
 
   &:hover {
-    background-color: #f0ecd8 !important;
+    background-color: #e9ecef !important;
   }
 `;
 

@@ -38,6 +38,7 @@ import {
   DetailStatusBadge,
   HeaderActions,
   IconButton,
+  Loading,
   PaginationContainer,
   PlanBadge,
   RightActions,
@@ -272,7 +273,12 @@ const StudentsTab: React.FC = () => {
     );
   }
 
-  if (isLoading) return <Container>Carregando alunos...</Container>;
+  if (isLoading)
+    return (
+      <Container>
+        <Loading />
+      </Container>
+    );
   if (isError)
     return <Container>Não foi possível carregar os alunos.</Container>;
 

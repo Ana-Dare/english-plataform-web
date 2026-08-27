@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const DashboardContainer = styled.div`
   display: flex;
@@ -21,7 +21,7 @@ export const SidebarContainer = styled.aside<{ $isOpen?: boolean }>`
   @media (max-width: 1024px) {
     position: fixed;
     height: 100vh;
-    transform: translateX(${({ $isOpen }) => ($isOpen ? '0' : '-100%')});
+    transform: translateX(${({ $isOpen }) => ($isOpen ? "0" : "-100%")});
   }
 `;
 
@@ -40,7 +40,6 @@ export const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
 `;
 
 export const ContentArea = styled.div`
@@ -56,9 +55,9 @@ export const ContentArea = styled.div`
 
 export const MobileOverlay = styled.div<{ $isOpen: boolean }>`
   display: none;
-  
+
   @media (max-width: 1024px) {
-    display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
+    display: ${({ $isOpen }) => ($isOpen ? "block" : "none")};
     position: fixed;
     top: 0;
     left: 0;
