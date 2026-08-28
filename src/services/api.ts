@@ -77,7 +77,7 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        const response = await api.post("/api/refresh-token", {
+        const response = await api.post("/refresh-token", {
           refreshToken,
         });
 
