@@ -5,6 +5,7 @@ import {
   ClassesGrid, ClassCard, ClassCardHeader, LevelBadge, ClassCardBody,
   ClassCardInfo, StudentsPreview, StudentAvatarSmall, MoreStudents
 } from './style';
+import { motion } from 'framer-motion';
 import CreateClassModal from './CreateClassModal';
 import type { StudentMock } from './CreateClassModal';
 import ClassDetail from './ClassDetail';
@@ -45,7 +46,11 @@ const getInitials = (name: string) => {
   return parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0];
 };
 
-const ClassesTab: React.FC = () => {
+interface ClassesTabProps {
+  onNavigateToStudent?: (studentId: number) => void;
+}
+
+const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
   const [classes, setClasses] = useState<ClassType[]>(initialMockClasses);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -71,34 +76,57 @@ const ClassesTab: React.FC = () => {
       <ClassDetail 
         classData={selectedClass} 
         onBack={() => setSelectedClass(null)} 
+        onNavigateToStudent={onNavigateToStudent}
       />
     );
   }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
 
   return (
     <Container>
       <HeaderActions>
         <Title>Gerenciar Turmas</Title>
         <RightActions style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <SearchWrapper style={{ width: '340px', flexShrink: 0 }}>
+          <SearchWrapper>
             <Search size={18} />
             <input 
               type="text" 
               placeholder="Pesquisar por nome da turma..." 
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ padding: '0.85rem 1rem 0.85rem 3rem', borderRadius: '12px', border: '1px solid #eaeaea', width: '100%', boxSizing: 'border-box' }}
             />
           </SearchWrapper>
-          <AddButton onClick={() => setShowCreateModal(true)} style={{ flexShrink: 0, borderRadius: '12px', padding: '0.85rem 1.5rem', background: 'linear-gradient(135deg, #08142c 0%, #1a3d6e 100%)', border: 'none', color: '#fff', display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+          <AddButton onClick={() => setShowCreateModal(true)}>
             <Plus size={18} /> Nova Turma
           </AddButton>
         </RightActions>
       </HeaderActions>
 
-      <ClassesGrid>
+      <ClassesGrid
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {filteredClasses.map(c => (
-          <ClassCard key={c.id} onClick={() => setSelectedClass(c)}>
+          <ClassCard 
+            key={c.id} 
+            onClick={() => setSelectedClass(c)}
+            variants={itemVariants}
+            whileHover={{ y: -4, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+          >
             <ClassCardHeader $level={c.level}>
               <h3>{c.name}</h3>
               <LevelBadge>{c.level}</LevelBadge>

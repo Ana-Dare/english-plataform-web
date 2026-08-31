@@ -3,64 +3,58 @@ import styled from "styled-components";
 export const SidebarStyle = styled.div`
   display: flex;
   flex: 1;
-  padding: 2rem;
+  padding: 4rem 10%;
   box-sizing: border-box;
-  background-color: ${(props) => props.theme.colors.gold};
-  border-radius: 0 9.375rem 9.375rem 0;
-  justify-content: space-between;
+  background-color: #08142c;
+  justify-content: center;
   flex-direction: column;
-  color: ${(props) => props.theme.colors.white};
+  color: #ffffff;
   position: relative;
-  width: 40%;
+  width: 45%;
   height: 100%;
   font-family: "Rubik", sans-serif;
+  gap: 3rem;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
+  box-shadow: 10px 0 40px rgba(8, 20, 44, 0.15);
+  z-index: 10;
 
   @media (max-width: 768px) {
     display: none;
   }
-
-  .fade-in,
-  .fade-out {
-    transition: opacity 0.8s ease;
-  }
-
-  .fade-in {
-    opacity: 1;
-  }
-
-  .fade-out {
-    opacity: 0.2;
-  }
 `;
 
-export const SidebarImage = styled.div`
+export const CreativeCircle = styled.div<{ $size: string; $top: string; $right: string; $borderWidth?: string; $opacity?: number }>`
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 99%;
-  height: 100%;
-  height: 100%;
-  border-radius: 0 9.375rem 9.375rem 0;
-  background-color: #1e3a8a;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5));
+  top: ${({ $top }) => $top};
+  right: ${({ $right }) => $right};
+  width: ${({ $size }) => $size};
+  height: ${({ $size }) => $size};
+  border-radius: 50%;
+  border: ${({ $borderWidth }) => $borderWidth || '1px'} solid rgba(245, 230, 211, ${({ $opacity }) => $opacity || 0.1});
+  pointer-events: none;
+  z-index: 1;
+`;
 
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 0 9.375rem 9.375rem 0;
+export const FloatingElement = styled.div<{ $top: string; $left?: string; $right?: string; $size: string; $opacity: number; $delay: number }>`
+  position: absolute;
+  top: ${({ $top }) => $top};
+  ${({ $left }) => $left && `left: ${$left};`}
+  ${({ $right }) => $right && `right: ${$right};`}
+  width: ${({ $size }) => $size};
+  height: ${({ $size }) => $size};
+  background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+  opacity: ${({ $opacity }) => $opacity};
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
 
-    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5));
+  animation: float 10s infinite ease-in-out alternate;
+  animation-delay: ${({ $delay }) => $delay}s;
 
-    z-index: 2;
-  }
-
-  img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-    border-radius: 0 9.375rem 9.375rem 0;
-    display: block;
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(20px, -30px) scale(1.1); }
   }
 `;
 

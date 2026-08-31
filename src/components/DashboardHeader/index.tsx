@@ -10,6 +10,9 @@ import {
   DropdownIcon,
   ProfileDropdown,
   ProfileHeader,
+  DropdownMenuList,
+  DropdownMenuItem,
+  DropdownDivider,
   LogoutButton,
   NotificationDropdown,
   NotifHeader,
@@ -17,8 +20,17 @@ import {
   NotifList,
   NotifItem,
 } from "./style";
-import { Bell, ChevronDown, User, LogOut, Menu } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  User,
+  LogOut,
+  Menu,
+  UserCircle,
+  Settings,
+} from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { useProfile } from "../../contexts/ProfileContext";
 
 const notificationsData = [
   {
@@ -59,20 +71,31 @@ interface DashboardHeaderProps {
   onOpenMenu?: () => void;
   userName?: string;
   userEmail?: string;
+  onNavigate?: (tab: string) => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onOpenMenu,
   userName = "Aluno",
   userEmail = "fulano.siciliano.silva@gmail.com",
+  onNavigate,
 }) => {
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
+  const [notifications, setNotifications] = useState(notificationsData);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Use profile data for display name
+  const displayName =
+    profile.firstName && profile.lastName
+      ? `${profile.firstName} ${profile.lastName}`
+      : userName;
+  const displayEmail = profile.email || userEmail;
 
   // Close modals when clicking outside
   useEffect(() => {
@@ -98,9 +121,28 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     navigate("/login");
   };
 
+  const handleMenuClick = (tab: string) => {
+    setIsProfileOpen(false);
+    onNavigate?.(tab);
+  };
+
   const filteredNotifs = showOnlyUnread
-    ? notificationsData.filter((n) => n.unread)
-    : notificationsData;
+    ? notifications.filter((n) => n.unread)
+    : notifications;
+
+  const handleNotifClick = (notif: any) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notif.id ? { ...n, unread: false } : n))
+    );
+    setIsNotifOpen(false);
+    // Wait, onNavigate doesn't take an ID parameter currently. I'll need to update the prop definition if I want it.
+    // For now, I can just use a generic 'notificacoes' tab and TeacherDashboard can manage it, or I can update the prop.
+    onNavigate?.("notificacoes");
+    
+    // I will fire a custom event with the notification ID so the NotificationsTab can intercept it
+    const event = new CustomEvent("openNotification", { detail: notif.id });
+    window.dispatchEvent(event);
+  };
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10, scale: 0.95 },
@@ -130,7 +172,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 border: "none",
                 cursor: "pointer",
                 alignItems: "center",
-                color: "#333",
+                color: "#ffffff",
               }}
               className="mobile-menu-btn"
             >
@@ -140,7 +182,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Greeting>Good evening, {userName}</Greeting>
+          <Greeting>Good evening, {displayName}</Greeting>
           {/* Notifications */}
           <div ref={notifRef}>
             <NotificationIcon
@@ -173,7 +215,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   <NotifList>
                     {filteredNotifs.length > 0 ? (
                       filteredNotifs.map((notif) => (
-                        <NotifItem key={notif.id} $unread={notif.unread}>
+                        <NotifItem
+                          key={notif.id}
+                          $unread={notif.unread}
+                          onClick={() => handleNotifClick(notif)}
+                        >
                           <div className="title-row">
                             <h4>{notif.title}</h4>
                             <span className="time">{notif.time}</span>
@@ -209,7 +255,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               }}
             >
               <Avatar>
-                <User size={20} />
+                {profile.photoUrl ? (
+                  <img
+                    src={profile.photoUrl}
+                    alt="Perfil"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
+                ) : (
+                  <User size={20} />
+                )}
               </Avatar>
               <DropdownIcon>
                 <ChevronDown size={16} />
@@ -226,17 +285,45 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 >
                   <ProfileHeader>
                     <Avatar style={{ width: "48px", height: "48px" }}>
-                      <User size={24} />
+                      {profile.photoUrl ? (
+                        <img
+                          src={profile.photoUrl}
+                          alt="Perfil"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      ) : (
+                        <User size={24} />
+                      )}
                     </Avatar>
                     <div className="info">
-                      <strong>{userName}</strong>
-                      <span>{userEmail}</span>
+                      <strong>{displayName}</strong>
+                      <span>{displayEmail}</span>
                     </div>
                   </ProfileHeader>
-                  <LogoutButton onClick={handleLogout}>
-                    <LogOut size={18} />
-                    Sair de sua conta
-                  </LogoutButton>
+                  <DropdownMenuList>
+                    <DropdownMenuItem
+                      onClick={() => handleMenuClick("perfil")}
+                    >
+                      <UserCircle />
+                      Perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/admin')}
+                    >
+                      <Settings />
+                      Administração
+                    </DropdownMenuItem>
+                    <DropdownDivider />
+                    <LogoutButton onClick={handleLogout}>
+                      <LogOut />
+                      Sair de sua conta
+                    </LogoutButton>
+                  </DropdownMenuList>
                 </ProfileDropdown>
               )}
             </AnimatePresence>

@@ -1,15 +1,33 @@
 export const mainTheme = {
   colors: {
-    bg: "#f5f5f7",
-    cardBg: "#f7f3f3",
+    /* Principais */
+    azulMarinho: "#1F2B45",
+    salmao: "#C57A67",
+    rosaSalmao: "#FFA38C",
+    branco: "#ffffff",
+    cinza: "#4D4D4D",
+
+    /* Derivados com opacidade (uso em backgrounds) */
+    azulMarinho10: "rgba(31, 43, 69, 0.1)",
+    salmao25: "rgba(197, 122, 103, 0.25)",
+    cinza50: "rgba(77, 77, 77, 0.5)",
+
+    /* Feedback */
+    sucesso: "#22c55e",
+    aviso: "#f59e0b",
+    erro: "#ef4444",
+
+    /* Aliases para compatibilidade */
+    bg: "#f7f7f8",
+    cardBg: "#ffffff",
     white: "#ffffff",
-    text: "#0f172a",
-    muted: "#64748b",
-    border: "#e2e8f0",
-    blue: "#1e3a8a",
-    gold: "#C9A227",
-    danger: "#EAE0D5",
-    success: "#045421",
+    text: "#1F2B45",
+    muted: "#4D4D4D",
+    border: "rgba(31, 43, 69, 0.12)",
+    blue: "#1F2B45",
+    gold: "#C57A67",
+    danger: "#ef4444",
+    success: "#22c55e",
   },
   spacings: {
     none: "0px",

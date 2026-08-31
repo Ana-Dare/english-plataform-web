@@ -5,6 +5,7 @@ import {
   FieldGroup, CloseBtn, PrimaryBtn, SecondaryBtn
 } from './style';
 import styled from 'styled-components';
+import { useToast } from "../../../contexts/ToastContext";
 
 const CheckboxGroup = styled.label`
   display: flex;
@@ -41,6 +42,7 @@ interface AddClassEventModalProps {
 }
 
 const AddClassEventModal: React.FC<AddClassEventModalProps> = ({ onClose, onSave }) => {
+  const { addToast } = useToast();
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -49,7 +51,7 @@ const AddClassEventModal: React.FC<AddClassEventModalProps> = ({ onClose, onSave
 
   const handleSave = () => {
     if (!title.trim() || !date || !startTime || !endTime) {
-      alert('Por favor, preencha todos os campos obrigatórios (título, data e horários).');
+      addToast('Por favor, preencha todos os campos obrigatórios (título, data e horários).', 'warning');
       return;
     }
     onSave({ title, date, startTime, endTime, syncAgenda });

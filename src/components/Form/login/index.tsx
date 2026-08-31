@@ -114,7 +114,7 @@ const FormLogin = () => {
             if (errors.email)
               setErrors((prev) => ({ ...prev, email: undefined }));
           }}
-          iconLeft={<Mail size={18} color="#fff" />}
+          iconLeft={<Mail size={18} color="#94a3b8" />}
           feedback={errors.email ? "danger" : undefined}
           helpText={errors.email}
         />
@@ -128,19 +128,19 @@ const FormLogin = () => {
             if (errors.password)
               setErrors((prev) => ({ ...prev, password: undefined }));
           }}
-          iconLeft={<Lock size={18} color="#fff" />}
+          iconLeft={<Lock size={18} color="#94a3b8" />}
           iconRight={
             isVisiblePassword ? (
               <EyeOff
                 size={18}
-                color="#fff"
+                color="#94a3b8"
                 style={{ cursor: "pointer" }}
                 onClick={() => setIsVisiblePassword((prev) => !prev)}
               />
             ) : (
               <Eye
                 size={18}
-                color="#fff"
+                color="#94a3b8"
                 style={{ cursor: "pointer" }}
                 onClick={() => setIsVisiblePassword((prev) => !prev)}
               />
@@ -155,9 +155,9 @@ const FormLogin = () => {
         <Button
           children={submitting ? "Entrando..." : "Confirmar"}
           wide
-          $variant="secondary"
           onClick={handleSubmit}
           disabled={submitting}
+          style={{ background: '#C57A67', borderColor: '#C57A67', color: '#fff' }}
         />
       </FormWrapper>
     </Container>

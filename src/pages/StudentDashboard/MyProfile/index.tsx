@@ -5,8 +5,10 @@ import {
   ProfileContainer, HeaderArea, BigAvatar, HeaderTexts,
   SectionCard, SectionTitle, FormGrid, FormGroup, InputWrapper, ButtonContainer, SaveButton, SuccessMessage
 } from './style';
+import { useToast } from "../../../contexts/ToastContext";
 
 const MyProfile: React.FC = () => {
+  const { addToast } = useToast();
   // States for Personal Info
   const [name, setName] = useState('Aluno Fulano Siciliano da Silva');
   const [email, setEmail] = useState('fulano.siciliano.silva@gmail.com');
@@ -50,7 +52,7 @@ const MyProfile: React.FC = () => {
 
   const handleSavePassword = () => {
     if (!currentPassword || !newPassword || newPassword !== confirmPassword) {
-      alert("Por favor, preencha as senhas corretamente. A nova senha e a confirmação devem ser iguais.");
+      addToast("Por favor, preencha as senhas corretamente. A nova senha e a confirmação devem ser iguais.", "warning");
       return;
     }
     setIsSavingPassword(true);

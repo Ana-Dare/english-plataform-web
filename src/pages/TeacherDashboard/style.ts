@@ -50,10 +50,11 @@ export const ContentArea = styled.div`
 `;
 
 export const PageTitle = styled.h2`
-  font-size: 1.15rem;
-  color: #555;
-  margin: 0 0 1rem 0;
-  font-weight: 500;
+  font-family: 'Rubik', sans-serif;
+  font-size: clamp(1.25rem, 2vw + 1rem, 1.5rem);
+  color: #4D4D4D;
+  margin: 0 0 1.5rem 0;
+  font-weight: 600;
 `;
 
 export const TopStatsGrid = styled.div`
@@ -78,7 +79,7 @@ export const ColumnsLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  margin-top: 1rem;
+  margin-top: 2rem;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -93,14 +94,16 @@ export const Column = styled.div`
 `;
 
 export const SectionTitle = styled.h3`
-  font-size: 1.1rem;
-  color: #1a1a1a;
-  margin: 0 0 0.3rem 0;
+  font-family: 'Rubik', sans-serif;
+  font-size: clamp(1.15rem, 1.5vw + 0.9rem, 1.3rem);
+  color: #1F2B45;
+  margin: 1rem 0 0.5rem 0;
   font-weight: 700;
 `;
 
 export const SectionSubtitle = styled.p`
-  font-size: 0.85rem;
-  color: #666;
+  font-family: 'Rubik', sans-serif;
+  font-size: 0.9rem;
+  color: #4D4D4D;
   margin: 0 0 1.5rem 0;
 `;

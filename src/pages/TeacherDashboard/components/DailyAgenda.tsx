@@ -14,7 +14,7 @@ const TimelineLine = styled.div`
   bottom: 10px;
   left: 24px;
   width: 2px;
-  background-color: #e0e0e0;
+  background-color: #e0d8d3;
   z-index: 1;
 `;
 
@@ -27,8 +27,8 @@ const AgendaItem = styled.div`
 `;
 
 const TimeBubble = styled.div`
-  background-color: #3165e3;
-  color: white;
+  background-color: #2b3a4e;
+  color: #f0ebe7;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -38,13 +38,13 @@ const TimeBubble = styled.div`
   font-weight: 600;
   font-size: 0.9rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(49, 101, 227, 0.2);
+  box-shadow: 0 4px 10px rgba(43, 58, 78, 0.2);
 `;
 
 const ContentCard = styled.div`
   flex: 1;
-  background-color: #f1f4fb;
-  border: 1px solid #c9d8fa;
+  background-color: #ffffff;
+  border: 1px solid #e8e0db;
   border-radius: 8px;
   padding: 1rem 1.2rem;
   display: flex;
@@ -54,8 +54,8 @@ const ContentCard = styled.div`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #e6ecfa;
-    border-color: #b1c7f7;
+    background-color: #f9f6f4;
+    border-color: #d4957f;
   }
 `;
 
@@ -67,14 +67,14 @@ const ClassInfo = styled.div`
   h4 {
     margin: 0;
     font-size: 0.95rem;
-    color: #0b1f5c;
+    color: #2b3a4e;
     font-weight: 600;
   }
 
   p {
     margin: 0;
     font-size: 0.75rem;
-    color: #4a5a80;
+    color: #7a8a9e;
   }
 `;
 
@@ -96,7 +96,7 @@ const DailyAgenda = () => {
               <h4>{cls.name}</h4>
               <p>{cls.students}</p>
             </ClassInfo>
-            <ChevronDown size={20} color="#3165e3" />
+            <ChevronDown size={20} color="#7a8a9e" />
           </ContentCard>
         </AgendaItem>
       ))}

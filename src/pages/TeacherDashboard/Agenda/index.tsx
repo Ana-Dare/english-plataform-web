@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { addMonths, subMonths, format, isSameDay, isAfter, startOfDay, addDays } from 'date-fns';
+import { addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, format, isSameDay, isAfter, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Clock, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Clock, CalendarDays, Search } from 'lucide-react';
 import { 
   AgendaPageLayout, AgendaContainer, AgendaHeader, MonthTitle, HeaderControls, 
-  IconButton, PrimaryButton,
+  IconButton, PrimaryButton, SearchWrapper, ViewToggle, ViewToggleButton,
   UpcomingContainer, UpcomingHeader, UpcomingList, UpcomingEventCard,
   EventTimeIndicator, EventCardContent, EventCardTitle, EventCardMeta,
   EventCardDate, EventTypeBadge, EmptyUpcoming
@@ -12,6 +12,8 @@ import {
 import CalendarGrid from './CalendarGrid';
 import EventModal from './EventModal';
 import type { CalendarEvent } from './EventModal';
+
+type ViewMode = 'mensal' | 'semanal';
 
 // Initial Mock Data
 const today = new Date();
@@ -34,7 +36,10 @@ const typeLabels: Record<string, string> = {
 
 const AgendaTab: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [viewMode, setViewMode] = useState<ViewMode>('mensal');
   const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,18 +48,40 @@ const AgendaTab: React.FC = () => {
 
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const prevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
+  const nextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
+
+  const handlePrev = () => viewMode === 'mensal' ? prevMonth() : prevWeek();
+  const handleNext = () => viewMode === 'mensal' ? nextMonth() : nextWeek();
+
+  const headerTitle = useMemo(() => {
+    if (viewMode === 'mensal') {
+      return format(currentMonth, 'MMMM yyyy', { locale: ptBR });
+    }
+    const weekStart = startOfWeek(currentWeek, { locale: ptBR });
+    const weekEnd = endOfWeek(currentWeek, { locale: ptBR });
+    return `${format(weekStart, "d 'de' MMM", { locale: ptBR })} — ${format(weekEnd, "d 'de' MMM", { locale: ptBR })}`;
+  }, [viewMode, currentMonth, currentWeek]);
+
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery) return events;
+    return events.filter(e => 
+      e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      typeLabels[e.type].toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [events, searchQuery]);
 
   // Upcoming events: from today forward, sorted by date then time
   const upcomingEvents = useMemo(() => {
     const todayStart = startOfDay(new Date());
-    return events
+    return filteredEvents
       .filter(e => isSameDay(e.date, todayStart) || isAfter(e.date, todayStart))
       .sort((a, b) => {
         const dateCompare = a.date.getTime() - b.date.getTime();
         if (dateCompare !== 0) return dateCompare;
         return a.time.localeCompare(b.time);
       });
-  }, [events]);
+  }, [filteredEvents]);
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
@@ -92,21 +119,36 @@ const AgendaTab: React.FC = () => {
       <AgendaContainer>
         <AgendaHeader>
           <HeaderControls>
-            <IconButton onClick={prevMonth}><ChevronLeft size={18} /></IconButton>
-            <IconButton onClick={nextMonth}><ChevronRight size={18} /></IconButton>
-            <MonthTitle>
-              {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
-            </MonthTitle>
+            <IconButton onClick={handlePrev}><ChevronLeft size={18} /></IconButton>
+            <IconButton onClick={handleNext}><ChevronRight size={18} /></IconButton>
+            <MonthTitle>{headerTitle}</MonthTitle>
           </HeaderControls>
 
+          <ViewToggle>
+            <ViewToggleButton $active={viewMode === 'mensal'} onClick={() => setViewMode('mensal')}>Mensal</ViewToggleButton>
+            <ViewToggleButton $active={viewMode === 'semanal'} onClick={() => setViewMode('semanal')}>Semanal</ViewToggleButton>
+          </ViewToggle>
+
+          <SearchWrapper>
+            <Search size={22} />
+            <input 
+              type="text" 
+              placeholder="Pesquisar eventos..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </SearchWrapper>
+
           <PrimaryButton onClick={openNewEventModal}>
-            <Plus size={16} /> Novo Evento
+            <Plus size={16} /> Novo
           </PrimaryButton>
         </AgendaHeader>
 
         <CalendarGrid 
-          currentMonth={currentMonth} 
-          events={events} 
+          currentMonth={currentMonth}
+          currentWeek={currentWeek}
+          viewMode={viewMode}
+          events={filteredEvents} 
           onDateClick={handleDateClick} 
           onEventClick={handleEventClick} 
         />
@@ -127,7 +169,7 @@ const AgendaTab: React.FC = () => {
                   <EventCardTitle>{event.title}</EventCardTitle>
                   <EventCardMeta>
                     <Clock size={12} />
-                    {event.time}
+                    {event.time}{event.endTime ? ` – ${event.endTime}` : ''}
                     <EventTypeBadge $type={event.type}>
                       {typeLabels[event.type]}
                     </EventTypeBadge>

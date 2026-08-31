@@ -7,6 +7,7 @@ export const Container = styled.div`
   box-sizing: border-box;
   width: 55%;
   padding: 2rem;
+  background-color: #ffffff;
   font-family: "Rubik", sans-serif;
 
   @media (max-width: 768px) {
@@ -19,33 +20,28 @@ export const Container = styled.div`
 export const FormWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   padding: 3rem;
   box-sizing: border-box;
-  background-color: ${({ theme }) => theme.colors.gold};
-  box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.2),
-    0 15px 30px rgba(204, 171, 74, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
-  filter: drop-shadow(0 0 20px rgba(204, 171, 74, 0.15));
-  background: linear-gradient(135deg, #ccab4a 0%, #b38d21 100%);
-  border-radius: 150px 24px 24px 24px;
+  background-color: transparent;
   width: 100%;
-  max-width: 640px;
+  max-width: 440px;
   height: fit-content;
 
-  <<<<<<< HEAD ======= @media (max-width: 768px) {
+  @media (max-width: 768px) {
     padding: 2rem 1.5rem;
-    border-radius: 40px 24px 24px 24px;
+    border-radius: 24px;
   }
 
-  >>>>>>>baf0919 (feat: criaçaõ dashboard professora) .link {
-    color: ${({ theme }) => theme.colors.white};
+  .link {
+    color: #08142c;
     font-weight: 500;
     text-decoration: none;
     text-align: right;
+    cursor: pointer;
+    font-size: 0.9rem;
     &:hover {
-      color: ${({ theme }) => theme.colors.white};
+      color: #3b82f6;
       text-decoration: underline;
     }
   }
@@ -60,18 +56,20 @@ export const FormHeader = styled.div`
   align-items: center;
 
   h2 {
-    font-size: 1.5rem;
-    color: ${({ theme }) => theme.colors.white};
-    font-weight: 400;
-    line-height: 1.6;
+    font-size: 1.8rem;
+    color: #08142c;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
   }
 
   p {
-    font-size: ${({ theme }) => theme.sizes.subtitle};
-    color: ${({ theme }) => theme.colors.white};
-    font-weight: 300;
-    line-height: 1.6;
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 400;
+    line-height: 1.4;
     text-align: center;
+    margin: 0 0 1rem 0;
   }
 `;
 

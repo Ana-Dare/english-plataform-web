@@ -1,78 +1,57 @@
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
   SidebarContent,
-  SidebarImage,
   SidebarStyle,
   SidebarTitle,
   SidebarTitleText,
+  FloatingElement,
+  CreativeCircle,
 } from "./style";
 
-import woman from "../../assets/images/woman.jpg";
-import twoWoman from "../../assets/images/two-woman.png";
-import usaFlag from "../../assets/images/usa-flag.jpg";
 import logoCl from "../../assets/images/logo-black.png";
 
 const Sidebar = () => {
-  const [indexImg, setIndexImg] = useState(0);
-  const [indexAlt, setIndexAlt] = useState(0);
-  const [indexText, setIndexText] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(true);
-
-  const images = [woman, twoWoman, usaFlag];
-
-  const altImg = [
-    "Mulher sorrindo",
-    "Duas mulheres sorrindo",
-    "Bandeira dos Estados Unidos",
-  ];
-
-  const text = [
-    "Aulas e traduções de inglês em um só lugar.",
-    "Expanda seus horizontes e domine um novo idioma.",
-    "Métodos práticos e personalizados para a sua fluência.",
-  ];
-
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
-
-    const interval = setInterval(() => {
-      setIsAnimating(false);
-
-      timeout = setTimeout(() => {
-        setIndexImg((prevIndex) => (prevIndex + 1) % images.length);
-        setIndexText((prevIndex) => (prevIndex + 1) % text.length);
-        setIndexAlt((prevIndex) => (prevIndex + 1) % altImg.length);
-
-        setIsAnimating(true);
-      }, 1000);
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, []);
-
   return (
-    <>
-      <SidebarStyle className={isAnimating ? "fade-in" : "fade-out"}>
-        <SidebarTitle>
-          <img src={logoCl} alt="Logo Lara Charantola" />
-          <SidebarTitleText>
-            <h5>Lara Charantola: Aulas e Traduções</h5>
-            <p>Professora online | Teacher | Tradutora</p>
-          </SidebarTitleText>
-        </SidebarTitle>
-        <SidebarContent>
-          <h4>{text[indexText]}</h4>
-          <h5>LC Aulas e Traduções</h5>
-          <h6>Sua plataforma de ensino personalizada</h6>
-        </SidebarContent>
-        <SidebarImage>
-          <img src={images[indexImg]} alt={altImg[indexAlt]} />
-        </SidebarImage>
-      </SidebarStyle>
-    </>
+    <SidebarStyle>
+      {/* Decorative Background Elements - Creative Circles */}
+      <CreativeCircle $size="300px" $top="-50px" $right="-100px" $borderWidth="2px" $opacity={0.15} />
+      <CreativeCircle $size="500px" $top="15%" $right="-250px" $borderWidth="1px" $opacity={0.1} />
+      <CreativeCircle $size="120px" $top="65%" $right="40px" $borderWidth="3px" $opacity={0.15} />
+      <CreativeCircle $size="650px" $top="50%" $right="-300px" $borderWidth="1px" $opacity={0.08} />
+      
+      <FloatingElement $top="10%" $left="-10%" $size="300px" $opacity={0.03} $delay={0} />
+      <FloatingElement $top="60%" $right="-20%" $size="400px" $opacity={0.04} $delay={1} />
+      <FloatingElement $top="40%" $left="60%" $size="150px" $opacity={0.05} $delay={2} />
+      
+      <SidebarTitle
+        as={motion.div}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <div style={{ background: '#fff', borderRadius: '50%', padding: '2px', display: 'flex' }}>
+          <img src={logoCl} alt="Logo Lara Charantola" style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%' }} />
+        </div>
+        <SidebarTitleText>
+          <h5 style={{ color: '#f5e6d3' }}>Lara Charantola</h5>
+          <p style={{ color: '#f5e6d3', opacity: 0.9 }}>Aulas & Traduções</p>
+        </SidebarTitleText>
+      </SidebarTitle>
+      
+      <SidebarContent
+        as={motion.div}
+        initial={{ opacity: 0, x: -30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+      >
+        <h4 style={{ fontSize: '2.8rem', lineHeight: 1.2, marginBottom: '1.5rem', fontWeight: 800, color: '#f5e6d3' }}>
+          Bem-vindo(a) à plataforma de ensino <span style={{ color: '#C57A67' }}>LC.</span>
+        </h4>
+        <p style={{ fontSize: '1.1rem', lineHeight: 1.6, opacity: 0.9, color: '#e2e8f0' }}>
+          Acesse suas aulas personalizadas, acompanhe seu progresso, realize exercícios práticos e conquiste a fluência no idioma de forma moderna e organizada.
+        </p>
+      </SidebarContent>
+    </SidebarStyle>
   );
 };
 

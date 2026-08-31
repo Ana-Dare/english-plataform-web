@@ -10,15 +10,18 @@ import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ForgotPassword from "./pages/ForgotPassword";
-import ProtectedRoutes from "./routes/ProtectedRoutes";
+import { ToastProvider } from "./contexts/ToastContext";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLogin from "./pages/AdminLogin";
 
 function App() {
   return (
     <AuthProvider>
+      <ToastProvider>
       <CookieConsent />
       <BrowserRouter>
-        <Routes>
-          {/* Rotas públicas */}
+      <Routes>
+                  {/* Rotas públicas */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -26,7 +29,6 @@ function App() {
           <Route path="/confirmation-email" element={<EmailConfirmation />} />
 
           {/* Rotas privadas */}
-          <Route element={<ProtectedRoutes />}>
             <Route path="/apresntation" element={<PageHome />} />
             <Route path="/cursos" element={<PageCourses />} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -34,14 +36,17 @@ function App() {
             <Route path="/confirmation-email" element={<EmailConfirmation />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route
               path="/politica-de-privacidade"
               element={<PrivacyPolicy />}
             />
+      </Routes>
+
             {/* <Route path="*" element={<div> Página não encontrada</div>} /> */}
-          </Route>
-        </Routes>
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

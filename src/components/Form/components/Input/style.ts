@@ -13,7 +13,7 @@ export const Field = styled.div<FieldProps>`
   label {
     font-size: 1rem;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.white};
+    color: #334155;
   }
 
   p,
@@ -22,12 +22,12 @@ export const Field = styled.div<FieldProps>`
     font-weight: 700;
     color: ${(props) =>
       props.$feedback === "danger"
-        ? "#991B1B"
+        ? "#dc2626"
         : props.$feedback === "success"
-          ? props.theme.colors.success
+          ? "#16a34a"
           : props.$feedback === "warning"
-            ? props.theme.colors.gold
-            : props.theme.colors.white};
+            ? "#ca8a04"
+            : "#64748b"};
   }
 `;
 
@@ -47,21 +47,26 @@ export const InputField = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border-bottom: solid 1px ${(props) => props.theme.colors.bg};
+  border-bottom: solid 1.5px #e2e8f0;
   border-top: none;
   border-left: none;
   border-right: none;
   gap: 1rem;
   width: 100%;
   box-sizing: border-box;
-  padding: 0 0.5rem;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #3b82f6;
+  }
 
   input {
     border: none;
     padding: 0.5rem;
     width: 100%;
     background: transparent;
-    color: ${(props) => props.theme.colors.white};
+    color: #1e293b;
     box-sizing: border-box;
     font-size: ${(props) => props.theme.sizes.subtitle};
     flex: 1;
@@ -69,20 +74,20 @@ export const InputField = styled.div`
       outline: none;
     }
     &::placeholder {
-      color: ${(props) => props.theme.colors.white};
+      color: #94a3b8;
     }
 
     &:-webkit-autofill,
     &:-webkit-autofill:hover,
     &:-webkit-autofill:focus,
     &:-webkit-autofill:active {
-      -webkit-text-fill-color: #fff !important;
+      -webkit-text-fill-color: #1e293b !important;
       transition: background-color 5000s ease-in-out 0s;
-      box-shadow: 0 0 0px 1000px "#C9A227" inset !important;
+      box-shadow: 0 0 0px 1000px #fff inset !important;
       font-size: 1 !important;
     }
     &:-webkit-autofill::placeholder {
-      color: #fff;
+      color: #94a3b8;
     }
   }
 `;

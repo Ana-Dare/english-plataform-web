@@ -42,58 +42,104 @@ export const Loading = styled.div`
 
 export const HeaderActions = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  width: 100%;
 `;
 
 export const SearchWrapper = styled.div`
   display: flex;
   align-items: center;
   background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  width: 300px;
-  max-width: 100%;
-  transition: border-color 0.2s ease;
+  border-radius: 50px;
+  padding: 0.6rem 1.2rem;
+  width: 100%;
+  min-width: 260px;
+  max-width: 320px;
+  flex-shrink: 0;
+  border: 1px solid #1F2B45;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
 
   &:focus-within {
-    border-color: #08142c;
+    border-color: #2a4a7f;
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.12);
   }
 
   svg {
-    color: #888;
-    margin-right: 0.5rem;
+    color: #2a4a7f;
+    margin-right: 0.8rem;
     flex-shrink: 0;
   }
 
   input {
     border: none;
     outline: none;
-    font-size: 0.9rem;
-    font-family: "Rubik", sans-serif;
+    font-size: 0.95rem;
+    font-family: inherit;
     width: 100%;
-    color: #333;
+    color: #1e293b;
+    background: transparent;
 
     &::placeholder {
-      color: #999;
+      color: #94a3b8;
     }
   }
 
   @media (max-width: 768px) {
-    width: 100%;
+    max-width: 100%;
   }
 `;
+
+export const FilterSelect = styled.select`
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid #1F2B45;
+  border-radius: 999px;
+  padding: 0.55rem 2.4rem 0.55rem 1.1rem;
+  font-size: 0.88rem;
+  font-family: 'Rubik', inherit;
+  font-weight: 500;
+  color: #1F2B45;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231F2B45%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem top 52%;
+  background-size: 0.6rem auto;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: #2a4a7f;
+    background-color: #f0f4fa;
+    box-shadow: 0 4px 12px rgba(31, 43, 69, 0.15);
+    color: #2a4a7f;
+  }
+
+  &:focus {
+    border-color: #2a4a7f;
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.12), 0 2px 8px rgba(31, 43, 69, 0.06);
+    color: #2a4a7f;
+    background-color: #f0f4fa;
+  }
+`;
+
 
 export const RightActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+  margin-left: auto;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     width: 100%;
+    margin-left: 0;
     justify-content: space-between;
   }
 `;
@@ -141,11 +187,11 @@ export const IconButton = styled.button`
 `;
 
 export const AddButton = styled.button`
-  background-color: #08142c;
-  color: #fff;
+  background-color: #1F2B45; /* Azul marinho profissional */
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
+  border-radius: 50px; /* Redondo */
+  padding: 0.6rem 1.4rem;
   font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
@@ -155,11 +201,12 @@ export const AddButton = styled.button`
   gap: 0.5rem;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.2);
 
   &:hover {
-    background-color: #1a3d6e;
+    background-color: #141d2e;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(8, 20, 44, 0.2);
+    box-shadow: 0 4px 12px rgba(31, 43, 69, 0.3);
   }
 
   @media (max-width: 480px) {
@@ -322,6 +369,8 @@ export const ActionIconBtn = styled.button<{
 
 export const ActionsWrapper = styled.div`
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 0.4rem;
 `;
 
@@ -646,7 +695,7 @@ export const RegisterContainer = styled.div`
 
 export const RegisterHeader = styled.div`
   background: linear-gradient(135deg, #08142c 0%, #1a3d6e 100%);
-  padding: 1.8rem 2.5rem;
+  padding: 1.2rem 1.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -701,13 +750,13 @@ export const StepDot = styled.div<{ $active: boolean; $done: boolean }>`
 `;
 
 export const RegisterBody = styled.div`
-  padding: 2.5rem;
+  padding: 1.25rem 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 0.7rem;
   @media (max-width: 600px) {
-    padding: 1.2rem;
-    gap: 1.5rem;
+    padding: 1rem;
+    gap: 0.6rem;
   }
 `;
 
@@ -715,10 +764,9 @@ export const PhotoUploadSection = styled.div`
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.5rem;
-  background: #f8f9fc;
-  border-radius: 12px;
-  border: 1px dashed #d0d5dd;
+  padding: 1rem 0 1.5rem;
+  background: transparent;
+  border-bottom: 1px solid #f1f5f9;
   @media (max-width: 600px) {
     flex-direction: column;
     text-align: center;
@@ -795,7 +843,14 @@ export const PhotoUploadBtn = styled.button`
 export const RegisterSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.65rem;
+  padding: 1rem 0 1.5rem;
+  background: transparent;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 export const RegisterSectionTitle = styled.h4`
@@ -806,8 +861,8 @@ export const RegisterSectionTitle = styled.h4`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e2e8f0;
   svg {
     color: #555;
   }
@@ -816,10 +871,10 @@ export const RegisterSectionTitle = styled.h4`
 export const RegisterGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
+  gap: 0.7rem 1rem;
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0.65rem;
   }
 `;
 
@@ -833,79 +888,120 @@ export const RegisterField = styled.div`
 `;
 
 export const RegisterLabel = styled.label`
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #555;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #3f3f46;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.45px;
   display: flex;
   align-items: center;
   gap: 0.3rem;
   svg {
-    color: #aaa;
+    color: #888;
   }
   span {
     color: #d93025;
+    font-weight: 800;
   }
 `;
 
-export const RegisterInput = styled.input`
-  padding: 0.75rem 1rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
+export const FieldError = styled.span`
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #d93025;
+  margin-top: 0.1rem;
+`;
+
+export const RegisterInput = styled.input<{ $error?: boolean }>`
+  padding: 0.65rem 1rem;
+  border: 1.5px solid ${({ $error }) => ($error ? "#d93025" : "#8d8d8d")};
+  border-radius: 14px;
   font-family: inherit;
   font-size: 0.9rem;
   outline: none;
-  transition: all 0.2s;
-  background: #fff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #fdfcfb 100%);
   width: 100%;
   box-sizing: border-box;
+  color: #1F2B45;
   &:focus {
-    border-color: #08142c;
-    box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08);
+    border-color: ${({ $error }) => ($error ? "#d93025" : "#C57A67")};
+    box-shadow: ${({ $error }) =>
+      $error
+        ? "0 0 0 3px rgba(217, 48, 37, 0.12)"
+        : "0 0 0 3px rgba(197, 122, 103, 0.12), 0 2px 8px rgba(197, 122, 103, 0.08)"};
+    background: #fff;
+  }
+  &:hover:not(:focus) {
+    border-color: ${({ $error }) => ($error ? "#d93025" : "#6b6b6b")};
   }
   &::placeholder {
-    color: #aaa;
+    color: #888888;
   }
 `;
 
 export const RegisterSelect = styled.select`
-  padding: 0.75rem 1rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.9rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid #1F2B45;
+  border-radius: 999px;
+  padding: 0.75rem 2.4rem 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  font-family: 'Rubik', inherit;
+  font-weight: 500;
+  color: #1F2B45;
   outline: none;
-  transition: all 0.2s;
-  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231F2B45%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem top 52%;
+  background-size: 0.7rem auto;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
   width: 100%;
   box-sizing: border-box;
-  cursor: pointer;
+
+  &:hover {
+    border-color: #2a4a7f;
+    background-color: #f0f4fa;
+    box-shadow: 0 4px 12px rgba(31, 43, 69, 0.15);
+    color: #2a4a7f;
+  }
+
   &:focus {
-    border-color: #08142c;
-    box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08);
+    border-color: #2a4a7f;
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.12), 0 2px 8px rgba(31, 43, 69, 0.06);
+    color: #2a4a7f;
+    background-color: #f0f4fa;
   }
 `;
 
 export const RegisterTextarea = styled.textarea`
   padding: 0.75rem 1rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
+  border: 1.5px solid #8d8d8d;
+  border-radius: 14px;
   font-family: inherit;
   font-size: 0.9rem;
   outline: none;
-  transition: all 0.2s;
-  background: #fff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #fdfcfb 100%);
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
-  min-height: 80px;
+  min-height: 72px;
+  color: #1F2B45;
+  line-height: 1.5;
   &:focus {
-    border-color: #08142c;
-    box-shadow: 0 0 0 3px rgba(8, 20, 44, 0.08);
+    border-color: #C57A67;
+    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.12), 0 2px 8px rgba(197, 122, 103, 0.08);
+    background: #fff;
+  }
+  &:hover:not(:focus) {
+    border-color: #6b6b6b;
   }
   &::placeholder {
-    color: #aaa;
+    color: #888888;
   }
 `;
 
@@ -922,7 +1018,7 @@ export const PlanCard = styled.div<{
   $type: "Regular" | 1;
 }>`
   flex: 1;
-  padding: 1.2rem;
+  padding: 0.85rem 1rem;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -950,10 +1046,10 @@ export const PlanCard = styled.div<{
           `
       : css`
           background: #fff;
-          border: 2px solid #e0e0e0;
+          border: 1.5px solid #8d8d8d;
           color: #555;
           &:hover {
-            border-color: #bbb;
+            border-color: #6b6b6b;
             background: #fafafa;
           }
         `}
@@ -996,10 +1092,10 @@ export const PlanCheck = styled.div<{ $selected: boolean }>`
 export const RegisterFooter = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 0.8rem;
-  padding: 1.5rem 2.5rem;
-  border-top: 1px solid #eee;
-  background: #fafafa;
+  gap: 1rem;
+  padding: 1rem 1.75rem;
+  border-top: 1.5px solid #c4c4c4;
+  background: linear-gradient(135deg, #faf8f7 0%, #f5f0ed 100%);
   @media (max-width: 600px) {
     padding: 1rem;
     flex-direction: column;

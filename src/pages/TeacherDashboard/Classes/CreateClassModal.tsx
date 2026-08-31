@@ -5,6 +5,8 @@ import {
   FieldGroup, StudentListSelect, StudentSelectItem, StudentSelectInfo, CheckCircle,
   CloseBtn, PrimaryBtn, SecondaryBtn
 } from './style';
+import CustomDropdown from '../../../components/CustomDropdown';
+import { useToast } from "../../../contexts/ToastContext";
 
 export interface StudentMock {
   id: string;
@@ -28,6 +30,7 @@ interface CreateClassModalProps {
 }
 
 const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) => {
+  const { addToast } = useToast();
   const [name, setName] = useState('');
   const [level, setLevel] = useState('Beginner');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -46,7 +49,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) 
 
   const handleSave = () => {
     if (!name.trim()) {
-      alert('Por favor, informe o nome da turma.');
+      addToast('Por favor, informe o nome da turma.', 'warning');
       return;
     }
     const selectedStudents = availableStudents.filter(s => selectedIds.has(s.id));
@@ -72,11 +75,15 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) 
           </FieldGroup>
           <FieldGroup>
             <label>Nível</label>
-            <select value={level} onChange={e => setLevel(e.target.value)}>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-            </select>
+            <CustomDropdown
+              value={level}
+              onChange={(val) => setLevel(val)}
+              options={[
+                { value: 'Beginner', label: 'Beginner' },
+                { value: 'Intermediate', label: 'Intermediate' },
+                { value: 'Advanced', label: 'Advanced' },
+              ]}
+            />
           </FieldGroup>
           <FieldGroup>
             <label>Selecionar Alunos ({selectedIds.size} selecionados)</label>

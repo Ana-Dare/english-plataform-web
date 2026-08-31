@@ -11,19 +11,19 @@ const PendingItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f1f4fb;
+  background-color: #ffffff;
   border-radius: 8px;
   padding: 0.8rem 1.2rem;
   font-size: 0.85rem;
-  color: #3165e3;
+  color: #2b3a4e;
   font-weight: 500;
-  border: 1px solid #d4e0fc;
+  border: 1px solid #e8e0db;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #e6ecfa;
-    border-color: #b1c7f7;
+    background-color: #f9f6f4;
+    border-color: #d4957f;
   }
 `;
 
@@ -37,7 +37,7 @@ const DotItem = styled.div`
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background-color: #3165e3;
+    background-color: #d4957f;
   }
 `;
 
@@ -55,7 +55,7 @@ const RecentPending = () => {
         <PendingItem key={idx}>
           <DotItem>{task}</DotItem>
           {idx < 2 && (
-            <AlertTriangle size={16} color="#3165e3" strokeWidth={2} />
+            <AlertTriangle size={16} color="#d4957f" strokeWidth={2} />
           )}
         </PendingItem>
       ))}

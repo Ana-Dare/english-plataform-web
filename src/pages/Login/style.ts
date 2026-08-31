@@ -5,12 +5,12 @@ export const LoginStyle = styled.div`
   flex-direction: row;
   width: 100%;
   height: 100vh;
-  gap: 1rem;
+  background-color: #ffffff;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     flex-direction: column;
     height: auto;
     min-height: 100vh;
-    gap: 0;
   }
 `;

@@ -7,12 +7,13 @@ import {
   ModalFormArea,
   ModalFormTitle,
   FormInput,
-  FormSelect,
   ModalSubmitButton
 } from "./style";
+import CustomDropdown from "../CustomDropdown";
 
 const PromoModal = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [interesse, setInteresse] = useState("");
 
   useEffect(() => {
     // Show modal if it hasn't been closed in this session
@@ -58,12 +59,16 @@ const PromoModal = () => {
             <FormInput type="email" placeholder="Seu E-mail" required />
             <FormInput type="tel" placeholder="Seu Telefone / WhatsApp" required />
             
-            <FormSelect required>
-              <option value="">Qual o seu interesse?</option>
-              <option value="aulas">Aulas de Inglês</option>
-              <option value="traducoes">Serviços de Tradução</option>
-              <option value="teste">Agendar Aula Teste Grátis</option>
-            </FormSelect>
+            <CustomDropdown
+              value={interesse}
+              onChange={setInteresse}
+              options={[
+                { value: '', label: 'Qual o seu interesse?' },
+                { value: 'aulas', label: 'Aulas de Inglês' },
+                { value: 'traducoes', label: 'Serviços de Tradução' },
+                { value: 'teste', label: 'Agendar Aula Teste Grátis' },
+              ]}
+            />
 
             <ModalSubmitButton type="submit">Quero Minha Aula Teste</ModalSubmitButton>
           </form>

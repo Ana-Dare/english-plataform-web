@@ -19,9 +19,9 @@ export const ToggleButton = styled.button<{ $collapsed: boolean }>`
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #1a2d4a;
-  border: 2.5px solid #263f63;
-  color: #8ab4f8;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2.5px solid rgba(255, 255, 255, 0.15);
+  color: #FFA38C;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,7 +39,7 @@ export const ToggleButton = styled.button<{ $collapsed: boolean }>`
   }
 
   &:hover {
-    background: #263f63;
+    background: rgba(255, 255, 255, 0.15);
     transform: ${({ $collapsed }) =>
       $collapsed ? "translateX(-50%) scale(1.1)" : "scale(1.1)"};
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
@@ -63,21 +63,21 @@ export const LogoCircle = styled.div`
   height: 40px;
   min-width: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d4af37, #f3e5ab);
+  background: linear-gradient(135deg, #C57A67, #FFA38C);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0a1628;
+  color: #1F2B45;
   font-weight: bold;
   font-family: serif;
   font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 2px 8px rgba(197, 122, 103, 0.3);
 `;
 
 export const LogoText = styled.span<{ $collapsed: boolean }>`
   font-weight: 600;
   font-size: 1rem;
-  color: #e8edf5;
+  color: #ffffff;
   white-space: nowrap;
   opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
   transform: ${({ $collapsed }) =>
@@ -126,16 +126,12 @@ export const MenuItem = styled.li<{ $active?: boolean; $collapsed?: boolean }>`
     $active
       ? css`
           color: #ffffff;
-          background: linear-gradient(
-            135deg,
-            rgba(212, 175, 55, 0.2),
-            rgba(212, 175, 55, 0.08)
-          );
+          background: rgba(197, 122, 103, 0.25);
           font-weight: 600;
-          box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.25);
+          box-shadow: 0 0 0 1px rgba(197, 122, 103, 0.3);
         `
       : css`
-          color: rgba(200, 210, 230, 0.7);
+          color: rgba(255, 255, 255, 0.65);
           background-color: transparent;
           font-weight: 400;
         `}
@@ -143,7 +139,7 @@ export const MenuItem = styled.li<{ $active?: boolean; $collapsed?: boolean }>`
   &:hover {
     background: ${({ $active }) =>
       $active
-        ? "linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.12))"
+        ? "rgba(197, 122, 103, 0.3)"
         : "rgba(255, 255, 255, 0.06)"};
     color: #ffffff;
   }
@@ -155,11 +151,11 @@ export const MenuItem = styled.li<{ $active?: boolean; $collapsed?: boolean }>`
     margin-right: ${({ $collapsed }) => ($collapsed ? "0" : "14px")};
     transition: all 0.25s ease;
     color: ${({ $active }) =>
-      $active ? "#d4af37" : "rgba(200, 210, 230, 0.55)"};
+      $active ? "#FFA38C" : "rgba(255, 255, 255, 0.5)"};
   }
 
   &:hover svg {
-    color: ${({ $active }) => ($active ? "#e8c84a" : "#8ab4f8")};
+    color: ${({ $active }) => ($active ? "#FFA38C" : "rgba(255, 255, 255, 0.8)")};
   }
 `;
 
@@ -179,8 +175,8 @@ export const MenuLabel = styled.span<{ $collapsed: boolean }>`
 export const Tooltip = styled.div`
   position: absolute;
   left: calc(100% + 12px);
-  background: #1e3254;
-  color: #e8edf5;
+  background: #1F2B45;
+  color: #ffffff;
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 0.82rem;
@@ -192,7 +188,7 @@ export const Tooltip = styled.div`
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(77, 77, 77, 0.5);
   z-index: 100;
 
   &::before {
@@ -203,7 +199,7 @@ export const Tooltip = styled.div`
     transform: translateY(-50%);
     border-width: 5px 5px 5px 0;
     border-style: solid;
-    border-color: transparent #1e3254 transparent transparent;
+    border-color: transparent #1F2B45 transparent transparent;
   }
 `;
 

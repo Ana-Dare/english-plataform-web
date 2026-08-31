@@ -15,6 +15,7 @@ import {
   DropzoneContainer,
   RichTextWrapper,
 } from "./style";
+import { useToast } from "../../../contexts/ToastContext";
 
 export interface MaterialData {
   title: string;
@@ -26,16 +27,19 @@ export interface MaterialData {
 interface AddMaterialModalProps {
   onClose: () => void;
   onSave: (data: MaterialData) => void;
+  initialData?: MaterialData;
 }
 
 const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   onClose,
   onSave,
+  initialData
 }) => {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState<"pdf" | "video" | "link">("pdf");
-  const [url, setUrl] = useState("");
-  const [description, setDescription] = useState("");
+  const { addToast } = useToast();
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [type, setType] = useState<"pdf" | "video" | "link">(initialData?.type || "pdf");
+  const [url, setUrl] = useState(initialData?.url || "");
+  const [description, setDescription] = useState(initialData?.description || "");
 
   const [fileName, setFileName] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
@@ -70,7 +74,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
   const handleSave = () => {
     if (!title.trim()) {
-      alert("Por favor, informe o título do material.");
+      addToast("Por favor, informe o título do material.", "warning");
       return;
     }
     onSave({ title, type, url, description });
@@ -80,7 +84,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
     <ModalOverlay>
       <ModalContent $expanded>
         <ModalHeader>
-          <h3>Adicionar Material</h3>
+          <h3>{initialData ? "Editar Material" : "Adicionar Material"}</h3>
           <CloseBtn onClick={onClose}>
             <X size={20} />
           </CloseBtn>
@@ -170,7 +174,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         </ModalBody>
         <ModalFooter>
           <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-          <PrimaryBtn onClick={handleSave}>Adicionar Material</PrimaryBtn>
+          <PrimaryBtn onClick={handleSave}>{initialData ? "Salvar Alterações" : "Adicionar Material"}</PrimaryBtn>
         </ModalFooter>
       </ModalContent>
     </ModalOverlay>

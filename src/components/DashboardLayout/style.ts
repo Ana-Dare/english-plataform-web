@@ -4,12 +4,12 @@ export const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
   width: 100vw;
-  background-color: #fafafa;
+  background-color: #f7f7f8;
   overflow: hidden;
 `;
 
 export const SidebarContainer = styled.aside<{ $isOpen?: boolean }>`
-  background: linear-gradient(180deg, #0a1628 0%, #0e1f3d 50%, #0a1628 100%);
+  background: #1F2B45;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
@@ -35,8 +35,8 @@ export const MainContent = styled.main`
 
 export const HeaderContainer = styled.header`
   height: 70px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: #1F2B45;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -46,7 +46,7 @@ export const ContentArea = styled.div`
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
-  background-color: #fafafa;
+  background-color: #f7f7f8;
 
   @media (max-width: 768px) {
     padding: 1.5rem 1rem;
@@ -63,7 +63,7 @@ export const MobileOverlay = styled.div<{ $isOpen: boolean }>`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(31, 43, 69, 0.5);
     z-index: 40;
     backdrop-filter: blur(2px);
   }

@@ -7,6 +7,12 @@ import {
   ExternalLink,
   CalendarPlus,
   FileUp,
+  Users,
+  Stethoscope,
+  Paperclip,
+  Clock,
+  CheckCircle,
+  Edit2
 } from "lucide-react";
 import {
   DetailContainer,
@@ -22,9 +28,6 @@ import {
   DetailContent,
   PostCard,
   PostHeader,
-  PostAvatar,
-  PostMeta,
-  PostBody,
   CreatePostBox,
   PrimaryBtn,
   MaterialsGrid,
@@ -33,19 +36,36 @@ import {
   MaterialInfo,
   ClassAgendaList,
   AgendaItem,
-  AgendaItemInfo,
   AgendaDateBox,
-  AgendaDetails,
+  AgendaContent,
+  StudentsGrid,
+  StudentCard,
+  JustificationList,
+  JustificationItem,
+  JustificationInfo,
+  JustificationStatus,
+  ActionGroup,
+  JustificationActionBtn,
+  SectionHeader,
+  SectionTitle,
+  PostList,
+  PostAuthor,
+  PostContent
 } from "./style";
 import type { ClassType } from "./types";
 import AddMaterialModal from "./AddMaterialModal";
 import type { MaterialData } from "./AddMaterialModal";
 import AddClassEventModal from "./AddClassEventModal";
 import type { ClassEventData } from "./AddClassEventModal";
+import EvaluateJustificationModal from "./EvaluateJustificationModal";
+import { useToast } from "../../../contexts/ToastContext";
+import { Check, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ClassDetailProps {
   classData: ClassType;
   onBack: () => void;
+  onNavigateToStudent?: (studentId: number) => void;
 }
 
 const getInitials = (name: string) => {
@@ -55,8 +75,9 @@ const getInitials = (name: string) => {
     : parts[0][0];
 };
 
-const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
-  const [activeTab, setActiveTab] = useState<"mural" | "materiais" | "agenda">(
+const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigateToStudent }) => {
+  const { addToast } = useToast();
+  const [activeTab, setActiveTab] = useState<"mural" | "materiais" | "agenda" | "alunos" | "atestados">(
     "mural",
   );
   const [newPost, setNewPost] = useState("");
@@ -85,6 +106,7 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
   };
 
   const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(null);
   const [materials, setMaterials] = useState<MaterialData[]>([
     {
       title: "Guia de Estudos - Módulo 1",
@@ -118,8 +140,52 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
     },
   ]);
 
+  const [justifications, setJustifications] = useState([
+    {
+      id: 1,
+      student: "Carlos Silva",
+      date: "2026-08-12",
+      reason: "Consulta médica de emergência",
+      status: "Em Análise",
+      document: "atestado_medico.pdf",
+      feedback: ""
+    },
+    {
+      id: 2,
+      student: "Ana Souza",
+      date: "2026-08-05",
+      reason: "Exames de sangue",
+      status: "Aceito",
+      document: "exames_ana.png",
+      feedback: "Atestado recebido e abonado."
+    }
+  ]);
+
+  const [evaluatingJustification, setEvaluatingJustification] = useState<{ id: number; action: 'approve' | 'reject'; student: string } | null>(null);
+
+  const handleEvaluateJustification = (message: string) => {
+    if (!evaluatingJustification) return;
+    
+    const { id, action, student } = evaluatingJustification;
+    const newStatus = action === 'approve' ? 'Aceito' : 'Recusado';
+
+    setJustifications(prev => prev.map(j => 
+      j.id === id ? { ...j, status: newStatus, feedback: message } : j
+    ));
+
+    addToast(`Atestado ${newStatus.toLowerCase()} com sucesso! Feedback enviado ao aluno.`, 'success');
+    setEvaluatingJustification(null);
+  };
+
   const handleAddMaterial = (data: MaterialData) => {
-    setMaterials([data, ...materials]);
+    if (editingMaterialIndex !== null) {
+      const newMaterials = [...materials];
+      newMaterials[editingMaterialIndex] = data;
+      setMaterials(newMaterials);
+      setEditingMaterialIndex(null);
+    } else {
+      setMaterials([data, ...materials]);
+    }
     setShowMaterialModal(false);
   };
 
@@ -127,11 +193,11 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
     setEvents([data, ...events]);
     setShowEventModal(false);
     if (data.syncAgenda) {
-      alert(
-        `Aula "${data.title}" agendada e adicionada à sua agenda pessoal com sucesso!`,
+      addToast(
+        `Aula "${data.title}" agendada e adicionada à sua agenda pessoal com sucesso!`, "success"
       );
     } else {
-      alert(`Aula "${data.title}" agendada com sucesso!`);
+      addToast(`Aula "${data.title}" agendada com sucesso!`, "success");
     }
   };
 
@@ -200,132 +266,238 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
         >
           <Calendar size={18} /> Agenda da Turma
         </TabBtn>
+        <TabBtn
+          $active={activeTab === "alunos"}
+          onClick={() => setActiveTab("alunos")}
+        >
+          <Users size={18} /> Alunos da Turma
+        </TabBtn>
+        <TabBtn
+          $active={activeTab === "atestados"}
+          onClick={() => setActiveTab("atestados")}
+        >
+          <Stethoscope size={18} /> Atestados Médicos
+        </TabBtn>
       </DetailTabs>
 
       <DetailContent>
         {activeTab === "mural" && (
-          <div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <SectionHeader>
+              <SectionTitle>
+                <MessageSquare size={24} /> Mural de Avisos
+              </SectionTitle>
+            </SectionHeader>
             <CreatePostBox>
-              <textarea
-                placeholder="Escreva um aviso para a turma..."
+              <textarea 
+                placeholder="Escreva um aviso para a turma..." 
                 value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
+                onChange={e => setNewPost(e.target.value)}
               />
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <PrimaryBtn onClick={handleCreatePost}>
-                  Publicar Aviso
-                </PrimaryBtn>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <PrimaryBtn onClick={handleCreatePost}>Publicar</PrimaryBtn>
               </div>
             </CreatePostBox>
-
-            {posts.map((post) => (
-              <PostCard key={post.id}>
-                <PostHeader>
-                  <PostAvatar>{getInitials(post.author)}</PostAvatar>
-                  <PostMeta>
-                    <strong>{post.author}</strong>
-                    <span>{post.date}</span>
-                  </PostMeta>
-                </PostHeader>
-                <PostBody>{post.content}</PostBody>
-              </PostCard>
-            ))}
-          </div>
+            
+            <PostList>
+              {posts.map(post => (
+                <PostCard key={post.id}>
+                  <PostHeader>
+                    <PostAuthor>
+                      <StudentAvatarSmall $color="#08142c" $index={0} style={{ width: '40px', height: '40px' }}>
+                        {getInitials(post.author)}
+                      </StudentAvatarSmall>
+                      <div>
+                        <strong>{post.author}</strong>
+                        <br />
+                        <span>{post.date}</span>
+                      </div>
+                    </PostAuthor>
+                  </PostHeader>
+                  <PostContent>{post.content}</PostContent>
+                </PostCard>
+              ))}
+            </PostList>
+          </motion.div>
         )}
 
         {activeTab === "materiais" && (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "2rem",
-              }}
-            >
-              <h3 style={{ margin: 0, color: "#08142c" }}>
-                Materiais da Turma
-              </h3>
-              <PrimaryBtn
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-                onClick={() => setShowMaterialModal(true)}
-              >
-                <FileUp size={16} /> Adicionar Material
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <SectionHeader>
+              <SectionTitle>
+                <FileText size={24} /> Materiais & Atividades
+              </SectionTitle>
+              <PrimaryBtn style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} onClick={() => addToast("Em breve: Upload de materiais", "info")}>
+                <FileUp size={16} /> Novo Material
               </PrimaryBtn>
-            </div>
-
+            </SectionHeader>
             <MaterialsGrid>
               {materials.map((mat, idx) => (
-                <MaterialCard key={idx}>
-                  <MaterialIcon $type={mat.type}>
-                    {mat.type === "pdf" ? (
-                      <FileText size={24} />
-                    ) : (
-                      <ExternalLink size={24} />
-                    )}
-                  </MaterialIcon>
-                  <MaterialInfo>
+                <MaterialCard 
+                  key={idx} 
+                  onClick={() => {
+                    if (mat.url && mat.url !== '#') {
+                      window.open(mat.url, '_blank');
+                    } else {
+                      addToast('Este material é apenas um exemplo e não possui link válido.', 'info');
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                    <MaterialIcon $type={mat.type}>
+                      {mat.type === "pdf" ? (
+                        <FileText size={24} />
+                      ) : (
+                        <ExternalLink size={24} />
+                      )}
+                    </MaterialIcon>
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setEditingMaterialIndex(idx); 
+                        setShowMaterialModal(true); 
+                      }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: '4px' }}
+                      title="Editar Material"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  </div>
+                  <MaterialInfo style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <h4>{mat.title}</h4>
-                    <p>{mat.description || "Nenhuma descrição"}</p>
+                    <div 
+                      style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, margin: 0 }}
+                      dangerouslySetInnerHTML={{ __html: mat.description || "Nenhuma descrição" }} 
+                    />
                   </MaterialInfo>
                 </MaterialCard>
               ))}
             </MaterialsGrid>
-          </div>
+          </motion.div>
         )}
 
         {activeTab === "agenda" && (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "2rem",
-              }}
-            >
-              <h3 style={{ margin: 0, color: "#08142c" }}>Próximas Aulas</h3>
-              <PrimaryBtn
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-                onClick={() => setShowEventModal(true)}
-              >
-                <CalendarPlus size={16} /> Nova Aula
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <SectionHeader>
+              <SectionTitle>
+                <Calendar size={24} /> Próximas Aulas
+              </SectionTitle>
+              <PrimaryBtn style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} onClick={() => addToast("Em breve: Agendamento de aulas", "info")}>
+                <Calendar size={16} /> Nova Aula
               </PrimaryBtn>
-            </div>
-
+            </SectionHeader>
             <ClassAgendaList>
               {events.map((ev, idx) => {
                 const dateObj = new Date(ev.date + "T00:00:00");
-                const day = isNaN(dateObj.getTime())
-                  ? ev.date.split("-")[2] || "?"
-                  : dateObj.getDate().toString().padStart(2, "0");
-                const month = isNaN(dateObj.getTime())
-                  ? "Mês"
-                  : dateObj.toLocaleString("pt-BR", { month: "short" });
+                const day = isNaN(dateObj.getTime()) ? ev.date.split("-")[2] || "?" : dateObj.getDate().toString().padStart(2, "0");
+                const month = isNaN(dateObj.getTime()) ? "Mês" : dateObj.toLocaleString("pt-BR", { month: "short" });
                 return (
                   <AgendaItem key={idx}>
-                    <AgendaItemInfo>
-                      <AgendaDateBox>
-                        <strong>{day}</strong>
-                        <span>{month}</span>
-                      </AgendaDateBox>
-                      <AgendaDetails>
-                        <h4>{ev.title}</h4>
-                        <span>
-                          <Calendar size={14} /> {ev.startTime} - {ev.endTime}
-                        </span>
-                      </AgendaDetails>
-                    </AgendaItemInfo>
+                    <AgendaDateBox>
+                      <strong>{day}</strong>
+                      <span>{month}</span>
+                    </AgendaDateBox>
+                    <AgendaContent>
+                      <strong>{ev.title}</strong>
+                      <span><Clock size={14} /> {ev.startTime} - {ev.endTime}</span>
+                    </AgendaContent>
                   </AgendaItem>
                 );
               })}
             </ClassAgendaList>
-          </div>
+          </motion.div>
+        )}
+
+        {activeTab === "alunos" && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <SectionHeader>
+              <SectionTitle>
+                <Users size={24} /> Alunos Matriculados
+              </SectionTitle>
+            </SectionHeader>
+            <StudentsGrid>
+              {classData.students.map(student => (
+                <StudentCard key={student.id} onClick={() => {
+                  if (onNavigateToStudent) {
+                    onNavigateToStudent(parseInt(student.id));
+                  }
+                }}>
+                  <StudentAvatarSmall $color={student.avatarColor} $index={0} style={{ width: '48px', height: '48px', fontSize: '1.2rem', marginLeft: 0 }}>
+                    {getInitials(student.name)}
+                  </StudentAvatarSmall>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong style={{ color: '#1a1a1a', fontSize: '1.05rem', marginBottom: '0.2rem' }}>{student.name}</strong>
+                    <span style={{ color: '#666', fontSize: '0.85rem' }}>{student.email}</span>
+                  </div>
+                </StudentCard>
+              ))}
+            </StudentsGrid>
+          </motion.div>
+        )}
+
+        {activeTab === "atestados" && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <SectionHeader>
+              <SectionTitle>
+                <Stethoscope size={24} /> Atestados e Justificativas de Faltas
+              </SectionTitle>
+            </SectionHeader>
+            
+            <JustificationList>
+              {justifications.map(just => (
+                <JustificationItem key={just.id}>
+                  <JustificationInfo>
+                    <h4>{just.student}</h4>
+                    <span><Calendar size={14} /> Falta referente ao dia: {just.date}</span>
+                    <span><Stethoscope size={14} /> Motivo: {just.reason}</span>
+                  </JustificationInfo>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                      <span style={{ color: '#3b82f6', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                        <Paperclip size={14} /> {just.document}
+                      </span>
+                      <JustificationStatus $status={just.status}>
+                        {just.status === 'Aceito' ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} /> Aceito</span> : just.status === 'Recusado' ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><X size={14} /> Recusado</span> : <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> Em Análise</span>}
+                      </JustificationStatus>
+                      
+                      {just.status === 'Em Análise' && (
+                        <ActionGroup>
+                          <JustificationActionBtn 
+                            $type="approve" 
+                            onClick={() => setEvaluatingJustification({ id: just.id, action: 'approve', student: just.student })}
+                          >
+                            <Check size={16} /> Aprovar
+                          </JustificationActionBtn>
+                          <JustificationActionBtn 
+                            $type="reject" 
+                            onClick={() => setEvaluatingJustification({ id: just.id, action: 'reject', student: just.student })}
+                          >
+                            <X size={16} /> Recusar
+                          </JustificationActionBtn>
+                        </ActionGroup>
+                      )}
+                    </div>
+                    {just.feedback && (
+                      <span style={{ fontSize: '0.85rem', color: '#666', background: '#f8f9fc', padding: '0.4rem 0.8rem', borderRadius: '8px', maxWidth: '300px', textAlign: 'right' }}>
+                        <strong>Feedback:</strong> {just.feedback}
+                      </span>
+                    )}
+                  </div>
+                </JustificationItem>
+              ))}
+            </JustificationList>
+          </motion.div>
         )}
       </DetailContent>
 
       {showMaterialModal && (
         <AddMaterialModal
-          onClose={() => setShowMaterialModal(false)}
+          onClose={() => {
+            setShowMaterialModal(false);
+            setEditingMaterialIndex(null);
+          }}
           onSave={handleAddMaterial}
+          initialData={editingMaterialIndex !== null ? materials[editingMaterialIndex] : undefined}
         />
       )}
 
@@ -333,6 +505,15 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
         <AddClassEventModal
           onClose={() => setShowEventModal(false)}
           onSave={handleAddEvent}
+        />
+      )}
+
+      {evaluatingJustification && (
+        <EvaluateJustificationModal
+          studentName={evaluatingJustification.student}
+          action={evaluatingJustification.action}
+          onClose={() => setEvaluatingJustification(null)}
+          onConfirm={handleEvaluateJustification}
         />
       )}
     </DetailContainer>

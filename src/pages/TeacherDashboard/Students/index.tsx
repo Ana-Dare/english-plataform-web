@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ArrowLeft,
   Award,
@@ -13,9 +13,12 @@ import {
   Search,
   User,
   UserX,
+  Power,
+  MapPin,
+  Users
 } from "lucide-react";
+import CustomDropdown from '../../../components/CustomDropdown';
 import {
-  ActionIconBtn,
   ActionsWrapper,
   AddButton,
   Avatar,
@@ -38,11 +41,10 @@ import {
   DetailStatusBadge,
   HeaderActions,
   IconButton,
-  Loading,
   PaginationContainer,
   PlanBadge,
-  RightActions,
   SearchWrapper,
+  FilterSelect,
   StatusBadge,
   StudentCell,
   StudentInfo,
@@ -61,11 +63,11 @@ import type {
 } from "../types";
 import {
   desactive,
-  listStudent,
   registerStudent,
   updateStudent,
 } from "../services";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "../../../contexts/ToastContext";
 
 interface Student {
   id: number;
@@ -80,7 +82,9 @@ interface Student {
   plan: 0 | 1;
   turma: string;
   enrollDate: string;
+  rawEnrollDate: string;
   observations: string;
+  progress?: number;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -125,7 +129,9 @@ const toStudent = (student: IStudents): Student => ({
   plan: student.profile.vip ? 1 : 0,
   turma: "Não atribuída",
   enrollDate: formatDate(student.createdAt),
+  rawEnrollDate: student.createdAt,
   observations: student.profile.notes ?? "",
+  progress: (student as any).progress ?? Math.floor(Math.random() * 40) + 60,
 });
 
 const buildUpdatePayload = (
@@ -151,30 +157,115 @@ const buildUpdatePayload = (
   return params;
 };
 
-const StudentsTab: React.FC = () => {
+const MOCK_STUDENTS: IStudents[] = [
+  {
+    id: 1,
+    name: "João Silva",
+    email: "joao.silva@example.com",
+    phone: "11999999999",
+    birthdate: "2000-05-15T00:00:00.000Z",
+    active: true,
+    createdAt: "2023-01-10T10:00:00.000Z",
+    role: "student",
+    profile: {
+      levelId: 2,
+      vip: true,
+      notes: "Aluno dedicado, prefere aulas à noite.",
+    },
+  },
+  {
+    id: 2,
+    name: "Maria Oliveira",
+    email: "maria.oliveira@example.com",
+    phone: "11888888888",
+    birthdate: "1995-10-20T00:00:00.000Z",
+    active: false,
+    createdAt: "2023-02-15T10:00:00.000Z",
+    role: "student",
+    profile: {
+      levelId: null,
+      vip: false,
+      notes: null,
+    },
+  },
+  {
+    id: 3,
+    name: "Carlos Santos",
+    email: "carlos@example.com",
+    phone: "11777777777",
+    birthdate: "2001-08-10T00:00:00.000Z",
+    active: true,
+    createdAt: "2023-03-20T10:00:00.000Z",
+    role: "student",
+    profile: {
+      levelId: 1,
+      vip: true,
+      notes: null,
+    },
+  }
+];
+
+interface StudentsTabProps {
+  initialStudentId?: number | null;
+}
+
+const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
+  const { addToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterLevel, setFilterLevel] = useState("todos");
+  const [filterTurma] = useState("todas");
+  const [filterFreq] = useState("qualquer");
+  const [filterStatus, setFilterStatus] = useState("ativos");
+  const [sortOrder, setSortOrder] = useState("recent");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Student | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [studentsList, setStudentsList] = useState(MOCK_STUDENTS);
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["studentsList"],
-    queryFn: listStudent,
-  });
+  const students = useMemo(() => studentsList.map(toStudent), [studentsList]);
 
-  const students = useMemo(() => (data?.students ?? []).map(toStudent), [data]);
-  const filteredStudents = useMemo(
-    () =>
-      students.filter(
-        (student) =>
-          student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          student.email.toLowerCase().includes(searchQuery.toLowerCase()),
-      ),
-    [students, searchQuery],
-  );
+  useEffect(() => {
+    if (initialStudentId) {
+      const student = students.find(s => s.id === initialStudentId);
+      if (student) {
+        setSelectedStudent(student);
+        setIsEditing(false);
+        setEditForm(null);
+      }
+    }
+  }, [initialStudentId, students]);
+
+  const filteredStudents = useMemo(() => {
+    const filtered = students.filter((student) => {
+      const matchSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          student.email.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchLevel = filterLevel === "todos" || student.levelId === Number(filterLevel);
+      
+      const matchStatus = filterStatus === "todos" || 
+                          (filterStatus === "ativos" && student.isActive) ||
+                          (filterStatus === "inativos" && !student.isActive);
+                          
+      return matchSearch && matchLevel && matchStatus;
+    });
+
+    return filtered.sort((a, b) => {
+      if (sortOrder === "recent") {
+        return new Date(b.rawEnrollDate).getTime() - new Date(a.rawEnrollDate).getTime();
+      }
+      if (sortOrder === "oldest") {
+        return new Date(a.rawEnrollDate).getTime() - new Date(b.rawEnrollDate).getTime();
+      }
+      if (sortOrder === "az") {
+        return a.name.localeCompare(b.name);
+      }
+      return 0;
+    });
+  }, [students, searchQuery, filterLevel, filterTurma, filterFreq, filterStatus, sortOrder]);
   const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE);
   const validCurrentPage = Math.min(currentPage, Math.max(totalPages, 1));
   const currentStudents = useMemo(() => {
@@ -215,9 +306,10 @@ const StudentsTab: React.FC = () => {
     onSuccess: () => {
       setShowRegister(false);
       void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
+      addToast("Aluno cadastrado com sucesso!", "success");
     },
     onError: () => {
-      alert("Não foi possível cadastrar o aluno. Tente novamente.");
+      addToast("Não foi possível cadastrar o aluno. Tente novamente.", "error");
     },
   });
 
@@ -226,9 +318,10 @@ const StudentsTab: React.FC = () => {
     onSuccess: () => {
       setSelectedStudent(null);
       void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
+      addToast("Status do aluno atualizado com sucesso!", "success");
     },
     onError: () => {
-      alert("Não foi possível desativar o aluno. Tente novamente.");
+      addToast("Não foi possível desativar o aluno. Tente novamente.", "error");
     },
   });
 
@@ -240,9 +333,10 @@ const StudentsTab: React.FC = () => {
       setEditForm(null);
       setIsEditing(false);
       void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
+      addToast("Dados atualizados com sucesso!", "success");
     },
     onError: () => {
-      alert("Não foi possível atualizar o aluno. Tente novamente.");
+      addToast("Não foi possível atualizar o aluno. Tente novamente.", "error");
     },
   });
 
@@ -254,7 +348,7 @@ const StudentsTab: React.FC = () => {
     if (!selectedStudent || !editForm) return;
 
     if (!editForm.name.trim() || !editForm.email.trim()) {
-      alert("Nome e e-mail são obrigatórios.");
+      addToast("Nome e e-mail são obrigatórios.", "warning");
       return;
     }
 
@@ -272,15 +366,6 @@ const StudentsTab: React.FC = () => {
       <RegisterStudent onBack={handleBackToList} onSave={handleRegisterSave} />
     );
   }
-
-  if (isLoading)
-    return (
-      <Container>
-        <Loading />
-      </Container>
-    );
-  if (isError)
-    return <Container>Não foi possível carregar os alunos.</Container>;
 
   if (selectedStudent) {
     const displayData = isEditing && editForm ? editForm : selectedStudent;
@@ -540,6 +625,12 @@ const StudentsTab: React.FC = () => {
     );
   }
 
+  const toggleStudentStatus = (id: number) => {
+    setStudentsList(prev => prev.map(s => 
+      s.id === id ? { ...s, active: !s.active } : s
+    ));
+  };
+
   return (
     <Container>
       <HeaderActions>
@@ -547,35 +638,47 @@ const StudentsTab: React.FC = () => {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Pesquisar por nome ou email..."
+            placeholder="Pesquisar aluno"
             value={searchQuery}
             onChange={handleSearchChange}
           />
         </SearchWrapper>
-        <RightActions>
-          <PaginationContainer>
-            <span>
-              Página {validCurrentPage} de {Math.max(totalPages, 1)}
-            </span>
-            <IconButton
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              disabled={validCurrentPage === 1}
-            >
-              <ChevronLeft size={18} />
-            </IconButton>
-            <IconButton
-              onClick={() =>
-                setCurrentPage((page) => Math.min(totalPages, page + 1))
-              }
-              disabled={validCurrentPage >= totalPages}
-            >
-              <ChevronRight size={18} />
-            </IconButton>
-          </PaginationContainer>
+        
+        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <CustomDropdown 
+            value={sortOrder} 
+            onChange={setSortOrder} 
+            options={[
+              { value: "recent", label: "Mais recentes" },
+              { value: "oldest", label: "Mais antigos" },
+              { value: "az", label: "Ordem alfabética (A-Z)" }
+            ]}
+          />
+
+          <CustomDropdown 
+            value={filterLevel} 
+            onChange={setFilterLevel} 
+            options={[
+              { value: "todos", label: "Nível: Todos" },
+              { value: "1", label: "Nível: 1" },
+              { value: "2", label: "Nível: 2" }
+            ]}
+          />
+
+          <CustomDropdown 
+            value={filterStatus} 
+            onChange={setFilterStatus} 
+            options={[
+              { value: "ativos", label: "Status: Ativos" },
+              { value: "inativos", label: "Status: Inativos" },
+              { value: "todos", label: "Status: Todos" }
+            ]}
+          />
+
           <AddButton onClick={() => setShowRegister(true)}>
-            <Plus size={18} /> Cadastrar Aluno
+            Adicionar aluno <Plus size={16} />
           </AddButton>
-        </RightActions>
+        </div>
       </HeaderActions>
 
       <TableContainer>
@@ -586,6 +689,7 @@ const StudentsTab: React.FC = () => {
               <Th>Plano</Th>
               <Th>Nível</Th>
               <Th>Turma</Th>
+              <Th>Andamento</Th>
               <Th>Telefone</Th>
               <Th>Status</Th>
               <Th>Ações</Th>
@@ -594,7 +698,11 @@ const StudentsTab: React.FC = () => {
           <tbody>
             {currentStudents.length > 0 ? (
               currentStudents.map((student) => (
-                <Tr key={student.id}>
+                <Tr 
+                  key={student.id}
+                  onClick={() => handleOpenDetail(student)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <Td>
                     <StudentCell>
                       <Avatar $color={student.avatarColor}>
@@ -613,20 +721,41 @@ const StudentsTab: React.FC = () => {
                   </Td>
                   <Td>{student.level}</Td>
                   <Td>{student.turma}</Td>
+                  <Td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#333' }}>{student.progress}%</span>
+                      <div style={{ width: '60px', height: '4px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ width: `${student.progress}%`, height: '100%', background: '#f59e0b', borderRadius: '4px' }} />
+                      </div>
+                    </div>
+                  </Td>
                   <Td>{student.phone || "Não informado"}</Td>
                   <Td>
                     <StatusBadge $active={student.isActive}>
                       {student.isActive ? "Ativo" : "Inativo"}
                     </StatusBadge>
                   </Td>
-                  <Td>
+                  <Td onClick={(e) => e.stopPropagation()}>
                     <ActionsWrapper>
-                      <ActionIconBtn
-                        title="Ver detalhes / Editar"
-                        onClick={() => handleOpenDetail(student)}
-                      >
-                        <Edit2 size={16} />
-                      </ActionIconBtn>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <IconButton
+                          title="Editar Aluno"
+                          onClick={() => {
+                            handleOpenDetail(student);
+                            setEditForm({ ...student });
+                            setIsEditing(true);
+                          }}
+                        >
+                          <Edit2 size={16} />
+                        </IconButton>
+                        <IconButton
+                          title={student.isActive ? "Desativar Aluno" : "Reativar Aluno"}
+                          onClick={() => toggleStudentStatus(student.id)}
+                          style={{ color: student.isActive ? '#ef4444' : '#22c55e' }}
+                        >
+                          <Power size={16} />
+                        </IconButton>
+                      </div>
                     </ActionsWrapper>
                   </Td>
                 </Tr>
@@ -648,6 +777,30 @@ const StudentsTab: React.FC = () => {
           </tbody>
         </Table>
       </TableContainer>
+      
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+        <PaginationContainer>
+          <span>
+            Mostrando {(validCurrentPage - 1) * ITEMS_PER_PAGE + 1} a {Math.min(validCurrentPage * ITEMS_PER_PAGE, filteredStudents.length)} de {filteredStudents.length} alunos
+          </span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <IconButton
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={validCurrentPage === 1}
+            >
+              <ChevronLeft size={18} />
+            </IconButton>
+            <IconButton
+              onClick={() =>
+                setCurrentPage((page) => Math.min(totalPages, page + 1))
+              }
+              disabled={validCurrentPage >= totalPages}
+            >
+              <ChevronRight size={18} />
+            </IconButton>
+          </div>
+        </PaginationContainer>
+      </div>
     </Container>
   );
 };

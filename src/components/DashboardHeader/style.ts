@@ -7,10 +7,10 @@ export const HeaderContainer = styled.header`
   justify-content: flex-end;
   height: 100%;
   width: 100%;
-  background: linear-gradient(180deg, #0a1628 0%, #0e1f3d 50%, #0a1628 100%);
+  background: linear-gradient(180deg, #1e2a3a 0%, #2b3a4e 50%, #1e2a3a 100%);
   background-size: 100% 100vh;
   background-position: top;
-  color: #fff;
+  color: #f0ebe7;
   padding: 0 2rem;
 `;
 
@@ -20,7 +20,7 @@ export const HeaderContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #fff;
+  color: #f0ebe7;
 
   .mobile-menu-btn {
     display: none;
@@ -33,7 +33,7 @@ export const HeaderContent = styled.div`
 export const Greeting = styled.h2`
   margin: 0;
   font-size: 1.2rem;
-  color: #fff;
+  color: #f0ebe7;
   font-weight: 500;
 
   @media (max-width: 768px) {
@@ -43,7 +43,7 @@ export const Greeting = styled.h2`
 
 export const NotificationIcon = styled.div`
   cursor: pointer;
-  color: #fff;
+  color: #f0ebe7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,7 +54,7 @@ export const NotificationIcon = styled.div`
   transition: background-color 0.2s;
 
   &:hover {
-    color: #f5f5f5;
+    color: #d4957f;
   }
 `;
 
@@ -72,16 +72,16 @@ export const Avatar = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid #d4af37;
+  border: 2px solid #d4957f;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fcedb3;
-  color: #d4af37;
+  background-color: #f0ebe7;
+  color: #d4957f;
 `;
 
 export const DropdownIcon = styled.div`
-  color: #fff;
+  color: #f0ebe7;
   display: flex;
   align-items: center;
 `;
@@ -94,12 +94,12 @@ export const DropdownContainer = styled.div`
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f0f0f0;
+  border: 1px solid #e8e0db;
   z-index: 1000;
   overflow: hidden;
   padding: 1rem;
   width: fit-content;
-  max-width:;
+  max-width: ;
 `;
 
 export const ProfileDropdown = styled(DropdownContainer)`
@@ -117,7 +117,7 @@ export const ProfileHeader = styled.div`
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e8e0db;
 
   .info {
     display: flex;
@@ -125,41 +125,91 @@ export const ProfileHeader = styled.div`
 
     strong {
       font-size: 0.95rem;
-      color: #333;
+      color: #2b3a4e;
     }
 
     span {
       font-size: 0.8rem;
-      color: #888;
+      color: #7a8a9e;
     }
   }
+`;
+
+export const DropdownMenuList = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0;
+`;
+
+export const DropdownMenuItem = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: transparent;
+  border: none;
+  color: #2b3a4e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Rubik", sans-serif;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: #f9f6f4;
+    color: #d4957f;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: #7a8a9e;
+    flex-shrink: 0;
+  }
+
+  &:hover svg {
+    color: #d4957f;
+  }
+`;
+
+export const DropdownDivider = styled.div`
+  height: 1px;
+  background: #e8e0db;
+  margin: 0.25rem 0.5rem;
 `;
 
 export const LogoutButton = styled.button`
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
   background: transparent;
   border: none;
-  color: #333;
-  font-size: 0.95rem;
+  color: #b0705c;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  font-family: "Rubik", sans-serif;
+  border-radius: 8px;
 
   &:hover {
-    background-color: #f9f9f9;
-    color: #d4af37;
+    background-color: #fdf0ec;
+    color: #964a33;
   }
 
   svg {
-    color: #666;
+    width: 18px;
+    height: 18px;
+    color: #b0705c;
+    flex-shrink: 0;
   }
 
   &:hover svg {
-    color: #d4af37;
+    color: #964a33;
   }
 `;
 
@@ -182,12 +232,12 @@ export const NotifHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e8e0db;
 
   h3 {
     margin: 0;
     font-size: 1rem;
-    color: #333;
+    color: #2b3a4e;
   }
 `;
 
@@ -196,13 +246,13 @@ export const ToggleSwitch = styled.div<{ $active: boolean }>`
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
-  color: #666;
+  color: #7a8a9e;
   cursor: pointer;
 
   .switch {
     width: 32px;
     height: 18px;
-    background-color: ${({ $active }) => ($active ? "#2563eb" : "#ccc")};
+    background-color: ${({ $active }) => ($active ? "#d4957f" : "#ccc")};
     border-radius: 12px;
     position: relative;
     transition: background-color 0.2s;
@@ -228,54 +278,60 @@ export const NotifList = styled.div`
 
 export const NotifItem = styled.div<{ $unread: boolean }>`
   padding: 16px 20px;
-  border-bottom: 1px solid #f9f9f9;
-  background-color: ${({ $unread }) => ($unread ? "#fdf8e1" : "#ffffff")};
+  border-bottom: 1px solid #f0ebe7;
+  background-color: ${({ $unread }) => ($unread ? "#fcfaf9" : "#ffffff")};
   transition: background-color 0.2s;
   cursor: pointer;
   position: relative;
 
   &:hover {
-    background-color: ${({ $unread }) => ($unread ? "#fcedb3" : "#f5f5f5")};
+    background-color: #f5f2f0;
   }
 
   .title-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    gap: 8px;
 
     h4 {
       margin: 0;
       font-size: 0.95rem;
-      color: #333;
+      color: ${({ $unread }) => ($unread ? "#d4957f" : "#2b3a4e")};
       font-weight: 600;
+      flex: 1;
     }
 
     .time {
       font-size: 0.75rem;
-      color: #888;
+      color: #7a8a9e;
+      white-space: nowrap;
+      margin-right: ${({ $unread }) => ($unread ? "16px" : "0")};
     }
   }
 
   .deadline {
     font-size: 0.8rem;
-    color: #2563eb;
+    color: #2b3a4e;
+    font-weight: 500;
     margin: 2px 0;
   }
 
   .desc {
     font-size: 0.85rem;
-    color: #666;
+    color: #7a8a9e;
     margin: 0;
+    line-height: 1.4;
   }
 
   .indicator {
     position: absolute;
-    top: 18px;
+    top: 20px;
     right: 20px;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background-color: ${({ $unread }) => ($unread ? "#2563eb" : "transparent")};
+    background-color: #d4957f;
   }
 `;

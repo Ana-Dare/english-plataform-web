@@ -52,44 +52,46 @@ export const RightActions = styled.div`
 `;
 
 export const SearchWrapper = styled.div`
-  position: relative;
-  width: 340px;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 50px;
+  padding: 0.6rem 1.2rem;
+  width: 100%;
+  min-width: 260px;
+  max-width: 320px;
   flex-shrink: 0;
+  border: 1px solid #1F2B45;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+
+  &:focus-within {
+    border-color: #C57A67;
+    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.15);
+  }
 
   svg {
-    position: absolute;
-    left: 1.2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
-    transition: color 0.2s;
+    color: #C57A67;
+    margin-right: 0.8rem;
+    flex-shrink: 0;
   }
 
   input {
-    width: 100%;
-    padding: 0.85rem 1rem 0.85rem 3rem;
-    border: 1px solid #eaeaea;
-    border-radius: 12px;
+    border: none;
+    outline: none;
     font-size: 0.95rem;
     font-family: inherit;
-    outline: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #fdfdfd;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-
-    &:focus {
-      background: #fff;
-      border-color: #1a3d6e;
-      box-shadow: 0 4px 12px rgba(26, 61, 110, 0.15);
-    }
+    width: 100%;
+    color: #1e293b;
+    background: transparent;
 
     &::placeholder {
-      color: #aaa;
+      color: #94a3b8;
     }
   }
 
   @media (max-width: 768px) {
-    width: 100%;
+    max-width: 100%;
   }
 `;
 
@@ -99,7 +101,7 @@ export const AddButton = styled.button`
   justify-content: center;
   gap: 0.6rem;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #08142c 0%, #1a3d6e 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -108,14 +110,14 @@ export const AddButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 10px rgba(8, 20, 44, 0.2);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
   font-family: inherit;
   white-space: nowrap;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(8, 20, 44, 0.3);
-    background: linear-gradient(135deg, #1a3d6e 0%, #2980b9 100%);
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
+    background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
   }
 
   &:active {
@@ -125,27 +127,65 @@ export const AddButton = styled.button`
 
 /* ================= Grid de Turmas ================= */
 
-export const ClassesGrid = styled.div`
+import { motion } from "framer-motion";
+
+export const ClassesGrid = styled(motion.div)`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
 `;
 
-export const ClassCard = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #eaeaea;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+export const FormSelect = styled.select`
+  width: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid #1F2B45;
+  border-radius: 999px;
+  padding: 0.75rem 2.4rem 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  font-family: 'Rubik', inherit;
+  font-weight: 500;
+  color: #1F2B45;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C57A67%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem top 52%;
+  background-size: 0.7rem auto;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-sizing: border-box;
+
+  &:hover {
+    border-color: #C57A67;
+    background-color: #fff8f6;
+    box-shadow: 0 4px 12px rgba(197, 122, 103, 0.18);
+    color: #C57A67;
+  }
+
+  &:focus {
+    border-color: #C57A67;
+    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.18), 0 2px 8px rgba(31, 43, 69, 0.06);
+    color: #C57A67;
+    background-color: #fff8f6;
+  }
+`;
+
+export const ClassCard = styled(motion.div)`
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
   overflow: hidden;
-  transition: all 0.2s ease-in-out;
+  transition: box-shadow 0.3s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
-    border-color: #d0d0d0;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
   }
 `;
 
@@ -154,11 +194,11 @@ export const ClassCardHeader = styled.div<{ $level: string }>`
   background: ${({ $level }) => {
     switch ($level) {
       case "Advanced":
-        return "linear-gradient(135deg, #08142c 0%, #1a3d6e 100%)";
+        return "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)";
       case "Intermediate":
-        return "linear-gradient(135deg, #1a3d6e 0%, #2980b9 100%)";
+        return "linear-gradient(135deg, #1e293b 0%, #334155 100%)";
       default:
-        return "linear-gradient(135deg, #2980b9 0%, #3498db 100%)";
+        return "linear-gradient(135deg, #334155 0%, #475569 100%)";
     }
   }};
   color: #fff;
@@ -174,12 +214,13 @@ export const ClassCardHeader = styled.div<{ $level: string }>`
 `;
 
 export const LevelBadge = styled.span`
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 `;
 
 export const ClassCardBody = styled.div`
@@ -335,84 +376,121 @@ export const DetailContent = styled.div`
   background: #fff;
 `;
 
-/* ================= Mural (Avisos) ================= */
+
+
+export const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+`;
+
+export const SectionTitle = styled.h3`
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  letter-spacing: -0.02em;
+
+  svg {
+    color: #3b82f6;
+  }
+`;
+
+export const CreatePostBox = styled.div`
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: box-shadow 0.2s ease;
+
+  &:focus-within {
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: none;
+    outline: none;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+
+    &:focus {
+      background: #ffffff;
+      border-color: #3b82f6;
+      box-shadow: inset 0 0 0 1px #3b82f6;
+    }
+  }
+`;
+
+export const PostList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
 
 export const PostCard = styled.div`
-  background: #fff;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
+  background: #ffffff;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+  }
 `;
 
 export const PostHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
   margin-bottom: 1rem;
 `;
 
-export const PostAvatar = styled.div`
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #08142c;
-  color: #fff;
+export const PostAuthor = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-`;
-
-export const PostMeta = styled.div`
-  display: flex;
-  flex-direction: column;
+  gap: 0.75rem;
 
   strong {
-    color: #1a1a1a;
-    font-size: 1rem;
+    color: #1e293b;
+    font-size: 1.05rem;
   }
 
   span {
-    color: #888;
-    font-size: 0.8rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 500;
   }
 `;
 
-export const PostBody = styled.div`
-  color: #444;
-  font-size: 1rem;
+export const PostContent = styled.p`
+  color: #334155;
   line-height: 1.6;
-`;
-
-export const CreatePostBox = styled.div`
-  background: #f8f9fc;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  textarea {
-    width: 100%;
-    padding: 1rem;
-    border: 1px solid #d0d0d0;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1rem;
-    resize: vertical;
-    min-height: 100px;
-    outline: none;
-    box-sizing: border-box;
-
-    &:focus {
-      border-color: #08142c;
-    }
-  }
+  font-size: 1rem;
+  margin: 0;
+  white-space: pre-wrap;
 `;
 
 /* ================= Materiais & Atividades ================= */
@@ -426,19 +504,19 @@ export const MaterialsGrid = styled.div`
 export const MaterialCard = styled.div`
   background: #fff;
   border: 1px solid #eaeaea;
-  border-radius: 10px;
+  border-radius: 16px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
   cursor: pointer;
 
   &:hover {
     border-color: #08142c;
-    box-shadow: 0 4px 12px rgba(8, 20, 44, 0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(8, 20, 44, 0.1);
+    transform: translateY(-4px);
   }
 `;
 
@@ -495,62 +573,78 @@ export const MaterialInfo = styled.div`
 export const ClassAgendaList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 `;
 
 export const AgendaItem = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1.2rem;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
-  background: #fff;
-`;
-
-export const AgendaItemInfo = styled.div`
-  display: flex;
   gap: 1.5rem;
-  align-items: center;
+  background: linear-gradient(to right, #ffffff, #f8fbff);
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-left: 5px solid #3b82f6;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.3);
+    background: linear-gradient(to right, #ffffff, #f0f7ff);
+  }
 `;
 
 export const AgendaDateBox = styled.div`
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border: 1px solid #7dd3fc;
+  color: #0369a1;
+  min-width: 75px;
+  height: 75px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #f8f9fc;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  min-width: 60px;
-
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.2);
+  
   strong {
-    font-size: 1.5rem;
-    color: #08142c;
+    font-size: 1.8rem;
+    font-weight: 800;
     line-height: 1;
+    color: #0c4a6e;
   }
 
   span {
-    font-size: 0.8rem;
-    color: #666;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
+    color: #0284c7;
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
   }
 `;
 
-export const AgendaDetails = styled.div`
-  h4 {
-    margin: 0 0 0.3rem 0;
-    font-size: 1.1rem;
-    color: #1a1a1a;
+export const AgendaContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+
+  strong {
+    color: #1e293b;
+    font-size: 1.15rem;
+    font-weight: 600;
   }
 
   span {
+    color: #64748b;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    color: #666;
-    font-size: 0.9rem;
+    gap: 0.5rem;
+    font-weight: 500;
   }
 `;
 
@@ -834,5 +928,114 @@ export const RichTextWrapper = styled.div`
     .ql-editor {
       min-height: 150px;
     }
+  }
+`;
+
+export const StudentsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+`;
+
+export const StudentCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(8, 20, 44, 0.08);
+    border-color: #08142c;
+  }
+`;
+
+export const JustificationList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const JustificationItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+  }
+`;
+
+export const JustificationInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  h4 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+  }
+
+  span {
+    color: #666;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+`;
+
+export const JustificationStatus = styled.div<{ $status: string }>`
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: ${({ $status }) => ($status === 'Aceito' ? '#e6f4ea' : $status === 'Recusado' ? '#fce8e6' : '#fef7e0')};
+  color: ${({ $status }) => ($status === 'Aceito' ? '#1e8e3e' : $status === 'Recusado' ? '#d93025' : '#f9ab00')};
+`;
+
+export const ActionGroup = styled.div`
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-left: 1.5rem;
+`;
+
+export const JustificationActionBtn = styled.button<{ $type: 'approve' | 'reject' }>`
+  background: ${({ $type }) => $type === 'approve' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
+  color: ${({ $type }) => $type === 'approve' ? '#10b981' : '#ef4444'};
+  border: 1px solid ${({ $type }) => $type === 'approve' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};
+  border-radius: 50px;
+  padding: 0.4rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: ${({ $type }) => $type === 'approve' ? '#10b981' : '#ef4444'};
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px ${({ $type }) => $type === 'approve' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'};
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
