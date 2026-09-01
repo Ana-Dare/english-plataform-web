@@ -6,24 +6,13 @@ export const Container = styled.div`
   gap: 2rem;
   animation: fadeIn 0.3s ease-in-out;
   height: 100%;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 `;
 
 export const HeaderActions = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-
+  width: 100%;
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
@@ -42,6 +31,7 @@ export const RightActions = styled.div`
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  width: fit-content;
 
   @media (max-width: 768px) {
     width: 100%;
@@ -57,21 +47,20 @@ export const SearchWrapper = styled.div`
   background-color: #fff;
   border-radius: 50px;
   padding: 0.6rem 1.2rem;
-  width: 100%;
   min-width: 260px;
   max-width: 320px;
   flex-shrink: 0;
-  border: 1px solid #1F2B45;
+  border: 1px solid #1f2b45;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
 
   &:focus-within {
-    border-color: #C57A67;
+    border-color: #c57a67;
     box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.15);
   }
 
   svg {
-    color: #C57A67;
+    color: #c57a67;
     margin-right: 0.8rem;
     flex-shrink: 0;
   }
@@ -100,7 +89,6 @@ export const AddButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  flex-shrink: 0;
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #fff;
   border: none;
@@ -109,7 +97,6 @@ export const AddButton = styled.button`
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
   font-family: inherit;
   white-space: nowrap;
@@ -118,10 +105,6 @@ export const AddButton = styled.button`
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
     background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 `;
 
@@ -138,13 +121,13 @@ export const ClassesGrid = styled(motion.div)`
 export const FormSelect = styled.select`
   width: 100%;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1.5px solid #1F2B45;
+  border: 1.5px solid #1f2b45;
   border-radius: 999px;
   padding: 0.75rem 2.4rem 0.75rem 1.25rem;
   font-size: 0.95rem;
-  font-family: 'Rubik', inherit;
+  font-family: "Rubik", inherit;
   font-weight: 500;
-  color: #1F2B45;
+  color: #1f2b45;
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -154,20 +137,24 @@ export const FormSelect = styled.select`
   background-position: right 1rem top 52%;
   background-size: 0.7rem auto;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow:
+    0 2px 8px rgba(31, 43, 69, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   box-sizing: border-box;
 
   &:hover {
-    border-color: #C57A67;
+    border-color: #c57a67;
     background-color: #fff8f6;
     box-shadow: 0 4px 12px rgba(197, 122, 103, 0.18);
-    color: #C57A67;
+    color: #c57a67;
   }
 
   &:focus {
-    border-color: #C57A67;
-    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.18), 0 2px 8px rgba(31, 43, 69, 0.06);
-    color: #C57A67;
+    border-color: #c57a67;
+    box-shadow:
+      0 0 0 3px rgba(197, 122, 103, 0.18),
+      0 2px 8px rgba(31, 43, 69, 0.06);
+    color: #c57a67;
     background-color: #fff8f6;
   }
 `;
@@ -376,8 +363,6 @@ export const DetailContent = styled.div`
   background: #fff;
 `;
 
-
-
 export const SectionHeader = styled.div`
   display: flex;
   align-items: center;
@@ -406,8 +391,8 @@ export const CreatePostBox = styled.div`
   background: #ffffff;
   padding: 1.5rem;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
   margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
@@ -451,13 +436,15 @@ export const PostCard = styled.div`
   background: #ffffff;
   padding: 1.5rem;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
   }
 `;
 
@@ -608,7 +595,7 @@ export const AgendaDateBox = styled.div`
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 10px rgba(56, 189, 248, 0.2);
-  
+
   strong {
     font-size: 1.8rem;
     font-weight: 800;
@@ -968,7 +955,7 @@ export const JustificationItem = styled.div`
   align-items: center;
   background: #fff;
   padding: 1.5rem;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
   transition: transform 0.2s ease;
@@ -1003,8 +990,18 @@ export const JustificationStatus = styled.div<{ $status: string }>`
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
-  background: ${({ $status }) => ($status === 'Aceito' ? '#e6f4ea' : $status === 'Recusado' ? '#fce8e6' : '#fef7e0')};
-  color: ${({ $status }) => ($status === 'Aceito' ? '#1e8e3e' : $status === 'Recusado' ? '#d93025' : '#f9ab00')};
+  background: ${({ $status }) =>
+    $status === "Aceito"
+      ? "#e6f4ea"
+      : $status === "Recusado"
+        ? "#fce8e6"
+        : "#fef7e0"};
+  color: ${({ $status }) =>
+    $status === "Aceito"
+      ? "#1e8e3e"
+      : $status === "Recusado"
+        ? "#d93025"
+        : "#f9ab00"};
 `;
 
 export const ActionGroup = styled.div`
@@ -1014,10 +1011,17 @@ export const ActionGroup = styled.div`
   margin-left: 1.5rem;
 `;
 
-export const JustificationActionBtn = styled.button<{ $type: 'approve' | 'reject' }>`
-  background: ${({ $type }) => $type === 'approve' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
-  color: ${({ $type }) => $type === 'approve' ? '#10b981' : '#ef4444'};
-  border: 1px solid ${({ $type }) => $type === 'approve' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};
+export const JustificationActionBtn = styled.button<{
+  $type: "approve" | "reject";
+}>`
+  background: ${({ $type }) =>
+    $type === "approve" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)"};
+  color: ${({ $type }) => ($type === "approve" ? "#10b981" : "#ef4444")};
+  border: 1px solid
+    ${({ $type }) =>
+      $type === "approve"
+        ? "rgba(16, 185, 129, 0.2)"
+        : "rgba(239, 68, 68, 0.2)"};
   border-radius: 50px;
   padding: 0.4rem 1rem;
   display: flex;
@@ -1029,10 +1033,14 @@ export const JustificationActionBtn = styled.button<{ $type: 'approve' | 'reject
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: ${({ $type }) => $type === 'approve' ? '#10b981' : '#ef4444'};
+    background: ${({ $type }) => ($type === "approve" ? "#10b981" : "#ef4444")};
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px ${({ $type }) => $type === 'approve' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'};
+    box-shadow: 0 4px 12px
+      ${({ $type }) =>
+        $type === "approve"
+          ? "rgba(16, 185, 129, 0.25)"
+          : "rgba(239, 68, 68, 0.25)"};
   }
 
   &:active {

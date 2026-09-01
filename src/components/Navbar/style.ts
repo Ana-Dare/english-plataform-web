@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const NavbarContainer = styled.nav`
   width: 100%;
-  height: 70px;
+  height: 4rem;
   background-color: #ffffff;
   display: flex;
   justify-content: space-between;
@@ -13,7 +13,7 @@ export const NavbarContainer = styled.nav`
   z-index: 1000;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
   border-bottom: 1px solid #f0f0f0;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   box-sizing: border-box;
 `;
 
@@ -24,7 +24,7 @@ export const Logo = styled.div`
   letter-spacing: 1px;
   text-transform: uppercase;
   line-height: 1.2;
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   color: #1a1a1a;
 `;
 
@@ -33,7 +33,7 @@ export const MobileMenuButton = styled.button<{ $isOpen?: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
-  color: ${({ $isOpen }) => ($isOpen ? '#ffffff' : '#333')};
+  color: ${({ $isOpen }) => ($isOpen ? "#ffffff" : "#333")};
   padding: 0.5rem;
   z-index: 1001;
 
@@ -44,7 +44,7 @@ export const MobileMenuButton = styled.button<{ $isOpen?: boolean }>`
 
 export const Overlay = styled.div<{ $isOpen?: boolean }>`
   display: none;
-  
+
   @media (max-width: 768px) {
     display: block;
     position: fixed;
@@ -55,8 +55,10 @@ export const Overlay = styled.div<{ $isOpen?: boolean }>`
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
     opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
-    visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    visibility: ${({ $isOpen }) => ($isOpen ? "visible" : "hidden")};
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
   }
 `;
 
@@ -77,9 +79,10 @@ export const MenuWrapper = styled.div<{ $isOpen?: boolean }>`
     padding: 100px 2rem 2rem;
     gap: 2.5rem;
     z-index: 1000;
-    transform: ${({ $isOpen }) => ($isOpen ? 'translateX(0)' : 'translateX(100%)')};
+    transform: ${({ $isOpen }) =>
+      $isOpen ? "translateX(0)" : "translateX(100%)"};
     transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
   }
 `;
 
@@ -112,17 +115,19 @@ export const NavItem = styled.li`
   text-transform: uppercase;
   letter-spacing: 1.8px;
   transition: color 0.3s ease;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 0;
     height: 2px;
     bottom: -6px;
     left: 50%;
     background: #0e2a52;
-    transition: width 0.3s ease, left 0.3s ease;
+    transition:
+      width 0.3s ease,
+      left 0.3s ease;
     border-radius: 2px;
   }
 
@@ -140,13 +145,13 @@ export const NavItem = styled.li`
     width: 100%;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 1rem;
-    
+
     &::after {
       display: none;
     }
 
     &:hover {
-      color: #D4AF37;
+      color: #d4af37;
     }
   }
 `;
@@ -160,7 +165,7 @@ export const CTAButton = styled.button`
   font-weight: 600;
   border-radius: 50px;
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   text-transform: uppercase;
   letter-spacing: 1.2px;
   transition: all 0.3s ease;
@@ -182,7 +187,7 @@ export const ButtonGroup = styled.div`
     flex-direction: column;
     width: 100%;
     padding: 0 1.5rem;
-    
+
     button {
       width: 100%;
     }

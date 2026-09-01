@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import AuthProvider from "./contexts/Auth/AuthProvider";
+import ToastProvider from "./contexts/Toast/provider";
 import PageHome from "./pages/Home";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import PageCourses from "./pages/Courses";
@@ -10,42 +11,42 @@ import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ForgotPassword from "./pages/ForgotPassword";
-import { ToastProvider } from "./contexts/ToastContext";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminLogin from "./pages/AdminLogin";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
 
 function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-      <CookieConsent />
-      <BrowserRouter>
-      <Routes>
-                  {/* Rotas públicas */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/confirmation-email" element={<EmailConfirmation />} />
-
-          {/* Rotas privadas */}
-            <Route path="/apresntation" element={<PageHome />} />
-            <Route path="/cursos" element={<PageCourses />} />
+        <CookieConsent />
+        <BrowserRouter>
+          <Routes>
+            {/* Rotas públicas */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/confirmation-email" element={<EmailConfirmation />} />
-            <Route path="/dashboard" element={<StudentDashboard />} />
-            <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-            <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route
-              path="/politica-de-privacidade"
-              element={<PrivacyPolicy />}
-            />
-      </Routes>
+            <Route path="*" element={<div> Página não encontrada</div>} />
 
-            {/* <Route path="*" element={<div> Página não encontrada</div>} /> */}
-      </BrowserRouter>
+            {/* Rotas privadas */}
+            <Route element={<ProtectedRoutes />}>
+              <Route path="/apresntation" element={<PageHome />} />
+              <Route path="/cursos" element={<PageCourses />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/confirmation-email"
+                element={<EmailConfirmation />}
+              />
+              <Route path="/dashboard" element={<StudentDashboard />} />
+              <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+              <Route
+                path="/politica-de-privacidade"
+                element={<PrivacyPolicy />}
+              />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </ToastProvider>
     </AuthProvider>
   );

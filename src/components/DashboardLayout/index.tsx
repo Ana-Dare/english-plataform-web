@@ -1,5 +1,12 @@
-import React from 'react';
-import { DashboardContainer, SidebarContainer, MainContent, HeaderContainer, ContentArea, MobileOverlay } from './style';
+import React from "react";
+import {
+  DashboardContainer,
+  SidebarContainer,
+  MainContent,
+  HeaderContainer,
+  ContentArea,
+  MobileOverlay,
+} from "./style";
 
 interface DashboardLayoutProps {
   sidebar: React.ReactNode;
@@ -9,7 +16,13 @@ interface DashboardLayoutProps {
   onCloseMobileMenu?: () => void;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ sidebar, header, children, isMobileMenuOpen, onCloseMobileMenu }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  sidebar,
+  header,
+  children,
+  isMobileMenuOpen,
+  onCloseMobileMenu,
+}) => {
   return (
     <DashboardContainer>
       <MobileOverlay $isOpen={!!isMobileMenuOpen} onClick={onCloseMobileMenu} />
@@ -17,10 +30,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ sidebar, header, chil
         {sidebar}
       </SidebarContainer>
       <MainContent>
-        <HeaderContainer>
-          {header}
-        </HeaderContainer>
+        <HeaderContainer>{header}</HeaderContainer>
         <ContentArea>
+          <div id="toast-viewport" />
           {children}
         </ContentArea>
       </MainContent>

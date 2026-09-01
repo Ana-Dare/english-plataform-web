@@ -9,7 +9,7 @@ export const DashboardContainer = styled.div`
 `;
 
 export const SidebarContainer = styled.aside<{ $isOpen?: boolean }>`
-  background: #1F2B45;
+  background: #1f2b45;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
@@ -35,7 +35,7 @@ export const MainContent = styled.main`
 
 export const HeaderContainer = styled.header`
   height: 70px;
-  background-color: #1F2B45;
+  background-color: #1f2b45;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
@@ -43,6 +43,7 @@ export const HeaderContainer = styled.header`
 `;
 
 export const ContentArea = styled.div`
+  position: relative;
   flex: 1;
   padding: 2rem;
   overflow-y: auto;

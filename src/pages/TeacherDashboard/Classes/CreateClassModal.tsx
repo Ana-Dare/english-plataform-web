@@ -1,12 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { X, Check } from 'lucide-react';
+import React, { useState, useMemo } from "react";
+import { X, Check } from "lucide-react";
 import {
-  ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
-  FieldGroup, StudentListSelect, StudentSelectItem, StudentSelectInfo, CheckCircle,
-  CloseBtn, PrimaryBtn, SecondaryBtn
-} from './style';
-import CustomDropdown from '../../../components/CustomDropdown';
-import { useToast } from "../../../contexts/ToastContext";
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  FieldGroup,
+  StudentListSelect,
+  StudentSelectItem,
+  StudentSelectInfo,
+  CheckCircle,
+  CloseBtn,
+  PrimaryBtn,
+  SecondaryBtn,
+} from "./style";
+import CustomDropdown from "../../../components/CustomDropdown";
+import useToast from "../../../contexts/Toast/useToast";
 
 export interface StudentMock {
   id: string;
@@ -17,27 +27,61 @@ export interface StudentMock {
 
 // Mocking available students for the modal
 const availableStudents: StudentMock[] = [
-  { id: '1', name: 'Ana Souza', email: 'ana.souza@email.com', avatarColor: '#3165e3' },
-  { id: '2', name: 'Carlos Silva', email: 'carlos.silva@email.com', avatarColor: '#e67e22' },
-  { id: '3', name: 'Beatriz Costa', email: 'beatriz.costa@email.com', avatarColor: '#8e44ad' },
-  { id: '4', name: 'Daniel Oliveira', email: 'daniel.oliveira@email.com', avatarColor: '#1abc9c' },
-  { id: '5', name: 'Fernanda Lima', email: 'fernanda.lima@email.com', avatarColor: '#e74c3c' },
+  {
+    id: "1",
+    name: "Ana Souza",
+    email: "ana.souza@email.com",
+    avatarColor: "#3165e3",
+  },
+  {
+    id: "2",
+    name: "Carlos Silva",
+    email: "carlos.silva@email.com",
+    avatarColor: "#e67e22",
+  },
+  {
+    id: "3",
+    name: "Beatriz Costa",
+    email: "beatriz.costa@email.com",
+    avatarColor: "#8e44ad",
+  },
+  {
+    id: "4",
+    name: "Daniel Oliveira",
+    email: "daniel.oliveira@email.com",
+    avatarColor: "#1abc9c",
+  },
+  {
+    id: "5",
+    name: "Fernanda Lima",
+    email: "fernanda.lima@email.com",
+    avatarColor: "#e74c3c",
+  },
 ];
 
 interface CreateClassModalProps {
   onClose: () => void;
-  onSave: (data: { name: string; level: string; students: StudentMock[] }) => void;
+  onSave: (data: {
+    name: string;
+    level: string;
+    students: StudentMock[];
+  }) => void;
 }
 
-const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) => {
+const CreateClassModal: React.FC<CreateClassModalProps> = ({
+  onClose,
+  onSave,
+}) => {
   const { addToast } = useToast();
-  const [name, setName] = useState('');
-  const [level, setLevel] = useState('Beginner');
+  const [name, setName] = useState("");
+  const [level, setLevel] = useState("Beginner");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredStudents = useMemo(() => {
-    return availableStudents.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    return availableStudents.filter((s) =>
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
   }, [searchQuery]);
 
   const toggleStudent = (id: string) => {
@@ -49,10 +93,12 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) 
 
   const handleSave = () => {
     if (!name.trim()) {
-      addToast('Por favor, informe o nome da turma.', 'warning');
+      addToast("Por favor, informe o nome da turma.", "warning");
       return;
     }
-    const selectedStudents = availableStudents.filter(s => selectedIds.has(s.id));
+    const selectedStudents = availableStudents.filter((s) =>
+      selectedIds.has(s.id),
+    );
     onSave({ name, level, students: selectedStudents });
   };
 
@@ -61,16 +107,18 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) 
       <ModalContent>
         <ModalHeader>
           <h3>Nova Turma</h3>
-          <CloseBtn onClick={onClose}><X size={20} /></CloseBtn>
+          <CloseBtn onClick={onClose}>
+            <X size={20} />
+          </CloseBtn>
         </ModalHeader>
         <ModalBody>
           <FieldGroup>
             <label>Nome da Turma</label>
-            <input 
-              type="text" 
-              placeholder="Ex: Turma Business 1" 
-              value={name} 
-              onChange={e => setName(e.target.value)} 
+            <input
+              type="text"
+              placeholder="Ex: Turma Business 1"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </FieldGroup>
           <FieldGroup>
@@ -79,28 +127,28 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ onClose, onSave }) 
               value={level}
               onChange={(val) => setLevel(val)}
               options={[
-                { value: 'Beginner', label: 'Beginner' },
-                { value: 'Intermediate', label: 'Intermediate' },
-                { value: 'Advanced', label: 'Advanced' },
+                { value: "Beginner", label: "Beginner" },
+                { value: "Intermediate", label: "Intermediate" },
+                { value: "Advanced", label: "Advanced" },
               ]}
             />
           </FieldGroup>
           <FieldGroup>
             <label>Selecionar Alunos ({selectedIds.size} selecionados)</label>
-            <input 
-              type="text" 
-              placeholder="Buscar aluno por nome..." 
+            <input
+              type="text"
+              placeholder="Buscar aluno por nome..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{ marginBottom: '0.5rem' }}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ marginBottom: "0.5rem" }}
             />
             <StudentListSelect>
-              {filteredStudents.map(student => {
+              {filteredStudents.map((student) => {
                 const isSelected = selectedIds.has(student.id);
                 return (
-                  <StudentSelectItem 
-                    key={student.id} 
-                    $selected={isSelected} 
+                  <StudentSelectItem
+                    key={student.id}
+                    $selected={isSelected}
                     onClick={() => toggleStudent(student.id)}
                   >
                     <CheckCircle $selected={isSelected}>

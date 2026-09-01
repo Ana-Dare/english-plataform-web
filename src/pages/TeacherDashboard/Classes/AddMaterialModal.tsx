@@ -15,7 +15,7 @@ import {
   DropzoneContainer,
   RichTextWrapper,
 } from "./style";
-import { useToast } from "../../../contexts/ToastContext";
+import useToast from "../../../contexts/Toast/useToast";
 
 export interface MaterialData {
   title: string;
@@ -33,13 +33,17 @@ interface AddMaterialModalProps {
 const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   onClose,
   onSave,
-  initialData
+  initialData,
 }) => {
   const { addToast } = useToast();
   const [title, setTitle] = useState(initialData?.title || "");
-  const [type, setType] = useState<"pdf" | "video" | "link">(initialData?.type || "pdf");
+  const [type, setType] = useState<"pdf" | "video" | "link">(
+    initialData?.type || "pdf",
+  );
   const [url, setUrl] = useState(initialData?.url || "");
-  const [description, setDescription] = useState(initialData?.description || "");
+  const [description, setDescription] = useState(
+    initialData?.description || "",
+  );
 
   const [fileName, setFileName] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
@@ -174,7 +178,9 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         </ModalBody>
         <ModalFooter>
           <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-          <PrimaryBtn onClick={handleSave}>{initialData ? "Salvar Alterações" : "Adicionar Material"}</PrimaryBtn>
+          <PrimaryBtn onClick={handleSave}>
+            {initialData ? "Salvar Alterações" : "Adicionar Material"}
+          </PrimaryBtn>
         </ModalFooter>
       </ModalContent>
     </ModalOverlay>

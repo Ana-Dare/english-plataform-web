@@ -59,7 +59,7 @@ export const SearchWrapper = styled.div`
   min-width: 260px;
   max-width: 320px;
   flex-shrink: 0;
-  border: 1px solid #1F2B45;
+  border: 1px solid #1f2b45;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
 
@@ -95,13 +95,13 @@ export const SearchWrapper = styled.div`
 
 export const FilterSelect = styled.select`
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1.5px solid #1F2B45;
+  border: 1.5px solid #1f2b45;
   border-radius: 999px;
   padding: 0.55rem 2.4rem 0.55rem 1.1rem;
   font-size: 0.88rem;
-  font-family: 'Rubik', inherit;
+  font-family: "Rubik", inherit;
   font-weight: 500;
-  color: #1F2B45;
+  color: #1f2b45;
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -111,7 +111,9 @@ export const FilterSelect = styled.select`
   background-position: right 0.85rem top 52%;
   background-size: 0.6rem auto;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow:
+    0 2px 8px rgba(31, 43, 69, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   letter-spacing: 0.01em;
   white-space: nowrap;
 
@@ -124,12 +126,13 @@ export const FilterSelect = styled.select`
 
   &:focus {
     border-color: #2a4a7f;
-    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.12), 0 2px 8px rgba(31, 43, 69, 0.06);
+    box-shadow:
+      0 0 0 3px rgba(31, 43, 69, 0.12),
+      0 2px 8px rgba(31, 43, 69, 0.06);
     color: #2a4a7f;
     background-color: #f0f4fa;
   }
 `;
-
 
 export const RightActions = styled.div`
   display: flex;
@@ -187,7 +190,7 @@ export const IconButton = styled.button`
 `;
 
 export const AddButton = styled.button`
-  background-color: #1F2B45; /* Azul marinho profissional */
+  background-color: #1f2b45; /* Azul marinho profissional */
   color: #ffffff;
   border: none;
   border-radius: 50px; /* Redondo */
@@ -694,15 +697,17 @@ export const RegisterContainer = styled.div`
 `;
 
 export const RegisterHeader = styled.div`
-  background: linear-gradient(135deg, #08142c 0%, #1a3d6e 100%);
-  padding: 1.2rem 1.75rem;
+  background: linear-gradient(135deg, #f4f6fa 0%, #eaeef6 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem 1.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1.5rem;
   @media (max-width: 600px) {
-    padding: 1.2rem 1rem;
+    padding: 1.5rem 1rem;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     align-items: flex-start;
   }
 `;
@@ -710,16 +715,17 @@ export const RegisterHeader = styled.div`
 export const RegisterHeaderLeft = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.5rem;
   h2 {
     margin: 0;
-    color: #fff;
+    color: #1f2b45;
     font-size: 1.3rem;
     font-weight: 700;
+    letter-spacing: -0.2px;
   }
   p {
     margin: 0;
-    color: rgba(255, 255, 255, 0.6);
+    color: #64748b;
     font-size: 0.82rem;
   }
 `;
@@ -750,13 +756,13 @@ export const StepDot = styled.div<{ $active: boolean; $done: boolean }>`
 `;
 
 export const RegisterBody = styled.div`
-  padding: 1.25rem 1.75rem 1.5rem;
+  padding: 2.5rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 2.5rem;
   @media (max-width: 600px) {
-    padding: 1rem;
-    gap: 0.6rem;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
   }
 `;
 
@@ -843,38 +849,32 @@ export const PhotoUploadBtn = styled.button`
 export const RegisterSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  padding: 1rem 0 1.5rem;
+  gap: 1.5rem;
   background: transparent;
-  border-bottom: 1px solid #f1f5f9;
-
-  &:last-child {
-    border-bottom: none;
-  }
 `;
 
 export const RegisterSectionTitle = styled.h4`
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: #08142c;
+  color: #1f2b45;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-bottom: 0.4rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
   svg {
-    color: #555;
+    color: #c57a67;
   }
 `;
 
 export const RegisterGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.7rem 1rem;
+  gap: 2.5rem 1.5rem;
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
-    gap: 0.65rem;
+    gap: 1.5rem;
   }
 `;
 
@@ -923,7 +923,7 @@ export const RegisterInput = styled.input<{ $error?: boolean }>`
   background: linear-gradient(135deg, #ffffff 0%, #fdfcfb 100%);
   width: 100%;
   box-sizing: border-box;
-  color: #1F2B45;
+  color: #1f2b45;
   &:focus {
     border-color: ${({ $error }) => ($error ? "#d93025" : "#C57A67")};
     box-shadow: ${({ $error }) =>
@@ -942,13 +942,13 @@ export const RegisterInput = styled.input<{ $error?: boolean }>`
 
 export const RegisterSelect = styled.select`
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1.5px solid #1F2B45;
+  border: 1.5px solid #1f2b45;
   border-radius: 999px;
   padding: 0.75rem 2.4rem 0.75rem 1.25rem;
   font-size: 0.95rem;
-  font-family: 'Rubik', inherit;
+  font-family: "Rubik", inherit;
   font-weight: 500;
-  color: #1F2B45;
+  color: #1f2b45;
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -958,7 +958,9 @@ export const RegisterSelect = styled.select`
   background-position: right 1rem top 52%;
   background-size: 0.7rem auto;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow:
+    0 2px 8px rgba(31, 43, 69, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   width: 100%;
   box-sizing: border-box;
 
@@ -971,7 +973,9 @@ export const RegisterSelect = styled.select`
 
   &:focus {
     border-color: #2a4a7f;
-    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.12), 0 2px 8px rgba(31, 43, 69, 0.06);
+    box-shadow:
+      0 0 0 3px rgba(31, 43, 69, 0.12),
+      0 2px 8px rgba(31, 43, 69, 0.06);
     color: #2a4a7f;
     background-color: #f0f4fa;
   }
@@ -989,12 +993,14 @@ export const RegisterTextarea = styled.textarea`
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
-  min-height: 72px;
-  color: #1F2B45;
+  min-height: 140px;
+  color: #1f2b45;
   line-height: 1.5;
   &:focus {
-    border-color: #C57A67;
-    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.12), 0 2px 8px rgba(197, 122, 103, 0.08);
+    border-color: #c57a67;
+    box-shadow:
+      0 0 0 3px rgba(197, 122, 103, 0.12),
+      0 2px 8px rgba(197, 122, 103, 0.08);
     background: #fff;
   }
   &:hover:not(:focus) {

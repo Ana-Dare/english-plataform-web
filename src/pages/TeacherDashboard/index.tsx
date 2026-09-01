@@ -24,6 +24,7 @@ import ProfileTab from "./Profile";
 import CertificatesTab from "./Certificates";
 import NotificationsTab from "./Notifications";
 import { ProfileProvider } from "../../contexts/ProfileContext";
+import StudentsProvider from "../../contexts/Students/StudentsProvider";
 
 const teacherMenuItems: SidebarMenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: <Home /> },
@@ -45,94 +46,103 @@ const TeacherDashboard: React.FC = () => {
 
   return (
     <ProfileProvider>
-      <DashboardLayout
-        isMobileMenuOpen={isSidebarOpen}
-        onCloseMobileMenu={() => setIsSidebarOpen(false)}
-        sidebar={
-          <DashboardSidebar
-            activeTab={activeTab}
-            onTabChange={(tab) => {
-              setActiveTab(tab);
-              setIsSidebarOpen(false);
-            }}
-            menuItems={teacherMenuItems}
-          />
-        }
-        header={
-          <DashboardHeader
-            onOpenMenu={() => setIsSidebarOpen(true)}
-            userName="Ms. Charantola"
-            userEmail="teacher@aulasetraducoes.com.br"
-            onNavigate={(tab) => setActiveTab(tab)}
-          />
-        }
-      >
-        {activeTab === "dashboard" && (
-          <>
-            <PageTitle>Visão geral de suas atividades de hoje</PageTitle>
+      <StudentsProvider>
+        <DashboardLayout
+          isMobileMenuOpen={isSidebarOpen}
+          onCloseMobileMenu={() => setIsSidebarOpen(false)}
+          sidebar={
+            <DashboardSidebar
+              activeTab={activeTab}
+              onTabChange={(tab) => {
+                setActiveTab(tab);
+                setIsSidebarOpen(false);
+              }}
+              menuItems={teacherMenuItems}
+            />
+          }
+          header={
+            <DashboardHeader
+              onOpenMenu={() => setIsSidebarOpen(true)}
+              userName="Ms. Charantola"
+              userEmail="teacher@aulasetraducoes.com.br"
+              onNavigate={(tab) => setActiveTab(tab)}
+            />
+          }
+        >
+          {activeTab === "dashboard" && (
+            <>
+              <PageTitle>Visão geral de suas atividades de hoje</PageTitle>
 
-            <TopStatsGrid>
-              <OverviewCard title="Alunos ativos" value="87" />
-              <OverviewCard title="Turmas ativas" value="12" />
-              <OverviewCard title="Aulas hoje" value="6" />
-              <OverviewCard
-                title="Pendências"
-                value="14"
-                subtitle="atividades para corrigir"
-              />
-              <OverviewCard title="Mensalidades pendentes" value="5" />
-            </TopStatsGrid>
+              <TopStatsGrid>
+                <OverviewCard title="Alunos ativos" value="87" />
+                <OverviewCard title="Turmas ativas" value="12" />
+                <OverviewCard title="Aulas hoje" value="6" />
+                <OverviewCard
+                  title="Pendências"
+                  value="14"
+                  subtitle="atividades para corrigir"
+                />
+                <OverviewCard title="Mensalidades pendentes" value="5" />
+              </TopStatsGrid>
 
-            <ColumnsLayout>
-              <Column>
-                <div>
-                  <SectionTitle>Agenda do dia</SectionTitle>
-                  <SectionSubtitle>Hoje, 3 de junho</SectionSubtitle>
-                  <DailyAgenda />
-                </div>
-              </Column>
-              <Column>
-                <div>
-                  <SectionTitle>Ações rápidas</SectionTitle>
-                  <QuickActions onAction={(tab) => setActiveTab(tab)} />
-                </div>
-                <div style={{ marginTop: "2rem" }}>
-                  <SectionTitle>Pendências recentes</SectionTitle>
-                  <RecentPending />
-                </div>
-              </Column>
-            </ColumnsLayout>
-          </>
-        )}
-
-        {activeTab === "alunos" && <StudentsTab initialStudentId={navStudentId} />}
-
-        {activeTab === "agenda" && <AgendaTab />}
-
-        {activeTab === "turmas" && <ClassesTab onNavigateToStudent={handleNavigateToStudent} />}
-
-        {activeTab === "perfil" && <ProfileTab />}
-
-        {activeTab === "certificados" && <CertificatesTab />}
-
-        {activeTab === "notificacoes" && <NotificationsTab />}
-
-        {activeTab !== "dashboard" &&
-          activeTab !== "alunos" &&
-          activeTab !== "agenda" &&
-          activeTab !== "turmas" &&
-          activeTab !== "certificados" &&
-          activeTab !== "notificacoes" &&
-          activeTab !== "perfil" && (
-            <div style={{ padding: "3rem", textAlign: "center", color: "#888" }}>
-              <h2>Em desenvolvimento</h2>
-              <p>
-                A aba "{teacherMenuItems.find((m) => m.id === activeTab)?.label}"
-                estará disponível em breve.
-              </p>
-            </div>
+              <ColumnsLayout>
+                <Column>
+                  <div>
+                    <SectionTitle>Agenda do dia</SectionTitle>
+                    <SectionSubtitle>Hoje, 3 de junho</SectionSubtitle>
+                    <DailyAgenda />
+                  </div>
+                </Column>
+                <Column>
+                  <div>
+                    <SectionTitle>Ações rápidas</SectionTitle>
+                    <QuickActions onAction={(tab) => setActiveTab(tab)} />
+                  </div>
+                  <div style={{ marginTop: "2rem" }}>
+                    <SectionTitle>Pendências recentes</SectionTitle>
+                    <RecentPending />
+                  </div>
+                </Column>
+              </ColumnsLayout>
+            </>
           )}
-      </DashboardLayout>
+
+          {activeTab === "alunos" && (
+            <StudentsTab initialStudentId={navStudentId} />
+          )}
+
+          {activeTab === "agenda" && <AgendaTab />}
+
+          {activeTab === "turmas" && (
+            <ClassesTab onNavigateToStudent={handleNavigateToStudent} />
+          )}
+
+          {activeTab === "perfil" && <ProfileTab />}
+
+          {activeTab === "certificados" && <CertificatesTab />}
+
+          {activeTab === "notificacoes" && <NotificationsTab />}
+
+          {activeTab !== "dashboard" &&
+            activeTab !== "alunos" &&
+            activeTab !== "agenda" &&
+            activeTab !== "turmas" &&
+            activeTab !== "certificados" &&
+            activeTab !== "notificacoes" &&
+            activeTab !== "perfil" && (
+              <div
+                style={{ padding: "3rem", textAlign: "center", color: "#888" }}
+              >
+                <h2>Em desenvolvimento</h2>
+                <p>
+                  A aba "
+                  {teacherMenuItems.find((m) => m.id === activeTab)?.label}"
+                  estará disponível em breve.
+                </p>
+              </div>
+            )}
+        </DashboardLayout>
+      </StudentsProvider>
     </ProfileProvider>
   );
 };

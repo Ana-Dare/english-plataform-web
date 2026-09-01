@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, ShieldAlert, ArrowRight, Mail, Shield, Users, BarChart2, ArrowLeft } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Lock,
+  ShieldAlert,
+  ArrowRight,
+  Mail,
+  Shield,
+  Users,
+  BarChart2,
+  ArrowLeft,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Container,
   LeftPanel,
@@ -24,12 +33,12 @@ import {
   ErrorMsg,
   LoginBtn,
   BackLink,
-} from './style';
-import { useToast } from '../../contexts/ToastContext';
+} from "./style";
+import useToast from "../../contexts/Toast/useToast";
 
 const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -38,8 +47,8 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     if (email.trim() && password.trim()) {
       setError(false);
-      addToast('Acesso administrativo liberado!', 'success');
-      setTimeout(() => navigate('/admin'), 400);
+      addToast("Acesso administrativo liberado!", "success");
+      setTimeout(() => navigate("/admin"), 400);
     } else {
       setError(true);
     }
@@ -51,7 +60,9 @@ const AdminLogin: React.FC = () => {
       <LeftPanel>
         <BrandLogo>
           <Shield size={28} color="#C57A67" />
-          <span>Aulas &amp; <em>Admin</em></span>
+          <span>
+            Aulas &amp; <em>Admin</em>
+          </span>
         </BrandLogo>
 
         <LeftContent
@@ -60,17 +71,25 @@ const AdminLogin: React.FC = () => {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <LeftTitle>
-            Área de<br />
+            Área de
+            <br />
             <span>Administração</span>
           </LeftTitle>
           <LeftSubtitle>
-            Acesso restrito à equipe autorizada. Gerencie usuários, configurações e dados da plataforma com segurança e controle total.
+            Acesso restrito à equipe autorizada. Gerencie usuários,
+            configurações e dados da plataforma com segurança e controle total.
           </LeftSubtitle>
 
           <Badges>
-            <Badge><Users size={13} /> Gestão de Usuários</Badge>
-            <Badge><BarChart2 size={13} /> Relatórios</Badge>
-            <Badge><Shield size={13} /> Segurança LGPD</Badge>
+            <Badge>
+              <Users size={13} /> Gestão de Usuários
+            </Badge>
+            <Badge>
+              <BarChart2 size={13} /> Relatórios
+            </Badge>
+            <Badge>
+              <Shield size={13} /> Segurança LGPD
+            </Badge>
           </Badges>
         </LeftContent>
       </LeftPanel>
@@ -98,9 +117,14 @@ const AdminLogin: React.FC = () => {
                   placeholder="admin@admin.com"
                   value={email}
                   autoFocus
-                  onChange={(e) => { setEmail(e.target.value); setError(false); }}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(false);
+                  }}
                 />
-                <InputIcon><Mail size={18} /></InputIcon>
+                <InputIcon>
+                  <Mail size={18} />
+                </InputIcon>
               </InputWrapper>
             </FieldGroup>
 
@@ -113,9 +137,14 @@ const AdminLogin: React.FC = () => {
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => { setPassword(e.target.value); setError(false); }}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(false);
+                  }}
                 />
-                <InputIcon><Lock size={18} /></InputIcon>
+                <InputIcon>
+                  <Lock size={18} />
+                </InputIcon>
               </InputWrapper>
             </FieldGroup>
 
@@ -144,8 +173,18 @@ const AdminLogin: React.FC = () => {
               Acessar Painel <ArrowRight size={18} />
             </LoginBtn>
 
-            <BackLink type="button" onClick={() => navigate('/teacher-dashboard')}>
-              <ArrowLeft size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+            <BackLink
+              type="button"
+              onClick={() => navigate("/teacher-dashboard")}
+            >
+              <ArrowLeft
+                size={14}
+                style={{
+                  display: "inline",
+                  marginRight: "4px",
+                  verticalAlign: "middle",
+                }}
+              />
               Voltar para o Painel do Professor
             </BackLink>
           </form>

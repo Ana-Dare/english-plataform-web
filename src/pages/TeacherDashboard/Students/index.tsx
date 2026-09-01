@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ArrowLeft,
   Award,
@@ -14,10 +14,8 @@ import {
   User,
   UserX,
   Power,
-  MapPin,
-  Users
 } from "lucide-react";
-import CustomDropdown from '../../../components/CustomDropdown';
+import CustomDropdown from "../../../components/CustomDropdown";
 import {
   ActionsWrapper,
   AddButton,
@@ -44,7 +42,6 @@ import {
   PaginationContainer,
   PlanBadge,
   SearchWrapper,
-  FilterSelect,
   StatusBadge,
   StudentCell,
   StudentInfo,
@@ -55,47 +52,12 @@ import {
   Tr,
 } from "./style";
 import RegisterStudent from "./RegisterStudent";
-import type {
-  IStudents,
-  RegisterStudentParams,
-  UpdateStudentParams,
-  UpdateStudentVariables,
-} from "../types";
-import {
-  desactive,
-  registerStudent,
-  updateStudent,
-} from "../services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "../../../contexts/ToastContext";
-
-interface Student {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  birthdate: string;
-  isActive: boolean;
-  avatarColor: string;
-  level: string;
-  levelId: number | null;
-  plan: 0 | 1;
-  turma: string;
-  enrollDate: string;
-  rawEnrollDate: string;
-  observations: string;
-  progress?: number;
-}
+import type { RegisterStudentParams, UpdateStudentParams } from "../types";
+import { useStudents } from "../../../contexts/Students/hooks/useStudents";
+import type { Student } from "../../../contexts/Students/StudentsContext";
+import useToast from "../../../contexts/Toast/useToast";
 
 const ITEMS_PER_PAGE = 10;
-const avatarColors = [
-  "#3165e3",
-  "#e67e22",
-  "#8e44ad",
-  "#1abc9c",
-  "#e74c3c",
-  "#2c3e50",
-];
 
 const getInitials = (name: string) => {
   const parts = name.split(" ");
@@ -111,28 +73,8 @@ const formatDate = (value: string) => {
     : date.toLocaleDateString("pt-BR");
 };
 
-const toDateInputValue = (value: string | null) => value?.split("T")[0] ?? "";
-
 const formatLevel = (levelId: number | null) =>
   levelId === null ? "Não definido" : `Nível ${levelId}`;
-
-const toStudent = (student: IStudents): Student => ({
-  id: student.id,
-  name: student.name,
-  email: student.email,
-  phone: student.phone ?? "",
-  birthdate: toDateInputValue(student.birthdate),
-  isActive: student.active,
-  avatarColor: avatarColors[student.id % avatarColors.length],
-  level: formatLevel(student.profile.levelId),
-  levelId: student.profile.levelId,
-  plan: student.profile.vip ? 1 : 0,
-  turma: "Não atribuída",
-  enrollDate: formatDate(student.createdAt),
-  rawEnrollDate: student.createdAt,
-  observations: student.profile.notes ?? "",
-  progress: (student as any).progress ?? Math.floor(Math.random() * 40) + 60,
-});
 
 const buildUpdatePayload = (
   current: Student,
@@ -157,60 +99,23 @@ const buildUpdatePayload = (
   return params;
 };
 
-const MOCK_STUDENTS: IStudents[] = [
-  {
-    id: 1,
-    name: "João Silva",
-    email: "joao.silva@example.com",
-    phone: "11999999999",
-    birthdate: "2000-05-15T00:00:00.000Z",
-    active: true,
-    createdAt: "2023-01-10T10:00:00.000Z",
-    role: "student",
-    profile: {
-      levelId: 2,
-      vip: true,
-      notes: "Aluno dedicado, prefere aulas à noite.",
-    },
-  },
-  {
-    id: 2,
-    name: "Maria Oliveira",
-    email: "maria.oliveira@example.com",
-    phone: "11888888888",
-    birthdate: "1995-10-20T00:00:00.000Z",
-    active: false,
-    createdAt: "2023-02-15T10:00:00.000Z",
-    role: "student",
-    profile: {
-      levelId: null,
-      vip: false,
-      notes: null,
-    },
-  },
-  {
-    id: 3,
-    name: "Carlos Santos",
-    email: "carlos@example.com",
-    phone: "11777777777",
-    birthdate: "2001-08-10T00:00:00.000Z",
-    active: true,
-    createdAt: "2023-03-20T10:00:00.000Z",
-    role: "student",
-    profile: {
-      levelId: 1,
-      vip: true,
-      notes: null,
-    },
-  }
-];
-
 interface StudentsTabProps {
   initialStudentId?: number | null;
 }
 
-const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
+const StudentsTab: React.FC<StudentsTabProps> = () => {
   const { addToast } = useToast();
+  const {
+    students,
+    isLoading,
+    isError,
+    addStudent,
+    isAdding,
+    updateStudent,
+    isUpdating,
+    deactivateStudent,
+    isDeactivating,
+  } = useStudents();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterLevel, setFilterLevel] = useState("todos");
   const [filterTurma] = useState("todas");
@@ -223,49 +128,51 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Student | null>(null);
   const [showRegister, setShowRegister] = useState(false);
-  const [studentsList, setStudentsList] = useState(MOCK_STUDENTS);
-  const queryClient = useQueryClient();
-
-  const students = useMemo(() => studentsList.map(toStudent), [studentsList]);
-
-  useEffect(() => {
-    if (initialStudentId) {
-      const student = students.find(s => s.id === initialStudentId);
-      if (student) {
-        setSelectedStudent(student);
-        setIsEditing(false);
-        setEditForm(null);
-      }
-    }
-  }, [initialStudentId, students]);
 
   const filteredStudents = useMemo(() => {
     const filtered = students.filter((student) => {
-      const matchSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          student.email.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchLevel = filterLevel === "todos" || student.levelId === Number(filterLevel);
-      
-      const matchStatus = filterStatus === "todos" || 
-                          (filterStatus === "ativos" && student.isActive) ||
-                          (filterStatus === "inativos" && !student.isActive);
-                          
+      const matchSearch =
+        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchLevel =
+        filterLevel === "todos" || student.levelId === Number(filterLevel);
+
+      const matchStatus =
+        filterStatus === "todos" ||
+        (filterStatus === "ativos" && student.isActive) ||
+        (filterStatus === "inativos" && !student.isActive);
+
       return matchSearch && matchLevel && matchStatus;
     });
 
     return filtered.sort((a, b) => {
       if (sortOrder === "recent") {
-        return new Date(b.rawEnrollDate).getTime() - new Date(a.rawEnrollDate).getTime();
+        return (
+          new Date(b.rawEnrollDate).getTime() -
+          new Date(a.rawEnrollDate).getTime()
+        );
       }
       if (sortOrder === "oldest") {
-        return new Date(a.rawEnrollDate).getTime() - new Date(b.rawEnrollDate).getTime();
+        return (
+          new Date(a.rawEnrollDate).getTime() -
+          new Date(b.rawEnrollDate).getTime()
+        );
       }
       if (sortOrder === "az") {
         return a.name.localeCompare(b.name);
       }
       return 0;
     });
-  }, [students, searchQuery, filterLevel, filterTurma, filterFreq, filterStatus, sortOrder]);
+  }, [
+    students,
+    searchQuery,
+    filterLevel,
+    filterTurma,
+    filterFreq,
+    filterStatus,
+    sortOrder,
+  ]);
   const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE);
   const validCurrentPage = Math.min(currentPage, Math.max(totalPages, 1));
   const currentStudents = useMemo(() => {
@@ -301,47 +208,37 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
     setEditForm(null);
   };
 
-  const { mutate: register } = useMutation({
-    mutationFn: registerStudent,
-    onSuccess: () => {
-      setShowRegister(false);
-      void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
-      addToast("Aluno cadastrado com sucesso!", "success");
-    },
-    onError: () => {
-      addToast("Não foi possível cadastrar o aluno. Tente novamente.", "error");
-    },
-  });
-
-  const { mutate: deactivateStudent, isPending: isDeactivating } = useMutation({
-    mutationFn: desactive,
-    onSuccess: () => {
-      setSelectedStudent(null);
-      void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
-      addToast("Status do aluno atualizado com sucesso!", "success");
-    },
-    onError: () => {
-      addToast("Não foi possível desativar o aluno. Tente novamente.", "error");
-    },
-  });
-
-  const { mutate: saveStudent, isPending: isSaving } = useMutation({
-    mutationFn: ({ userId, params }: UpdateStudentVariables) =>
-      updateStudent(userId, params),
-    onSuccess: () => {
-      setSelectedStudent(null);
-      setEditForm(null);
-      setIsEditing(false);
-      void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
-      addToast("Dados atualizados com sucesso!", "success");
-    },
-    onError: () => {
-      addToast("Não foi possível atualizar o aluno. Tente novamente.", "error");
-    },
-  });
-
   const handleRegisterSave = (student: RegisterStudentParams) => {
-    register({ ...student, notes: student.notes || "", active: 1 });
+    addStudent(
+      { ...student, notes: student.notes || "", active: 1 },
+      {
+        onSuccess: () => {
+          setShowRegister(false);
+          handleBackToList();
+          setCurrentPage(1);
+          addToast("Aluno cadastrado com sucesso!", "success");
+        },
+        onError: () =>
+          addToast(
+            "Não foi possível cadastrar o aluno. Tente novamente.",
+            "error",
+          ),
+      },
+    );
+  };
+
+  const handleDeactivate = (id: number) => {
+    deactivateStudent(id, {
+      onSuccess: () => {
+        setSelectedStudent(null);
+        addToast("Status do aluno atualizado com sucesso!", "success");
+      },
+      onError: () =>
+        addToast(
+          "Não foi possível desativar o aluno. Tente novamente.",
+          "error",
+        ),
+    });
   };
 
   const handleSaveEdit = () => {
@@ -358,12 +255,28 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
       return;
     }
 
-    saveStudent({ userId: selectedStudent.id, params });
+    updateStudent(selectedStudent.id, params, {
+      onSuccess: () => {
+        setSelectedStudent(null);
+        setEditForm(null);
+        setIsEditing(false);
+        addToast("Dados atualizados com sucesso!", "success");
+      },
+      onError: () =>
+        addToast(
+          "Não foi possível atualizar o aluno. Tente novamente.",
+          "error",
+        ),
+    });
   };
 
   if (showRegister) {
     return (
-      <RegisterStudent onBack={handleBackToList} onSave={handleRegisterSave} />
+      <RegisterStudent
+        onBack={handleBackToList}
+        onSave={handleRegisterSave}
+        isSaving={isAdding}
+      />
     );
   }
 
@@ -590,16 +503,16 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
                 <DetailActionBtn
                   $variant="secondary"
                   onClick={handleCancelEdit}
-                  disabled={isSaving}
+                  disabled={isUpdating}
                 >
                   Cancelar
                 </DetailActionBtn>
                 <DetailActionBtn
                   $variant="primary"
                   onClick={handleSaveEdit}
-                  disabled={isSaving}
+                  disabled={isUpdating}
                 >
-                  {isSaving ? "Salvando..." : "Salvar Alterações"}
+                  {isUpdating ? "Salvando..." : "Salvar Alterações"}
                 </DetailActionBtn>
               </>
             ) : (
@@ -608,7 +521,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
                   <DetailActionBtn
                     $variant="danger"
                     disabled={isDeactivating}
-                    onClick={() => deactivateStudent(selectedStudent.id)}
+                    onClick={() => handleDeactivate(selectedStudent.id)}
                   >
                     <UserX size={16} />
                     {isDeactivating ? "Desativando..." : "Desativar Aluno"}
@@ -625,12 +538,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
     );
   }
 
-  const toggleStudentStatus = (id: number) => {
-    setStudentsList(prev => prev.map(s => 
-      s.id === id ? { ...s, active: !s.active } : s
-    ));
-  };
-
   return (
     <Container>
       <HeaderActions>
@@ -643,35 +550,42 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
             onChange={handleSearchChange}
           />
         </SearchWrapper>
-        
-        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <CustomDropdown 
-            value={sortOrder} 
-            onChange={setSortOrder} 
+
+        <div
+          style={{
+            display: "flex",
+            gap: "0.8rem",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <CustomDropdown
+            value={sortOrder}
+            onChange={setSortOrder}
             options={[
               { value: "recent", label: "Mais recentes" },
               { value: "oldest", label: "Mais antigos" },
-              { value: "az", label: "Ordem alfabética (A-Z)" }
+              { value: "az", label: "Ordem alfabética (A-Z)" },
             ]}
           />
 
-          <CustomDropdown 
-            value={filterLevel} 
-            onChange={setFilterLevel} 
+          <CustomDropdown
+            value={filterLevel}
+            onChange={setFilterLevel}
             options={[
               { value: "todos", label: "Nível: Todos" },
               { value: "1", label: "Nível: 1" },
-              { value: "2", label: "Nível: 2" }
+              { value: "2", label: "Nível: 2" },
             ]}
           />
 
-          <CustomDropdown 
-            value={filterStatus} 
-            onChange={setFilterStatus} 
+          <CustomDropdown
+            value={filterStatus}
+            onChange={setFilterStatus}
             options={[
               { value: "ativos", label: "Status: Ativos" },
               { value: "inativos", label: "Status: Inativos" },
-              { value: "todos", label: "Status: Todos" }
+              { value: "todos", label: "Status: Todos" },
             ]}
           />
 
@@ -698,10 +612,10 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
           <tbody>
             {currentStudents.length > 0 ? (
               currentStudents.map((student) => (
-                <Tr 
+                <Tr
                   key={student.id}
                   onClick={() => handleOpenDetail(student)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
                   <Td>
                     <StudentCell>
@@ -722,10 +636,39 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
                   <Td>{student.level}</Td>
                   <Td>{student.turma}</Td>
                   <Td>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#333' }}>{student.progress}%</span>
-                      <div style={{ width: '60px', height: '4px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
-                        <div style={{ width: `${student.progress}%`, height: '100%', background: '#f59e0b', borderRadius: '4px' }} />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "4px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {student.progress}%
+                      </span>
+                      <div
+                        style={{
+                          width: "60px",
+                          height: "4px",
+                          background: "#e0e0e0",
+                          borderRadius: "4px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${student.progress}%`,
+                            height: "100%",
+                            background: "#f59e0b",
+                            borderRadius: "4px",
+                          }}
+                        />
                       </div>
                     </div>
                   </Td>
@@ -749,9 +692,16 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
                           <Edit2 size={16} />
                         </IconButton>
                         <IconButton
-                          title={student.isActive ? "Desativar Aluno" : "Reativar Aluno"}
-                          onClick={() => toggleStudentStatus(student.id)}
-                          style={{ color: student.isActive ? '#ef4444' : '#22c55e' }}
+                          title={
+                            student.isActive
+                              ? "Desativar Aluno"
+                              : "Aluno inativo"
+                          }
+                          disabled={!student.isActive || isDeactivating}
+                          onClick={() => handleDeactivate(student.id)}
+                          style={{
+                            color: student.isActive ? "#ef4444" : "#22c55e",
+                          }}
                         >
                           <Power size={16} />
                         </IconButton>
@@ -763,27 +713,38 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ initialStudentId }) => {
             ) : (
               <tr>
                 <Td
-                  colSpan={7}
+                  colSpan={8}
                   style={{
                     textAlign: "center",
                     color: "#888",
                     padding: "3rem",
                   }}
                 >
-                  Nenhum aluno encontrado.
+                  {isLoading
+                    ? "Carregando alunos..."
+                    : isError
+                      ? "Não foi possível carregar os alunos. Tente novamente."
+                      : "Nenhum aluno encontrado."}
                 </Td>
               </tr>
             )}
           </tbody>
         </Table>
       </TableContainer>
-      
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}
+      >
         <PaginationContainer>
           <span>
-            Mostrando {(validCurrentPage - 1) * ITEMS_PER_PAGE + 1} a {Math.min(validCurrentPage * ITEMS_PER_PAGE, filteredStudents.length)} de {filteredStudents.length} alunos
+            Mostrando {(validCurrentPage - 1) * ITEMS_PER_PAGE + 1} a{" "}
+            {Math.min(
+              validCurrentPage * ITEMS_PER_PAGE,
+              filteredStudents.length,
+            )}{" "}
+            de {filteredStudents.length} alunos
           </span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
             <IconButton
               onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
               disabled={validCurrentPage === 1}

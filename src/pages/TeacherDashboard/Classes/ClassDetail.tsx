@@ -5,14 +5,13 @@ import {
   FileText,
   Calendar,
   ExternalLink,
-  CalendarPlus,
   FileUp,
   Users,
   Stethoscope,
   Paperclip,
   Clock,
   CheckCircle,
-  Edit2
+  Edit2,
 } from "lucide-react";
 import {
   DetailContainer,
@@ -50,7 +49,7 @@ import {
   SectionTitle,
   PostList,
   PostAuthor,
-  PostContent
+  PostContent,
 } from "./style";
 import type { ClassType } from "./types";
 import AddMaterialModal from "./AddMaterialModal";
@@ -58,9 +57,9 @@ import type { MaterialData } from "./AddMaterialModal";
 import AddClassEventModal from "./AddClassEventModal";
 import type { ClassEventData } from "./AddClassEventModal";
 import EvaluateJustificationModal from "./EvaluateJustificationModal";
-import { useToast } from "../../../contexts/ToastContext";
 import { Check, X } from "lucide-react";
 import { motion } from "framer-motion";
+import useToast from "../../../contexts/Toast/useToast";
 
 interface ClassDetailProps {
   classData: ClassType;
@@ -75,11 +74,15 @@ const getInitials = (name: string) => {
     : parts[0][0];
 };
 
-const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigateToStudent }) => {
+const ClassDetail: React.FC<ClassDetailProps> = ({
+  classData,
+  onBack,
+  onNavigateToStudent,
+}) => {
   const { addToast } = useToast();
-  const [activeTab, setActiveTab] = useState<"mural" | "materiais" | "agenda" | "alunos" | "atestados">(
-    "mural",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "mural" | "materiais" | "agenda" | "alunos" | "atestados"
+  >("mural");
   const [newPost, setNewPost] = useState("");
   const [posts, setPosts] = useState([
     {
@@ -106,7 +109,9 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
   };
 
   const [showMaterialModal, setShowMaterialModal] = useState(false);
-  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(null);
+  const [editingMaterialIndex, setEditingMaterialIndex] = useState<
+    number | null
+  >(null);
   const [materials, setMaterials] = useState<MaterialData[]>([
     {
       title: "Guia de Estudos - Módulo 1",
@@ -148,7 +153,7 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
       reason: "Consulta médica de emergência",
       status: "Em Análise",
       document: "atestado_medico.pdf",
-      feedback: ""
+      feedback: "",
     },
     {
       id: 2,
@@ -157,23 +162,32 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
       reason: "Exames de sangue",
       status: "Aceito",
       document: "exames_ana.png",
-      feedback: "Atestado recebido e abonado."
-    }
+      feedback: "Atestado recebido e abonado.",
+    },
   ]);
 
-  const [evaluatingJustification, setEvaluatingJustification] = useState<{ id: number; action: 'approve' | 'reject'; student: string } | null>(null);
+  const [evaluatingJustification, setEvaluatingJustification] = useState<{
+    id: number;
+    action: "approve" | "reject";
+    student: string;
+  } | null>(null);
 
   const handleEvaluateJustification = (message: string) => {
     if (!evaluatingJustification) return;
-    
-    const { id, action, student } = evaluatingJustification;
-    const newStatus = action === 'approve' ? 'Aceito' : 'Recusado';
 
-    setJustifications(prev => prev.map(j => 
-      j.id === id ? { ...j, status: newStatus, feedback: message } : j
-    ));
+    const { id, action } = evaluatingJustification;
+    const newStatus = action === "approve" ? "Aceito" : "Recusado";
 
-    addToast(`Atestado ${newStatus.toLowerCase()} com sucesso! Feedback enviado ao aluno.`, 'success');
+    setJustifications((prev) =>
+      prev.map((j) =>
+        j.id === id ? { ...j, status: newStatus, feedback: message } : j,
+      ),
+    );
+
+    addToast(
+      `Atestado ${newStatus.toLowerCase()} com sucesso! Feedback enviado ao aluno.`,
+      "success",
+    );
     setEvaluatingJustification(null);
   };
 
@@ -194,7 +208,8 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
     setShowEventModal(false);
     if (data.syncAgenda) {
       addToast(
-        `Aula "${data.title}" agendada e adicionada à sua agenda pessoal com sucesso!`, "success"
+        `Aula "${data.title}" agendada e adicionada à sua agenda pessoal com sucesso!`,
+        "success",
       );
     } else {
       addToast(`Aula "${data.title}" agendada com sucesso!`, "success");
@@ -282,29 +297,37 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
 
       <DetailContent>
         {activeTab === "mural" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <SectionHeader>
               <SectionTitle>
                 <MessageSquare size={24} /> Mural de Avisos
               </SectionTitle>
             </SectionHeader>
             <CreatePostBox>
-              <textarea 
-                placeholder="Escreva um aviso para a turma..." 
+              <textarea
+                placeholder="Escreva um aviso para a turma..."
                 value={newPost}
-                onChange={e => setNewPost(e.target.value)}
+                onChange={(e) => setNewPost(e.target.value)}
               />
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <PrimaryBtn onClick={handleCreatePost}>Publicar</PrimaryBtn>
               </div>
             </CreatePostBox>
-            
+
             <PostList>
-              {posts.map(post => (
+              {posts.map((post) => (
                 <PostCard key={post.id}>
                   <PostHeader>
                     <PostAuthor>
-                      <StudentAvatarSmall $color="#08142c" $index={0} style={{ width: '40px', height: '40px' }}>
+                      <StudentAvatarSmall
+                        $color="#08142c"
+                        $index={0}
+                        style={{ width: "40px", height: "40px" }}
+                      >
                         {getInitials(post.author)}
                       </StudentAvatarSmall>
                       <div>
@@ -322,28 +345,47 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
         )}
 
         {activeTab === "materiais" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <SectionHeader>
               <SectionTitle>
                 <FileText size={24} /> Materiais & Atividades
               </SectionTitle>
-              <PrimaryBtn style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} onClick={() => addToast("Em breve: Upload de materiais", "info")}>
+              <PrimaryBtn
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+                onClick={() =>
+                  addToast("Em breve: Upload de materiais", "info")
+                }
+              >
                 <FileUp size={16} /> Novo Material
               </PrimaryBtn>
             </SectionHeader>
             <MaterialsGrid>
               {materials.map((mat, idx) => (
-                <MaterialCard 
-                  key={idx} 
+                <MaterialCard
+                  key={idx}
                   onClick={() => {
-                    if (mat.url && mat.url !== '#') {
-                      window.open(mat.url, '_blank');
+                    if (mat.url && mat.url !== "#") {
+                      window.open(mat.url, "_blank");
                     } else {
-                      addToast('Este material é apenas um exemplo e não possui link válido.', 'info');
+                      addToast(
+                        "Este material é apenas um exemplo e não possui link válido.",
+                        "info",
+                      );
                     }
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      width: "100%",
+                    }}
+                  >
                     <MaterialIcon $type={mat.type}>
                       {mat.type === "pdf" ? (
                         <FileText size={24} />
@@ -351,23 +393,43 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
                         <ExternalLink size={24} />
                       )}
                     </MaterialIcon>
-                    <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        setEditingMaterialIndex(idx); 
-                        setShowMaterialModal(true); 
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingMaterialIndex(idx);
+                        setShowMaterialModal(true);
                       }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: '4px' }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#888",
+                        padding: "4px",
+                      }}
                       title="Editar Material"
                     >
                       <Edit2 size={16} />
                     </button>
                   </div>
-                  <MaterialInfo style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <MaterialInfo
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.4rem",
+                    }}
+                  >
                     <h4>{mat.title}</h4>
-                    <div 
-                      style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, margin: 0 }}
-                      dangerouslySetInnerHTML={{ __html: mat.description || "Nenhuma descrição" }} 
+                    <div
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "#666",
+                        lineHeight: 1.4,
+                        margin: 0,
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: mat.description || "Nenhuma descrição",
+                      }}
                     />
                   </MaterialInfo>
                 </MaterialCard>
@@ -377,20 +439,33 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
         )}
 
         {activeTab === "agenda" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <SectionHeader>
               <SectionTitle>
                 <Calendar size={24} /> Próximas Aulas
               </SectionTitle>
-              <PrimaryBtn style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} onClick={() => addToast("Em breve: Agendamento de aulas", "info")}>
+              <PrimaryBtn
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+                onClick={() =>
+                  addToast("Em breve: Agendamento de aulas", "info")
+                }
+              >
                 <Calendar size={16} /> Nova Aula
               </PrimaryBtn>
             </SectionHeader>
             <ClassAgendaList>
               {events.map((ev, idx) => {
                 const dateObj = new Date(ev.date + "T00:00:00");
-                const day = isNaN(dateObj.getTime()) ? ev.date.split("-")[2] || "?" : dateObj.getDate().toString().padStart(2, "0");
-                const month = isNaN(dateObj.getTime()) ? "Mês" : dateObj.toLocaleString("pt-BR", { month: "short" });
+                const day = isNaN(dateObj.getTime())
+                  ? ev.date.split("-")[2] || "?"
+                  : dateObj.getDate().toString().padStart(2, "0");
+                const month = isNaN(dateObj.getTime())
+                  ? "Mês"
+                  : dateObj.toLocaleString("pt-BR", { month: "short" });
                 return (
                   <AgendaItem key={idx}>
                     <AgendaDateBox>
@@ -399,7 +474,9 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
                     </AgendaDateBox>
                     <AgendaContent>
                       <strong>{ev.title}</strong>
-                      <span><Clock size={14} /> {ev.startTime} - {ev.endTime}</span>
+                      <span>
+                        <Clock size={14} /> {ev.startTime} - {ev.endTime}
+                      </span>
                     </AgendaContent>
                   </AgendaItem>
                 );
@@ -409,25 +486,51 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
         )}
 
         {activeTab === "alunos" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <SectionHeader>
               <SectionTitle>
                 <Users size={24} /> Alunos Matriculados
               </SectionTitle>
             </SectionHeader>
             <StudentsGrid>
-              {classData.students.map(student => (
-                <StudentCard key={student.id} onClick={() => {
-                  if (onNavigateToStudent) {
-                    onNavigateToStudent(parseInt(student.id));
-                  }
-                }}>
-                  <StudentAvatarSmall $color={student.avatarColor} $index={0} style={{ width: '48px', height: '48px', fontSize: '1.2rem', marginLeft: 0 }}>
+              {classData.students.map((student) => (
+                <StudentCard
+                  key={student.id}
+                  onClick={() => {
+                    if (onNavigateToStudent) {
+                      onNavigateToStudent(parseInt(student.id));
+                    }
+                  }}
+                >
+                  <StudentAvatarSmall
+                    $color={student.avatarColor}
+                    $index={0}
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      fontSize: "1.2rem",
+                      marginLeft: 0,
+                    }}
+                  >
                     {getInitials(student.name)}
                   </StudentAvatarSmall>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong style={{ color: '#1a1a1a', fontSize: '1.05rem', marginBottom: '0.2rem' }}>{student.name}</strong>
-                    <span style={{ color: '#666', fontSize: '0.85rem' }}>{student.email}</span>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <strong
+                      style={{
+                        color: "#1a1a1a",
+                        fontSize: "1.05rem",
+                        marginBottom: "0.2rem",
+                      }}
+                    >
+                      {student.name}
+                    </strong>
+                    <span style={{ color: "#666", fontSize: "0.85rem" }}>
+                      {student.email}
+                    </span>
                   </div>
                 </StudentCard>
               ))}
@@ -436,41 +539,114 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
         )}
 
         {activeTab === "atestados" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <SectionHeader>
               <SectionTitle>
                 <Stethoscope size={24} /> Atestados e Justificativas de Faltas
               </SectionTitle>
             </SectionHeader>
-            
+
             <JustificationList>
-              {justifications.map(just => (
+              {justifications.map((just) => (
                 <JustificationItem key={just.id}>
                   <JustificationInfo>
                     <h4>{just.student}</h4>
-                    <span><Calendar size={14} /> Falta referente ao dia: {just.date}</span>
-                    <span><Stethoscope size={14} /> Motivo: {just.reason}</span>
+                    <span>
+                      <Calendar size={14} /> Falta referente ao dia: {just.date}
+                    </span>
+                    <span>
+                      <Stethoscope size={14} /> Motivo: {just.reason}
+                    </span>
                   </JustificationInfo>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                      <span style={{ color: '#3b82f6', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1.5rem",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: "#3b82f6",
+                          fontSize: "0.9rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.4rem",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
                         <Paperclip size={14} /> {just.document}
                       </span>
                       <JustificationStatus $status={just.status}>
-                        {just.status === 'Aceito' ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} /> Aceito</span> : just.status === 'Recusado' ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><X size={14} /> Recusado</span> : <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> Em Análise</span>}
+                        {just.status === "Aceito" ? (
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <CheckCircle size={14} /> Aceito
+                          </span>
+                        ) : just.status === "Recusado" ? (
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <X size={14} /> Recusado
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <Clock size={14} /> Em Análise
+                          </span>
+                        )}
                       </JustificationStatus>
-                      
-                      {just.status === 'Em Análise' && (
+
+                      {just.status === "Em Análise" && (
                         <ActionGroup>
-                          <JustificationActionBtn 
-                            $type="approve" 
-                            onClick={() => setEvaluatingJustification({ id: just.id, action: 'approve', student: just.student })}
+                          <JustificationActionBtn
+                            $type="approve"
+                            onClick={() =>
+                              setEvaluatingJustification({
+                                id: just.id,
+                                action: "approve",
+                                student: just.student,
+                              })
+                            }
                           >
                             <Check size={16} /> Aprovar
                           </JustificationActionBtn>
-                          <JustificationActionBtn 
-                            $type="reject" 
-                            onClick={() => setEvaluatingJustification({ id: just.id, action: 'reject', student: just.student })}
+                          <JustificationActionBtn
+                            $type="reject"
+                            onClick={() =>
+                              setEvaluatingJustification({
+                                id: just.id,
+                                action: "reject",
+                                student: just.student,
+                              })
+                            }
                           >
                             <X size={16} /> Recusar
                           </JustificationActionBtn>
@@ -478,7 +654,17 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
                       )}
                     </div>
                     {just.feedback && (
-                      <span style={{ fontSize: '0.85rem', color: '#666', background: '#f8f9fc', padding: '0.4rem 0.8rem', borderRadius: '8px', maxWidth: '300px', textAlign: 'right' }}>
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "#666",
+                          background: "#f8f9fc",
+                          padding: "0.4rem 0.8rem",
+                          borderRadius: "8px",
+                          maxWidth: "300px",
+                          textAlign: "right",
+                        }}
+                      >
                         <strong>Feedback:</strong> {just.feedback}
                       </span>
                     )}
@@ -497,7 +683,11 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack, onNavigate
             setEditingMaterialIndex(null);
           }}
           onSave={handleAddMaterial}
-          initialData={editingMaterialIndex !== null ? materials[editingMaterialIndex] : undefined}
+          initialData={
+            editingMaterialIndex !== null
+              ? materials[editingMaterialIndex]
+              : undefined
+          }
         />
       )}
 
