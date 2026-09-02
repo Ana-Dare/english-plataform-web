@@ -1,14 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, Users, GraduationCap, Image, Settings, LogOut, Shield, ChevronRight, Menu, X } from "lucide-react";
 import {
-  AdminWrap, Sidebar, SidebarTop, Brand, BrandBadge,
-  SidebarNav, NavGroup, NavGroupLabel, NavItem, NavLabel,
-  SidebarBottom, LogoutNavItem,
-  Main, Topbar, TopbarLeft, TopbarRight, PageCrumb,
-  AdminPill, TopbarBtn, Content, ContentHeader,
-  MobileOverlay, HamburgerBtn
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  Image,
+  Settings,
+  LogOut,
+  Shield,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
+import {
+  AdminWrap,
+  Sidebar,
+  SidebarTop,
+  Brand,
+  BrandBadge,
+  SidebarNav,
+  NavGroup,
+  NavGroupLabel,
+  NavItem,
+  NavLabel,
+  SidebarBottom,
+  LogoutNavItem,
+  Main,
+  Topbar,
+  TopbarLeft,
+  TopbarRight,
+  PageCrumb,
+  AdminPill,
+  TopbarBtn,
+  Content,
+  MobileOverlay,
+  HamburgerBtn,
 } from "./style";
 import AdminOverview from "./tabs/AdminOverview";
 import AdminUsers from "./tabs/AdminUsers";
@@ -18,20 +45,63 @@ import AdminSettings from "./tabs/AdminSettings";
 
 type Tab = "overview" | "users" | "levels" | "login-config" | "settings";
 
-const NAV: { id: Tab; label: string; icon: React.ReactNode; badge?: number; group: string }[] = [
-  { id: "overview",     label: "Visão Geral",       icon: <LayoutDashboard size={18}/>, group: "Principal" },
-  { id: "users",        label: "Usuários",           icon: <Users size={18}/>,           group: "Principal" },
-  { id: "levels",       label: "Níveis de Inglês",   icon: <GraduationCap size={18}/>,   group: "Conteúdo" },
-  { id: "login-config", label: "Config. de Login",   icon: <Image size={18}/>,            group: "Conteúdo" },
-  { id: "settings",     label: "Configurações",      icon: <Settings size={18}/>,         group: "Sistema" },
+const NAV: {
+  id: Tab;
+  label: string;
+  icon: React.ReactNode;
+  badge?: number;
+  group: string;
+}[] = [
+  {
+    id: "overview",
+    label: "Visão Geral",
+    icon: <LayoutDashboard size={18} />,
+    group: "Principal",
+  },
+  {
+    id: "users",
+    label: "Usuários",
+    icon: <Users size={18} />,
+    group: "Principal",
+  },
+  {
+    id: "levels",
+    label: "Níveis de Inglês",
+    icon: <GraduationCap size={18} />,
+    group: "Conteúdo",
+  },
+  {
+    id: "login-config",
+    label: "Config. de Login",
+    icon: <Image size={18} />,
+    group: "Conteúdo",
+  },
+  {
+    id: "settings",
+    label: "Configurações",
+    icon: <Settings size={18} />,
+    group: "Sistema",
+  },
 ];
 
 const TITLES: Record<Tab, { title: string; sub: string }> = {
-  "overview":     { title: "Visão Geral", sub: "Resumo e métricas da plataforma" },
-  "users":        { title: "Gestão de Usuários", sub: "Gerencie alunos, professores e admins" },
-  "levels":       { title: "Níveis de Inglês", sub: "Cadastre e edite os níveis disponíveis" },
-  "login-config": { title: "Configuração de Login", sub: "Personalize a tela de acesso ao sistema" },
-  "settings":     { title: "Configurações do Sistema", sub: "Parâmetros gerais e controles globais" },
+  overview: { title: "Visão Geral", sub: "Resumo e métricas da plataforma" },
+  users: {
+    title: "Gestão de Usuários",
+    sub: "Gerencie alunos, professores e admins",
+  },
+  levels: {
+    title: "Níveis de Inglês",
+    sub: "Cadastre e edite os níveis disponíveis",
+  },
+  "login-config": {
+    title: "Configuração de Login",
+    sub: "Personalize a tela de acesso ao sistema",
+  },
+  settings: {
+    title: "Configurações do Sistema",
+    sub: "Parâmetros gerais e controles globais",
+  },
 };
 
 const AdminDashboard: React.FC = () => {
@@ -39,7 +109,7 @@ const AdminDashboard: React.FC = () => {
   const [tab, setTab] = useState<Tab>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const groups = [...new Set(NAV.map(n => n.group))];
+  const groups = [...new Set(NAV.map((n) => n.group))];
 
   const handleNavClick = (id: Tab) => {
     setTab(id);
@@ -48,34 +118,46 @@ const AdminDashboard: React.FC = () => {
 
   const renderTab = () => {
     switch (tab) {
-      case "overview":     return <AdminOverview />;
-      case "users":        return <AdminUsers />;
-      case "levels":       return <AdminLevels />;
-      case "login-config": return <AdminLoginConfig />;
-      case "settings":     return <AdminSettings />;
+      case "overview":
+        return <AdminOverview />;
+      case "users":
+        return <AdminUsers />;
+      case "levels":
+        return <AdminLevels />;
+      case "login-config":
+        return <AdminLoginConfig />;
+      case "settings":
+        return <AdminSettings />;
     }
   };
 
   return (
     <AdminWrap>
       {/* Mobile overlay */}
-      <MobileOverlay $open={sidebarOpen} onClick={() => setSidebarOpen(false)} />
+      <MobileOverlay
+        $open={sidebarOpen}
+        onClick={() => setSidebarOpen(false)}
+      />
 
       {/* SIDEBAR */}
       <Sidebar $open={sidebarOpen}>
         <SidebarTop>
           <Brand>
             <Shield size={22} color="#C57A67" />
-            <span>Admin<em>Panel</em></span>
+            <span>
+              Admin<em>Panel</em>
+            </span>
           </Brand>
           <BrandBadge>Área Restrita</BrandBadge>
         </SidebarTop>
 
         <SidebarNav>
-          {groups.map(group => (
+          {groups.map((group) => (
             <div key={group}>
-              <NavGroup><NavGroupLabel>{group}</NavGroupLabel></NavGroup>
-              {NAV.filter(n => n.group === group).map(item => (
+              <NavGroup>
+                <NavGroupLabel>{group}</NavGroupLabel>
+              </NavGroup>
+              {NAV.filter((n) => n.group === group).map((item) => (
                 <NavItem
                   key={item.id}
                   $active={tab === item.id}
@@ -83,7 +165,9 @@ const AdminDashboard: React.FC = () => {
                 >
                   {item.icon}
                   <NavLabel>{item.label}</NavLabel>
-                  {tab === item.id && <ChevronRight size={14} style={{ opacity: 0.5 }} />}
+                  {tab === item.id && (
+                    <ChevronRight size={14} style={{ opacity: 0.5 }} />
+                  )}
                 </NavItem>
               ))}
             </div>
@@ -102,7 +186,7 @@ const AdminDashboard: React.FC = () => {
       <Main>
         <Topbar>
           <TopbarLeft>
-            <HamburgerBtn onClick={() => setSidebarOpen(v => !v)}>
+            <HamburgerBtn onClick={() => setSidebarOpen((v) => !v)}>
               {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
             </HamburgerBtn>
             <PageCrumb>
@@ -111,7 +195,9 @@ const AdminDashboard: React.FC = () => {
             </PageCrumb>
           </TopbarLeft>
           <TopbarRight>
-            <AdminPill><Shield size={12} /> Administrador</AdminPill>
+            <AdminPill>
+              <Shield size={12} /> Administrador
+            </AdminPill>
             <TopbarBtn onClick={() => navigate("/teacher-dashboard")}>
               <LogOut size={14} /> Sair
             </TopbarBtn>

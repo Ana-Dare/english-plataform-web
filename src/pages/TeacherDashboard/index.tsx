@@ -38,12 +38,7 @@ const teacherMenuItems: SidebarMenuItem[] = [
 const TeacherDashboard: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [navStudentId, setNavStudentId] = useState<number | null>(null);
-
-  const handleNavigateToStudent = (studentId: number) => {
-    setNavStudentId(studentId);
-    setActiveTab("alunos");
-  };
+  const [navStudentId] = useState<number | null>(null);
 
   return (
     <ProfileProvider>
@@ -113,9 +108,7 @@ const TeacherDashboard: React.FC = () => {
 
             {activeTab === "agenda" && <AgendaTab />}
 
-            {activeTab === "turmas" && (
-              <ClassesTab onNavigateToStudent={handleNavigateToStudent} />
-            )}
+            {activeTab === "turmas" && <ClassesTab />}
 
             {activeTab === "perfil" && <ProfileTab />}
 

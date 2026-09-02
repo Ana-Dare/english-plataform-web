@@ -1,5 +1,5 @@
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
+import styled from "styled-components";
+import { motion } from "framer-motion";
 
 export const Container = styled.div`
   display: flex;
@@ -35,13 +35,13 @@ export const HeaderActions = styled.div`
 
 export const FilterSelect = styled.select`
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1.5px solid #1F2B45;
+  border: 1.5px solid #1f2b45;
   border-radius: 999px;
   padding: 0.55rem 2.4rem 0.55rem 1.1rem;
   font-size: 0.88rem;
-  font-family: 'Rubik', inherit;
+  font-family: "Rubik", inherit;
   font-weight: 500;
-  color: #1F2B45;
+  color: #1f2b45;
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -51,26 +51,29 @@ export const FilterSelect = styled.select`
   background-position: right 0.85rem top 52%;
   background-size: 0.6rem auto;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(31, 43, 69, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow:
+    0 2px 8px rgba(31, 43, 69, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   min-width: 160px;
   letter-spacing: 0.01em;
   white-space: nowrap;
 
   &:hover {
-    border-color: #C57A67;
+    border-color: #c57a67;
     background-color: #fff8f6;
     box-shadow: 0 4px 12px rgba(197, 122, 103, 0.18);
-    color: #C57A67;
+    color: #c57a67;
   }
 
   &:focus {
-    border-color: #C57A67;
-    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.18), 0 2px 8px rgba(31, 43, 69, 0.06);
-    color: #C57A67;
+    border-color: #c57a67;
+    box-shadow:
+      0 0 0 3px rgba(197, 122, 103, 0.18),
+      0 2px 8px rgba(31, 43, 69, 0.06);
+    color: #c57a67;
     background-color: #fff8f6;
   }
 `;
-
 
 export const SearchWrapper = styled.div`
   display: flex;
@@ -82,17 +85,17 @@ export const SearchWrapper = styled.div`
   min-width: 260px;
   max-width: 320px;
   flex-shrink: 0;
-  border: 1px solid #1F2B45;
+  border: 1px solid #1f2b45;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
 
   &:focus-within {
-    border-color: #C57A67;
+    border-color: #c57a67;
     box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.15);
   }
 
   svg {
-    color: #C57A67;
+    color: #c57a67;
     margin-right: 0.8rem;
     flex-shrink: 0;
   }
@@ -125,12 +128,12 @@ export const TabsContainer = styled.div`
 `;
 
 export const TabButton = styled.button<{ $active: boolean }>`
-  background: ${({ $active }) => ($active ? '#1F2B45' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#4D4D4D')};
+  background: ${({ $active }) => ($active ? "#1F2B45" : "transparent")};
+  color: ${({ $active }) => ($active ? "#fff" : "#4D4D4D")};
   border: none;
   border-radius: 8px 8px 0 0;
   padding: 0.6rem 1.5rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -138,7 +141,7 @@ export const TabButton = styled.button<{ $active: boolean }>`
   transform: translateY(2px);
 
   &:hover {
-    color: ${({ $active }) => ($active ? '#fff' : '#1F2B45')};
+    color: ${({ $active }) => ($active ? "#fff" : "#1F2B45")};
   }
 `;
 
@@ -162,13 +165,13 @@ export const CertificateCard = styled(motion.div)`
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: 4px;
-    background: #1F2B45;
+    background: #1f2b45;
     transform: scaleY(0);
     transition: transform 0.3s ease;
   }
@@ -183,9 +186,9 @@ export const CertificateCard = styled(motion.div)`
     }
 
     button {
-      background: #1F2B45;
+      background: #1f2b45;
       color: #fff;
-      border-color: #1F2B45;
+      border-color: #1f2b45;
     }
   }
 
@@ -208,7 +211,7 @@ export const Avatar = styled.div<{ $bg: string; $color: string }>`
   flex-shrink: 0;
   background-color: ${({ $bg }) => $bg};
   color: ${({ $color }) => $color};
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
 `;
 
 export const CardInfo = styled.div`
@@ -221,18 +224,18 @@ export const CardInfo = styled.div`
 
 export const StudentName = styled.h3`
   margin: 0;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 1.1rem;
-  color: #1F2B45;
+  color: #1f2b45;
   font-weight: 700;
 `;
 
 export const LevelBadge = styled.span`
   background: rgba(197, 122, 103, 0.15);
-  color: #C57A67;
+  color: #c57a67;
   padding: 0.2rem 0.6rem;
   border-radius: 20px;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   display: inline-block;
@@ -256,7 +259,7 @@ export const MetaItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
 
   span:first-child {
     font-size: 0.75rem;
@@ -268,7 +271,7 @@ export const MetaItem = styled.div`
 
   span:last-child {
     font-size: 0.95rem;
-    color: #1F2B45;
+    color: #1f2b45;
     font-weight: 700;
   }
 `;
@@ -278,11 +281,11 @@ export const ViewProfileBtn = styled.button`
   align-items: center;
   gap: 0.5rem;
   background: transparent;
-  color: #1F2B45;
+  color: #1f2b45;
   border: 1px solid #e2e8f0;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -302,10 +305,10 @@ export const SendButton = styled.button`
   gap: 0.5rem;
   background: transparent;
   border: 1px solid rgba(31, 43, 69, 0.2);
-  color: #1F2B45;
+  color: #1f2b45;
   border-radius: 20px;
   padding: 0.5rem 1rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
@@ -324,8 +327,14 @@ export const DetailContainer = styled.div`
   animation: fadeIn 0.4s ease;
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -341,13 +350,17 @@ export const ProfileHeader = styled.div`
   overflow: hidden;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     right: -5%;
     top: -20%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
     border-radius: 50%;
   }
 `;
@@ -362,7 +375,7 @@ export const ProfileAvatar = styled.div<{ $bg: string; $color: string }>`
   align-items: center;
   justify-content: center;
   font-size: 2.2rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 700;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   border: 4px solid #fff;
@@ -378,9 +391,9 @@ export const ProfileInfo = styled.div`
 
 export const ProfileName = styled.h2`
   margin: 0;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 1.8rem;
-  color: #1F2B45;
+  color: #1f2b45;
   font-weight: 700;
 `;
 
@@ -408,7 +421,7 @@ export const BackButton = styled.button`
   background: transparent;
   border: none;
   color: #888;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -417,7 +430,7 @@ export const BackButton = styled.button`
   transition: color 0.2s;
 
   &:hover {
-    color: #1F2B45;
+    color: #1f2b45;
   }
 `;
 
@@ -429,14 +442,14 @@ export const DetailSection = styled.div`
 
 export const SectionTitle = styled.h4`
   margin: 0;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 1.2rem;
-  color: #1F2B45;
+  color: #1f2b45;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
+
   svg {
     color: #3b82f6; /* Azul claro acento */
   }
@@ -449,10 +462,10 @@ export const ProgressWrapper = styled.div`
 `;
 
 export const ProgressText = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  color: #1F2B45;
+  color: #1f2b45;
 `;
 
 export const ProgressBarContainer = styled.div`
@@ -488,12 +501,12 @@ export const InfoItem = styled.li`
   background: #fdfdfd;
   border: 1px solid #eaeaea;
   border-radius: 8px;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 0.95rem;
   color: #333;
 
   svg {
-    color: #1F2B45;
+    color: #1f2b45;
     opacity: 0.7;
   }
 `;
@@ -503,12 +516,12 @@ export const SendCertificateBtn = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #1F2B45;
+  background: #1f2b45;
   color: #fff;
   border: none;
   border-radius: 50px;
   padding: 0.8rem 1.5rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
@@ -538,7 +551,9 @@ export const InfoGroup = styled.div`
   border-radius: 12px;
   padding: 1.2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
@@ -547,7 +562,7 @@ export const InfoGroup = styled.div`
 `;
 
 export const InfoLabel = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 0.8rem;
   color: #888;
   text-transform: uppercase;
@@ -556,9 +571,9 @@ export const InfoLabel = styled.span`
 `;
 
 export const InfoValue = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 1rem;
-  color: #1F2B45;
+  color: #1f2b45;
   font-weight: 500;
 `;
 
@@ -567,9 +582,9 @@ export const Timeline = styled.div`
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
-  
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 11px;
     top: 10px;
@@ -596,7 +611,9 @@ export const TimelineIcon = styled.div`
   justify-content: center;
   flex-shrink: 0;
   z-index: 1;
-  box-shadow: 0 0 0 4px #fff, 0 2px 4px rgba(15, 23, 42, 0.2);
+  box-shadow:
+    0 0 0 4px #fff,
+    0 2px 4px rgba(15, 23, 42, 0.2);
 `;
 
 export const TimelineContent = styled.div`
@@ -625,14 +642,14 @@ export const TimelineHeader = styled.div`
 `;
 
 export const TimelineTitle = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
-  color: #1F2B45;
+  color: #1f2b45;
   font-size: 1.05rem;
 `;
 
 export const TimelineDate = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 0.85rem;
   color: #888;
   display: flex;
@@ -641,13 +658,15 @@ export const TimelineDate = styled.span`
 `;
 
 export const TimelineScore = styled.span<{ $score: number }>`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
-  background: ${({ $score }) => $score >= 90 ? '#d4f5d4' : $score >= 70 ? '#fff3cc' : '#fce4e4'};
-  color: ${({ $score }) => $score >= 90 ? '#166534' : $score >= 70 ? '#854d0e' : '#991b1b'};
+  background: ${({ $score }) =>
+    $score >= 90 ? "#d4f5d4" : $score >= 70 ? "#fff3cc" : "#fce4e4"};
+  color: ${({ $score }) =>
+    $score >= 90 ? "#166534" : $score >= 70 ? "#854d0e" : "#991b1b"};
 `;
 
 export const TimelineActions = styled.div`
@@ -661,10 +680,10 @@ export const ActionBtn = styled.button`
   gap: 0.3rem;
   background: transparent;
   border: 1px solid rgba(31, 43, 69, 0.2);
-  color: #1F2B45;
+  color: #1f2b45;
   border-radius: 6px;
   padding: 0.3rem 0.6rem;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -672,10 +691,9 @@ export const ActionBtn = styled.button`
 
   &:hover {
     background: rgba(31, 43, 69, 0.05);
-    border-color: #1F2B45;
+    border-color: #1f2b45;
   }
 `;
-
 
 export const MaterialGrid = styled.div`
   display: grid;
@@ -695,10 +713,12 @@ export const MaterialCard = styled(motion.div)`
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 
   /* Framer motion handles transform, we just handle border and shadow */
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 
   &:hover {
-    border-color: #C57A67;
+    border-color: #c57a67;
     box-shadow: 0 8px 20px rgba(197, 122, 103, 0.15);
   }
 `;
@@ -710,8 +730,14 @@ export const MaterialIcon = styled.div<{ $type: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${({ $type }) => $type === 'PDF' ? '#fee2e2' : $type === 'Audio' ? '#e0e7ff' : 'rgba(197, 122, 103, 0.1)'};
-  color: ${({ $type }) => $type === 'PDF' ? '#ef4444' : $type === 'Audio' ? '#4f46e5' : '#C57A67'};
+  background: ${({ $type }) =>
+    $type === "PDF"
+      ? "#fee2e2"
+      : $type === "Audio"
+        ? "#e0e7ff"
+        : "rgba(197, 122, 103, 0.1)"};
+  color: ${({ $type }) =>
+    $type === "PDF" ? "#ef4444" : $type === "Audio" ? "#4f46e5" : "#C57A67"};
 `;
 
 export const MaterialInfo = styled.div`
@@ -721,14 +747,14 @@ export const MaterialInfo = styled.div`
 `;
 
 export const MaterialTitle = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
-  color: #1F2B45;
+  color: #1f2b45;
   font-size: 0.95rem;
 `;
 
 export const MaterialMeta = styled.span`
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   color: #888;
   font-size: 0.8rem;
 `;

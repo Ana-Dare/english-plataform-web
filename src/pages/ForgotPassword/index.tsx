@@ -9,7 +9,10 @@ const ForgotPassword = () => {
 
   return (
     <ForgotPasswordStyle>
-      <Sidebar />
+      <Sidebar
+        title="Bem-vindo de volta"
+        message="Redefina sua senha para continuar acessando a plataforma."
+      />
       <ChevronLeft
         size={30}
         style={{
