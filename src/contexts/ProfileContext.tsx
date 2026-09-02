@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, type ReactNode } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 
 export interface ProfileData {
   firstName: string;
@@ -16,17 +22,19 @@ interface ProfileContextType {
 }
 
 const defaultProfile: ProfileData = {
-  firstName: "Ms.",
-  lastName: "Charantola",
-  email: "teacher@aulasetraducoes.com.br",
-  phone: "(11) 99999-9999",
-  description: "Professora de inglês com 10 anos de experiência em ensino de idiomas.",
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  description: "",
   photoUrl: null,
 };
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
-export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ProfileProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [profile, setProfile] = useState<ProfileData>(defaultProfile);
 
   const updateProfile = (data: Partial<ProfileData>) => {

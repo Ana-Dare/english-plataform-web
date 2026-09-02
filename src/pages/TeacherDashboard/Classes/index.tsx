@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Users } from "lucide-react";
 import {
@@ -13,91 +14,18 @@ import {
   LevelBadge,
   ClassCardBody,
   ClassCardInfo,
-  StudentsPreview,
-  StudentAvatarSmall,
-  MoreStudents,
 } from "./style";
 import CreateClassModal from "./CreateClassModal";
-import type { StudentMock } from "./CreateClassModal";
 import ClassDetail from "./ClassDetail";
-import type { ClassType } from "./types";
+import { useClasses } from "../../../contexts/Classes";
+import useToast from "../../../contexts/Toast/useToast";
 
-const initialMockClasses: ClassType[] = [
-  {
-    id: "1",
-    name: "Turma Beginner 1",
-    level: "Beginner",
-    students: [
-      {
-        id: "2",
-        name: "Carlos Silva",
-        email: "carlos@email.com",
-        avatarColor: "#e67e22",
-      },
-      {
-        id: "4",
-        name: "Daniel Oliveira",
-        email: "daniel@email.com",
-        avatarColor: "#1abc9c",
-      },
-      {
-        id: "9",
-        name: "Julia Martins",
-        email: "julia@email.com",
-        avatarColor: "#2980b9",
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Turma Intermediate A",
-    level: "Intermediate",
-    students: [
-      {
-        id: "1",
-        name: "Ana Souza",
-        email: "ana@email.com",
-        avatarColor: "#3165e3",
-      },
-      {
-        id: "10",
-        name: "Lucas Pereira",
-        email: "lucas@email.com",
-        avatarColor: "#d35400",
-      },
-    ],
-  },
-  {
-    id: "3",
-    name: "Particular Gabriel",
-    level: "Advanced",
-    students: [
-      {
-        id: "6",
-        name: "Gabriel Santos",
-        email: "gabriel@email.com",
-        avatarColor: "#2c3e50",
-      },
-    ],
-  },
-];
-
-const getInitials = (name: string) => {
-  const parts = name.split(" ");
-  return parts.length > 1
-    ? `${parts[0][0]}${parts[parts.length - 1][0]}`
-    : parts[0][0];
-};
-
-interface ClassesTabProps {
-  onNavigateToStudent?: (studentId: number) => void;
-}
-
-const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
-  const [classes, setClasses] = useState<ClassType[]>(initialMockClasses);
+const ClassesTab = () => {
+  const { classes, addClass, isAdding } = useClasses();
+  const { addToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<ClassType | null>(null);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
 
   const filteredClasses = useMemo(() => {
     return classes.filter((c) =>
@@ -105,19 +33,27 @@ const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
     );
   }, [classes, searchQuery]);
 
-  const handleCreateClass = (data: {
-    name: string;
-    level: string;
-    students: StudentMock[];
-  }) => {
-    const newClass: ClassType = {
-      id: Date.now().toString(),
-      name: data.name,
-      level: data.level,
-      students: data.students,
-    };
-    setClasses((prev) => [newClass, ...prev]);
-    setShowCreateModal(false);
+  const handleCreateClass = (data: { name: string; level: string }) => {
+    // data.level agora é o ID do nível (string), não o nome
+    const levelId = parseInt(data.level, 10);
+
+    addClass(
+      {
+        name: data.name,
+        level_id: levelId,
+        vip: false,
+        status: "active",
+      },
+      {
+        onSuccess: () => {
+          addToast("Turma criada com sucesso!", "success");
+          setShowCreateModal(false);
+        },
+        onError: () => {
+          addToast("Erro ao criar turma. Tente novamente.", "error");
+        },
+      },
+    );
   };
 
   if (selectedClass) {
@@ -125,7 +61,6 @@ const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
       <ClassDetail
         classData={selectedClass}
         onBack={() => setSelectedClass(null)}
-        onNavigateToStudent={onNavigateToStudent}
       />
     );
   }
@@ -152,8 +87,11 @@ const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </SearchWrapper>
-          <AddButton onClick={() => setShowCreateModal(true)}>
-            <Plus size={18} /> Nova Turma
+          <AddButton
+            onClick={() => setShowCreateModal(true)}
+            disabled={isAdding}
+          >
+            <Plus size={18} /> {isAdding ? "Criando..." : "Nova Turma"}
           </AddButton>
         </RightActions>
       </HeaderActions>
@@ -166,32 +104,15 @@ const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
             whileHover={{ y: -4, scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
           >
-            <ClassCardHeader $level={c.level}>
+            <ClassCardHeader $level={c.level_id?.toString() || "1"}>
               <h3>{c.name}</h3>
-              <LevelBadge>{c.level}</LevelBadge>
+              <LevelBadge>{c.level_id || 1}</LevelBadge>
             </ClassCardHeader>
             <ClassCardBody>
               <ClassCardInfo>
                 <Users size={16} />
-                <span>{c.students.length} aluno(s) matriculado(s)</span>
+                <span>Turma ativa</span>
               </ClassCardInfo>
-
-              {c.students.length > 0 && (
-                <StudentsPreview style={{ marginTop: "0.5rem" }}>
-                  {c.students.slice(0, 5).map((s, i) => (
-                    <StudentAvatarSmall
-                      key={s.id}
-                      $color={s.avatarColor}
-                      $index={i}
-                    >
-                      {getInitials(s.name)}
-                    </StudentAvatarSmall>
-                  ))}
-                  {c.students.length > 5 && (
-                    <MoreStudents>+{c.students.length - 5}</MoreStudents>
-                  )}
-                </StudentsPreview>
-              )}
             </ClassCardBody>
           </ClassCard>
         ))}
@@ -201,6 +122,7 @@ const ClassesTab: React.FC<ClassesTabProps> = ({ onNavigateToStudent }) => {
         <CreateClassModal
           onClose={() => setShowCreateModal(false)}
           onSave={handleCreateClass}
+          isLoading={isAdding}
         />
       )}
     </Container>

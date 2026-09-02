@@ -19,9 +19,6 @@ import {
   DetailBackBtn,
   DetailHeaderTitle,
   LevelBadge,
-  StudentsPreview,
-  StudentAvatarSmall,
-  MoreStudents,
   DetailTabs,
   TabBtn,
   DetailContent,
@@ -38,7 +35,6 @@ import {
   AgendaDateBox,
   AgendaContent,
   StudentsGrid,
-  StudentCard,
   JustificationList,
   JustificationItem,
   JustificationInfo,
@@ -50,8 +46,8 @@ import {
   PostList,
   PostAuthor,
   PostContent,
+  StudentAvatarSmall,
 } from "./style";
-import type { ClassType } from "./types";
 import AddMaterialModal from "./AddMaterialModal";
 import type { MaterialData } from "./AddMaterialModal";
 import AddClassEventModal from "./AddClassEventModal";
@@ -62,9 +58,8 @@ import { motion } from "framer-motion";
 import useToast from "../../../contexts/Toast/useToast";
 
 interface ClassDetailProps {
-  classData: ClassType;
+  classData: any;
   onBack: () => void;
-  onNavigateToStudent?: (studentId: number) => void;
 }
 
 const getInitials = (name: string) => {
@@ -74,11 +69,7 @@ const getInitials = (name: string) => {
     : parts[0][0];
 };
 
-const ClassDetail: React.FC<ClassDetailProps> = ({
-  classData,
-  onBack,
-  onNavigateToStudent,
-}) => {
+const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<
     "mural" | "materiais" | "agenda" | "alunos" | "atestados"
@@ -233,30 +224,16 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
                 alignItems: "center",
               }}
             >
-              <LevelBadge>{classData.level}</LevelBadge>
-              <StudentsPreview>
-                {classData.students.slice(0, 3).map((s, i) => (
-                  <StudentAvatarSmall
-                    key={s.id}
-                    $color={s.avatarColor}
-                    $index={i}
-                  >
-                    {getInitials(s.name)}
-                  </StudentAvatarSmall>
-                ))}
-                {classData.students.length > 3 && (
-                  <MoreStudents>+{classData.students.length - 3}</MoreStudents>
-                )}
-                <span
-                  style={{
-                    marginLeft: "12px",
-                    fontSize: "0.85rem",
-                    color: "rgba(255,255,255,0.8)",
-                  }}
-                >
-                  {classData.students.length} alunos
-                </span>
-              </StudentsPreview>
+              <LevelBadge>{classData.level_id || 1}</LevelBadge>
+              <span
+                style={{
+                  marginLeft: "12px",
+                  fontSize: "0.85rem",
+                  color: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Turma ativa
+              </span>
             </div>
           </div>
         </DetailHeaderTitle>
@@ -497,43 +474,18 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
               </SectionTitle>
             </SectionHeader>
             <StudentsGrid>
-              {classData.students.map((student) => (
-                <StudentCard
-                  key={student.id}
-                  onClick={() => {
-                    if (onNavigateToStudent) {
-                      onNavigateToStudent(parseInt(student.id));
-                    }
-                  }}
-                >
-                  <StudentAvatarSmall
-                    $color={student.avatarColor}
-                    $index={0}
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      fontSize: "1.2rem",
-                      marginLeft: 0,
-                    }}
-                  >
-                    {getInitials(student.name)}
-                  </StudentAvatarSmall>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <strong
-                      style={{
-                        color: "#1a1a1a",
-                        fontSize: "1.05rem",
-                        marginBottom: "0.2rem",
-                      }}
-                    >
-                      {student.name}
-                    </strong>
-                    <span style={{ color: "#666", fontSize: "0.85rem" }}>
-                      {student.email}
-                    </span>
-                  </div>
-                </StudentCard>
-              ))}
+              <div
+                style={{ textAlign: "center", color: "#999", padding: "2rem" }}
+              >
+                <Users
+                  size={48}
+                  style={{ opacity: 0.3, marginBottom: "1rem" }}
+                />
+                <p>
+                  Alunos desta turma serão exibidos aqui quando disponíveis na
+                  API.
+                </p>
+              </div>
             </StudentsGrid>
           </motion.div>
         )}

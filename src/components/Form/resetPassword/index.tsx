@@ -14,6 +14,10 @@ import {
   type StatusPassword,
 } from "./style";
 
+interface ResetPasswordProps {
+  title: string;
+}
+
 const STRENGTH_LEVELS: StatusPassword[] = [
   "veryWeak",
   "weak",
@@ -46,7 +50,7 @@ const calculateStrength = (password: string): StatusPassword | null => {
   return STRENGTH_LEVELS[Math.min(score, STRENGTH_LEVELS.length) - 1];
 };
 
-const FormResetPassword = () => {
+const FormResetPassword = ({ title }: ResetPasswordProps) => {
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [isVisiblePassword, setIsVisiblePassword] = useState<boolean>(false);
@@ -108,7 +112,7 @@ const FormResetPassword = () => {
   return (
     <FormWrapper>
       <FormHeader>
-        <h2>Redefinir senha</h2>
+        <h2>{title}</h2>
       </FormHeader>
       <Input
         label="Nova senha"
@@ -117,19 +121,19 @@ const FormResetPassword = () => {
         onChange={(e) => setNewPassword(e.currentTarget.value)}
         placeholder="Digite sua nova senha"
         type={isVisiblePassword ? "text" : "password"}
-        iconLeft={<Lock size={18} color="#fff" />}
+        iconLeft={<Lock size={18} color="#94a3b8" />}
         iconRight={
           isVisiblePassword ? (
             <EyeOff
               size={18}
-              color="#fff"
+              color="#94a3b8"
               style={{ cursor: "pointer" }}
               onClick={() => setIsVisiblePassword((prev) => !prev)}
             />
           ) : (
             <Eye
               size={18}
-              color="#fff"
+              color="#94a3b8"
               style={{ cursor: "pointer" }}
               onClick={() => setIsVisiblePassword((prev) => !prev)}
             />
@@ -160,19 +164,19 @@ const FormResetPassword = () => {
         onChange={(e) => setConfirmPassword(e.currentTarget.value)}
         placeholder="Confirme sua nova senha"
         type={isVisiblePasswordConfirm ? "text" : "password"}
-        iconLeft={<Lock size={18} color="#fff" />}
+        iconLeft={<Lock size={18} color="#94a3b8" />}
         iconRight={
           isVisiblePasswordConfirm ? (
             <EyeOff
               size={18}
-              color="#fff"
+              color="#94a3b8"
               style={{ cursor: "pointer" }}
               onClick={() => setIsVisiblePasswordConfirm((prev) => !prev)}
             />
           ) : (
             <Eye
               size={18}
-              color="#fff"
+              color="#94a3b8"
               style={{ cursor: "pointer" }}
               onClick={() => setIsVisiblePasswordConfirm((prev) => !prev)}
             />
@@ -187,6 +191,11 @@ const FormResetPassword = () => {
         $variant="secondary"
         wide
         onClick={handleSubmit}
+        style={{
+          background: "#111f37",
+          borderColor: "#111f37",
+          color: "#fff",
+        }}
       />
     </FormWrapper>
   );

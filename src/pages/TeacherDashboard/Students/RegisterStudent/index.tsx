@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import {
   Container,
@@ -19,28 +21,24 @@ import type {
   PersonalFieldKey,
   LevelOption,
 } from "./types";
-import type { RegisterStudentParams } from "../../types";
+import type { RegisterStudentParams } from "../../../../interfaces/students";
 import { isValidCPF } from "../helpers/validateCPF";
 import { isValidEmail } from "../helpers/validateEmail";
 import { isValidPhone } from "../helpers/validatePhone";
 import { isValidBirthdate } from "../helpers/validateBirthdate";
 import useToast from "../../../../contexts/Toast/useToast";
+import { useQuery } from "@tanstack/react-query";
+import { listLevels } from "../../services/level";
 
 interface RegisterStudentProps {
   onBack: () => void;
-  onSave: (student: RegisterStudentParams) => void;
+  onSave: (student: RegisterStudentParams, photoBlob?: Blob) => void;
   isSaving?: boolean;
 }
 
 const STEPS: StepDefinition[] = [
   { label: "Dados do Aluno", icon: "user" },
   { label: "Dados da Aula", icon: "book" },
-];
-
-const INITIAL_LEVELS: LevelOption[] = [
-  { id: 1, name: "A1" },
-  { id: 2, name: "A2" },
-  { id: 3, name: "B1" },
 ];
 
 const TURMAS = [
@@ -62,6 +60,7 @@ const INITIAL_FORM: StudentFormState = {
   active: 1,
   gender: "",
   photoUrl: null,
+  photoBlob: null,
   turma: "",
 };
 
@@ -73,11 +72,11 @@ const RegisterStudent = ({
   const { addToast } = useToast();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<StudentFormState>(INITIAL_FORM);
-  const [levels, setLevels] = useState<LevelOption[]>(INITIAL_LEVELS);
+  const [levels, setLevels] = useState<LevelOption[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const handleChange = (patch: Partial<StudentFormState>) => {
-    setForm((prev) => ({ ...prev, ...patch }));
+    setForm((prev: any) => ({ ...prev, ...patch }));
   };
 
   const clearError = (key: PersonalFieldKey) => {
@@ -89,6 +88,28 @@ const RegisterStudent = ({
     });
   };
 
+  //useQuery de níveis
+
+  const { data: dataLevels } = useQuery({
+    queryKey: ["levels"],
+    queryFn: () => listLevels(),
+  });
+
+  // Atualiza níveis quando dados da API chegam
+  useEffect(() => {
+    if (dataLevels?.levels && dataLevels.levels.length > 0) {
+      const mappedLevels: LevelOption[] = dataLevels.levels.map((level) => ({
+        id: level.id,
+        name: level.name,
+      }));
+      setLevels(mappedLevels);
+    }
+  }, [dataLevels]);
+
+  // Manipular foto de perfil
+
+  // Trocar prévia
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -98,13 +119,17 @@ const RegisterStudent = ({
     }
     const reader = new FileReader();
     reader.onloadend = () => {
-      handleChange({ photoUrl: reader.result as string });
+      handleChange({
+        photoUrl: reader.result as string, // para preview
+        photoBlob: file, // para envio
+      });
     };
     reader.readAsDataURL(file);
   };
 
+  // Remover prévia
   const handleRemovePhoto = () => {
-    handleChange({ photoUrl: null });
+    handleChange({ photoUrl: null, photoBlob: null });
   };
 
   const handleAddLevel = (name: string) => {
@@ -177,7 +202,7 @@ const RegisterStudent = ({
       active: form.active,
     };
 
-    onSave(payload);
+    onSave(payload, form.photoBlob || undefined);
   };
 
   return (

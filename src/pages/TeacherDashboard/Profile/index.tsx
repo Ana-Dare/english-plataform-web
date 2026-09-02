@@ -1,5 +1,7 @@
-import React, { useState, useRef } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useState, useRef, useEffect } from "react";
 import { useProfile } from "../../../contexts/ProfileContext";
+import { useAuth } from "../../../contexts/Auth/AuthContext";
 import {
   ProfileWrapper,
   ProfileContainer,
@@ -22,7 +24,6 @@ import {
   FormTextarea,
   TextareaWrapper,
   SaveButton,
-  PasswordToggle,
 } from "./style";
 import {
   Camera,
@@ -32,41 +33,70 @@ import {
   Mail,
   Phone,
   FileText,
-  Lock,
-  Eye,
-  EyeOff,
   Save,
   UserCircle,
-  Shield,
+  Badge,
+  AlertCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useToast from "../../../contexts/Toast/useToast";
+import { getInitials, getAvatarColorByName } from "../../../utils/avatar";
+import { updateUser } from "../../../services/auth";
 
 const ProfileTab: React.FC = () => {
   const { addToast } = useToast();
   const { profile, updateProfile, updatePhoto } = useProfile();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
-  const [email, setEmail] = useState(profile.email);
   const [phone, setPhone] = useState(profile.phone);
   const [description, setDescription] = useState(profile.description);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  // Sincronizar com dados do usuário autenticado
+  useEffect(() => {
+    if (user) {
+      const nameParts = user.name.split(" ");
+      setFirstName(nameParts[0] || "");
+      setLastName(nameParts.slice(1).join(" ") || "");
+    }
+  }, [user]);
 
-  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
-  const [showNewPwd, setShowNewPwd] = useState(false);
-  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const validateProfile = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!firstName.trim()) {
+      newErrors.firstName = "Nome é obrigatório";
+    }
+    if (!lastName.trim()) {
+      newErrors.lastName = "Sobrenome é obrigatório";
+    }
+    if (phone && !/^[\d\s\-()]+$/.test(phone)) {
+      newErrors.phone = "Telefone inválido";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        addToast("Arquivo muito grande. Máximo 5MB.", "error");
+        return;
+      }
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        addToast("Formato inválido. Use JPG ou PNG.", "error");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         updatePhoto(reader.result as string);
+        addToast("Foto de perfil atualizada!", "success");
       };
       reader.readAsDataURL(file);
     }
@@ -80,30 +110,51 @@ const ProfileTab: React.FC = () => {
     addToast("Foto de perfil removida.", "success");
   };
 
-  const handleSaveProfile = () => {
-    updateProfile({
-      firstName,
-      lastName,
-      email,
-      phone,
-      description,
-    });
-    addToast("Perfil atualizado com sucesso!", "success");
-  };
+  const handleSaveProfile = async () => {
+    if (!validateProfile()) {
+      addToast("Corrija os erros antes de salvar.", "error");
+      return;
+    }
 
-  const handleSavePassword = () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      addToast("Preencha todos os campos de senha.", "warning");
+    if (!user) {
+      addToast("Usuário não encontrado.", "error");
       return;
     }
-    if (newPassword !== confirmPassword) {
-      addToast("As senhas não coincidem.", "error");
-      return;
+
+    setIsSaving(true);
+    try {
+      // Combine nome e sobrenome
+      const fullName = `${firstName} ${lastName}`.trim();
+
+      // Chamar API para atualizar usuário
+      await updateUser(user.id, {
+        name: fullName,
+        email: user.email,
+        phone,
+      });
+
+      // Atualizar dados do usuário no contexto de autenticação
+      const updatedUserData = {
+        ...user,
+        name: fullName,
+      };
+      localStorage.setItem("@App:user", JSON.stringify(updatedUserData));
+
+      // Atualizar profile local também
+      updateProfile({
+        firstName,
+        lastName,
+        email: user.email,
+        phone,
+        description,
+      });
+
+      addToast("Perfil atualizado com sucesso!", "success");
+    } catch {
+      addToast("Erro ao atualizar perfil. Tente novamente.", "error");
+    } finally {
+      setIsSaving(false);
     }
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    addToast("Senha alterada com sucesso!", "success");
   };
 
   const containerVariants = {
@@ -119,8 +170,14 @@ const ProfileTab: React.FC = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
+      transition: { duration: 0.3 },
     },
+  };
+
+  const roleLabel = {
+    student: "Aluno",
+    teacher: "Professor",
+    admin: "Administrador",
   };
 
   return (
@@ -150,7 +207,25 @@ const ProfileTab: React.FC = () => {
                 {profile.photoUrl ? (
                   <img src={profile.photoUrl} alt="Foto de perfil" />
                 ) : (
-                  <User size={44} />
+                  user && (
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: user
+                          ? getAvatarColorByName(user.name)
+                          : "#1F2B45",
+                        color: "#ffffff",
+                        fontSize: "2rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {getInitials(user.name)}
+                    </div>
+                  )
                 )}
               </AvatarImage>
               <UploadOverlay htmlFor="photo-upload">
@@ -191,6 +266,47 @@ const ProfileTab: React.FC = () => {
             </PhotoInfo>
           </PhotoSection>
 
+          {/* Account Info Section */}
+          <FormSection as={motion.div} variants={itemVariants}>
+            <FormSectionTitle>
+              <Badge size={20} />
+              Informações da Conta
+            </FormSectionTitle>
+            <FormGrid>
+              <FormGroup>
+                <FormLabel>
+                  <User size={14} />
+                  Função
+                </FormLabel>
+                <InputWrapper>
+                  <Badge className="input-icon" />
+                  <FormInput
+                    type="text"
+                    value={roleLabel[user?.role || "student"]}
+                    disabled
+                    placeholder="Função"
+                  />
+                </InputWrapper>
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>
+                  <Mail size={14} />
+                  Email da Conta
+                </FormLabel>
+                <InputWrapper>
+                  <Mail className="input-icon" />
+                  <FormInput
+                    type="email"
+                    value={user?.email || ""}
+                    disabled
+                    placeholder="seu@email.com"
+                  />
+                </InputWrapper>
+              </FormGroup>
+            </FormGrid>
+          </FormSection>
+
           {/* Personal Info Section */}
           <FormSection as={motion.div} variants={itemVariants}>
             <FormSectionTitle>
@@ -208,10 +324,33 @@ const ProfileTab: React.FC = () => {
                   <FormInput
                     type="text"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => {
+                      setFirstName(e.target.value);
+                      if (errors.firstName) {
+                        setErrors({ ...errors, firstName: "" });
+                      }
+                    }}
                     placeholder="Seu nome"
+                    style={{
+                      borderColor: errors.firstName ? "#dc2626" : undefined,
+                    }}
                   />
                 </InputWrapper>
+                {errors.firstName && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      color: "#dc2626",
+                      fontSize: "0.875rem",
+                      marginTop: "4px",
+                    }}
+                  >
+                    <AlertCircle size={14} />
+                    {errors.firstName}
+                  </div>
+                )}
               </FormGroup>
 
               <FormGroup>
@@ -224,26 +363,33 @@ const ProfileTab: React.FC = () => {
                   <FormInput
                     type="text"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      setLastName(e.target.value);
+                      if (errors.lastName) {
+                        setErrors({ ...errors, lastName: "" });
+                      }
+                    }}
                     placeholder="Seu sobrenome"
+                    style={{
+                      borderColor: errors.lastName ? "#dc2626" : undefined,
+                    }}
                   />
                 </InputWrapper>
-              </FormGroup>
-
-              <FormGroup>
-                <FormLabel>
-                  <Mail size={14} />
-                  Email
-                </FormLabel>
-                <InputWrapper>
-                  <Mail className="input-icon" />
-                  <FormInput
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                  />
-                </InputWrapper>
+                {errors.lastName && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      color: "#dc2626",
+                      fontSize: "0.875rem",
+                      marginTop: "4px",
+                    }}
+                  >
+                    <AlertCircle size={14} />
+                    {errors.lastName}
+                  </div>
+                )}
               </FormGroup>
 
               <FormGroup>
@@ -256,10 +402,33 @@ const ProfileTab: React.FC = () => {
                   <FormInput
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      if (errors.phone) {
+                        setErrors({ ...errors, phone: "" });
+                      }
+                    }}
                     placeholder="(00) 00000-0000"
+                    style={{
+                      borderColor: errors.phone ? "#dc2626" : undefined,
+                    }}
                   />
                 </InputWrapper>
+                {errors.phone && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      color: "#dc2626",
+                      fontSize: "0.875rem",
+                      marginTop: "4px",
+                    }}
+                  >
+                    <AlertCircle size={14} />
+                    {errors.phone}
+                  </div>
+                )}
               </FormGroup>
 
               <FormGroup $fullWidth>
@@ -278,89 +447,9 @@ const ProfileTab: React.FC = () => {
               </FormGroup>
             </FormGrid>
 
-            <SaveButton onClick={handleSaveProfile}>
+            <SaveButton onClick={handleSaveProfile} disabled={isSaving}>
               <Save size={18} />
-              Salvar alterações
-            </SaveButton>
-          </FormSection>
-
-          {/* Password Section */}
-          <FormSection as={motion.div} variants={itemVariants}>
-            <FormSectionTitle>
-              <Shield size={20} />
-              Alterar Senha
-            </FormSectionTitle>
-            <FormGrid>
-              <FormGroup $fullWidth>
-                <FormLabel>
-                  <Lock size={14} />
-                  Senha atual
-                </FormLabel>
-                <InputWrapper>
-                  <Lock className="input-icon" />
-                  <FormInput
-                    type={showCurrentPwd ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Digite sua senha atual"
-                  />
-                  <PasswordToggle
-                    type="button"
-                    onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                  >
-                    {showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </PasswordToggle>
-                </InputWrapper>
-              </FormGroup>
-
-              <FormGroup>
-                <FormLabel>
-                  <Lock size={14} />
-                  Nova senha
-                </FormLabel>
-                <InputWrapper>
-                  <Lock className="input-icon" />
-                  <FormInput
-                    type={showNewPwd ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Digite a nova senha"
-                  />
-                  <PasswordToggle
-                    type="button"
-                    onClick={() => setShowNewPwd(!showNewPwd)}
-                  >
-                    {showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </PasswordToggle>
-                </InputWrapper>
-              </FormGroup>
-
-              <FormGroup>
-                <FormLabel>
-                  <Lock size={14} />
-                  Confirmar nova senha
-                </FormLabel>
-                <InputWrapper>
-                  <Lock className="input-icon" />
-                  <FormInput
-                    type={showConfirmPwd ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirme a nova senha"
-                  />
-                  <PasswordToggle
-                    type="button"
-                    onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                  >
-                    {showConfirmPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </PasswordToggle>
-                </InputWrapper>
-              </FormGroup>
-            </FormGrid>
-
-            <SaveButton onClick={handleSavePassword}>
-              <Lock size={18} />
-              Alterar senha
+              {isSaving ? "Salvando..." : "Salvar alterações"}
             </SaveButton>
           </FormSection>
         </ProfileContainer>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import {
   ModalOverlay,
@@ -17,6 +17,9 @@ import {
 } from "./style";
 import CustomDropdown from "../../../components/CustomDropdown";
 import useToast from "../../../contexts/Toast/useToast";
+import { useStudents } from "../../../contexts/Students/hooks/useStudents";
+import { listLevels } from "../services/level";
+import type { ILevel } from "../../../interfaces/levels";
 
 export interface StudentMock {
   id: string;
@@ -25,40 +28,6 @@ export interface StudentMock {
   avatarColor: string;
 }
 
-// Mocking available students for the modal
-const availableStudents: StudentMock[] = [
-  {
-    id: "1",
-    name: "Ana Souza",
-    email: "ana.souza@email.com",
-    avatarColor: "#3165e3",
-  },
-  {
-    id: "2",
-    name: "Carlos Silva",
-    email: "carlos.silva@email.com",
-    avatarColor: "#e67e22",
-  },
-  {
-    id: "3",
-    name: "Beatriz Costa",
-    email: "beatriz.costa@email.com",
-    avatarColor: "#8e44ad",
-  },
-  {
-    id: "4",
-    name: "Daniel Oliveira",
-    email: "daniel.oliveira@email.com",
-    avatarColor: "#1abc9c",
-  },
-  {
-    id: "5",
-    name: "Fernanda Lima",
-    email: "fernanda.lima@email.com",
-    avatarColor: "#e74c3c",
-  },
-];
-
 interface CreateClassModalProps {
   onClose: () => void;
   onSave: (data: {
@@ -66,23 +35,57 @@ interface CreateClassModalProps {
     level: string;
     students: StudentMock[];
   }) => void;
+  isLoading?: boolean;
 }
 
 const CreateClassModal: React.FC<CreateClassModalProps> = ({
   onClose,
   onSave,
+  isLoading = false,
 }) => {
   const { addToast } = useToast();
+  const { students } = useStudents();
   const [name, setName] = useState("");
-  const [level, setLevel] = useState("Beginner");
+  const [level, setLevel] = useState("");
+  const [levels, setLevels] = useState<ILevel[]>([]);
+  const [levelsLoading, setLevelsLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Carregar níveis ao montar
+  useEffect(() => {
+    const fetchLevels = async () => {
+      try {
+        const data = await listLevels();
+        setLevels(data.levels);
+        if (data.levels.length > 0) {
+          setLevel(data.levels[0].id.toString());
+        }
+      } catch (error) {
+        addToast("Erro ao carregar níveis", "error");
+      } finally {
+        setLevelsLoading(false);
+      }
+    };
+
+    fetchLevels();
+  }, [addToast]);
+
+  // Converter students do contexto para StudentMock
+  const studentsList: StudentMock[] = useMemo(() => {
+    return students.map((s) => ({
+      id: s.id.toString(),
+      name: s.name,
+      email: s.email,
+      avatarColor: s.avatarColor,
+    }));
+  }, [students]);
+
   const filteredStudents = useMemo(() => {
-    return availableStudents.filter((s) =>
+    return studentsList.filter((s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-  }, [searchQuery]);
+  }, [searchQuery, studentsList]);
 
   const toggleStudent = (id: string) => {
     const newSet = new Set(selectedIds);
@@ -96,22 +99,29 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
       addToast("Por favor, informe o nome da turma.", "warning");
       return;
     }
-    const selectedStudents = availableStudents.filter((s) =>
-      selectedIds.has(s.id),
-    );
+    if (!level) {
+      addToast("Por favor, selecione um nível.", "warning");
+      return;
+    }
+    const selectedStudents = studentsList.filter((s) => selectedIds.has(s.id));
     onSave({ name, level, students: selectedStudents });
   };
+
+  const levelOptions = levels.map((l) => ({
+    value: l.id.toString(),
+    label: l.name,
+  }));
 
   return (
     <ModalOverlay>
       <ModalContent>
         <ModalHeader>
           <h3>Nova Turma</h3>
-          <CloseBtn onClick={onClose}>
+          <CloseBtn onClick={onClose} disabled={isLoading}>
             <X size={20} />
           </CloseBtn>
         </ModalHeader>
-        <ModalBody>
+        <ModalBody style={{ opacity: isLoading || levelsLoading ? 0.5 : 1 }}>
           <FieldGroup>
             <label>Nome da Turma</label>
             <input
@@ -119,6 +129,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
               placeholder="Ex: Turma Business 1"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={isLoading || levelsLoading}
             />
           </FieldGroup>
           <FieldGroup>
@@ -126,11 +137,8 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             <CustomDropdown
               value={level}
               onChange={(val) => setLevel(val)}
-              options={[
-                { value: "Beginner", label: "Beginner" },
-                { value: "Intermediate", label: "Intermediate" },
-                { value: "Advanced", label: "Advanced" },
-              ]}
+              options={levelOptions}
+              disabled={isLoading || levelsLoading}
             />
           </FieldGroup>
           <FieldGroup>
@@ -141,32 +149,55 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ marginBottom: "0.5rem" }}
+              disabled={isLoading}
             />
             <StudentListSelect>
-              {filteredStudents.map((student) => {
-                const isSelected = selectedIds.has(student.id);
-                return (
-                  <StudentSelectItem
-                    key={student.id}
-                    $selected={isSelected}
-                    onClick={() => toggleStudent(student.id)}
-                  >
-                    <CheckCircle $selected={isSelected}>
-                      {isSelected && <Check size={14} />}
-                    </CheckCircle>
-                    <StudentSelectInfo>
-                      <strong>{student.name}</strong>
-                      <span>{student.email}</span>
-                    </StudentSelectInfo>
-                  </StudentSelectItem>
-                );
-              })}
+              {filteredStudents.length === 0 ? (
+                <div
+                  style={{
+                    padding: "1rem",
+                    textAlign: "center",
+                    color: "#999",
+                  }}
+                >
+                  {studentsList.length === 0
+                    ? "Nenhum aluno disponível"
+                    : "Nenhum aluno encontrado"}
+                </div>
+              ) : (
+                filteredStudents.map((student) => {
+                  const isSelected = selectedIds.has(student.id);
+                  return (
+                    <StudentSelectItem
+                      key={student.id}
+                      $selected={isSelected}
+                      onClick={() => !isLoading && toggleStudent(student.id)}
+                      style={{ opacity: isLoading ? 0.6 : 1 }}
+                    >
+                      <CheckCircle $selected={isSelected}>
+                        {isSelected && <Check size={14} />}
+                      </CheckCircle>
+                      <StudentSelectInfo>
+                        <strong>{student.name}</strong>
+                        <span>{student.email}</span>
+                      </StudentSelectInfo>
+                    </StudentSelectItem>
+                  );
+                })
+              )}
             </StudentListSelect>
           </FieldGroup>
         </ModalBody>
         <ModalFooter>
-          <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-          <PrimaryBtn onClick={handleSave}>Criar Turma</PrimaryBtn>
+          <SecondaryBtn onClick={onClose} disabled={isLoading}>
+            Cancelar
+          </SecondaryBtn>
+          <PrimaryBtn
+            onClick={handleSave}
+            disabled={isLoading || levelsLoading}
+          >
+            {isLoading ? "Criando..." : "Criar Turma"}
+          </PrimaryBtn>
         </ModalFooter>
       </ModalContent>
     </ModalOverlay>

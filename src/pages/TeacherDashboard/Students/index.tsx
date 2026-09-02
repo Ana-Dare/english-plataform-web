@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -52,7 +53,10 @@ import {
   Tr,
 } from "./style";
 import RegisterStudent from "./RegisterStudent";
-import type { RegisterStudentParams, UpdateStudentParams } from "../types";
+import type {
+  RegisterStudentParams,
+  UpdateStudentParams,
+} from "../../../interfaces/students";
 import { useStudents } from "../../../contexts/Students/hooks/useStudents";
 import type { Student } from "../../../contexts/Students/StudentsContext";
 import useToast from "../../../contexts/Toast/useToast";

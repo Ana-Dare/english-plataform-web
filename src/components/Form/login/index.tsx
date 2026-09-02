@@ -89,7 +89,19 @@ const FormLogin = () => {
     try {
       await login({ email, password });
       clearForm();
-      navigate("/teacher-dashboard");
+
+      // Redirecionar baseado no role do usuário
+      const userRole = localStorage.getItem("@App:userRole");
+      if (userRole === "student") {
+        navigate("/student-dashboard");
+      } else if (userRole === "teacher") {
+        navigate("/teacher-dashboard");
+      } else if (userRole === "admin") {
+        navigate("/admin-dashboard");
+      } else {
+        // Fallback caso role não seja reconhecido
+        navigate("/teacher-dashboard");
+      }
     } catch (error) {
       setErrors(mapApiError(error));
     } finally {
@@ -157,7 +169,11 @@ const FormLogin = () => {
           wide
           onClick={handleSubmit}
           disabled={submitting}
-          style={{ background: '#C57A67', borderColor: '#C57A67', color: '#fff' }}
+          style={{
+            background: "#111f37",
+            borderColor: "#111f37",
+            color: "#fff",
+          }}
         />
       </FormWrapper>
     </Container>

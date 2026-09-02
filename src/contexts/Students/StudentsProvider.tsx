@@ -9,13 +9,13 @@ import type {
   IStudents,
   RegisterStudentParams,
   UpdateStudentParams,
-} from "../../pages/TeacherDashboard/types";
+} from "../../interfaces/students";
 import {
   desactive,
   listStudent,
   registerStudent,
   updateStudent as updateStudentService,
-} from "../../pages/TeacherDashboard/services";
+} from "../../pages/TeacherDashboard/services/student";
 
 const STUDENTS_QUERY_KEY = ["studentsList"] as const;
 
@@ -80,7 +80,13 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   }, [queryClient]);
 
   const registerMutation = useMutation({
-    mutationFn: registerStudent,
+    mutationFn: ({
+      params,
+      photoBlob,
+    }: {
+      params: RegisterStudentParams;
+      photoBlob?: Blob;
+    }) => registerStudent(params, photoBlob),
     onSuccess: invalidateStudents,
   });
 
@@ -101,11 +107,20 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   });
 
   const addStudent = useCallback(
-    (params: RegisterStudentParams, callbacks?: MutationCallbacks) => {
-      registerMutation.mutate(params, {
-        onSuccess: () => callbacks?.onSuccess?.(),
-        onError: () => callbacks?.onError?.(),
-      });
+    (
+      params: RegisterStudentParams,
+      photoBlob?: Blob,
+      callbacks?: MutationCallbacks,
+    ) => {
+      registerMutation.mutate(
+        { params, photoBlob },
+        {
+          onSuccess: (response) => {
+            callbacks?.onSuccess?.({ student_id: response.student_id });
+          },
+          onError: () => callbacks?.onError?.(),
+        },
+      );
     },
     [registerMutation],
   );
@@ -119,7 +134,7 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
       updateMutation.mutate(
         { userId: id, params },
         {
-          onSuccess: () => callbacks?.onSuccess?.(),
+          onSuccess: () => callbacks?.onSuccess?.({ student_id: id }),
           onError: () => callbacks?.onError?.(),
         },
       );
@@ -130,7 +145,7 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   const deactivateStudent = useCallback(
     (id: number, callbacks?: MutationCallbacks) => {
       deactivateMutation.mutate(id, {
-        onSuccess: () => callbacks?.onSuccess?.(),
+        onSuccess: () => callbacks?.onSuccess?.({ student_id: id }),
         onError: () => callbacks?.onError?.(),
       });
     },

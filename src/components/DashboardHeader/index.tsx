@@ -23,7 +23,6 @@ import {
 import {
   Bell,
   ChevronDown,
-  User,
   LogOut,
   Menu,
   UserCircle,
@@ -31,6 +30,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useProfile } from "../../contexts/ProfileContext";
+import { useAuth } from "../../contexts/Auth/AuthContext";
+import { getInitials, getAvatarColorByName } from "../../utils/avatar";
 
 const notificationsData = [
   {
@@ -82,6 +83,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const { profile } = useProfile();
+  const { user } = useAuth();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
@@ -90,12 +92,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Use profile data for display name
+  // Use auth user data first, then profile data, then fallback to props
   const displayName =
-    profile.firstName && profile.lastName
+    user?.name ||
+    (profile.firstName && profile.lastName
       ? `${profile.firstName} ${profile.lastName}`
-      : userName;
-  const displayEmail = profile.email || userEmail;
+      : userName);
+  const displayEmail = user?.email || profile.email || userEmail;
+  const avatarColor = user ? getAvatarColorByName(user.name) : "#1F2B45";
+  const avatarInitials = user ? getInitials(user.name) : "US";
 
   // Close modals when clicking outside
   useEffect(() => {
@@ -118,6 +123,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem("@App:accessToken");
+    localStorage.removeItem("@App:refreshToken");
+    localStorage.removeItem("@App:user");
+    localStorage.removeItem("@App:userRole");
     navigate("/login");
   };
 
@@ -132,13 +141,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const handleNotifClick = (notif: any) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === notif.id ? { ...n, unread: false } : n))
+      prev.map((n) => (n.id === notif.id ? { ...n, unread: false } : n)),
     );
     setIsNotifOpen(false);
     // Wait, onNavigate doesn't take an ID parameter currently. I'll need to update the prop definition if I want it.
     // For now, I can just use a generic 'notificacoes' tab and TeacherDashboard can manage it, or I can update the prop.
     onNavigate?.("notificacoes");
-    
+
     // I will fire a custom event with the notification ID so the NotificationsTab can intercept it
     const event = new CustomEvent("openNotification", { detail: notif.id });
     window.dispatchEvent(event);
@@ -254,7 +263,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 setIsNotifOpen(false);
               }}
             >
-              <Avatar>
+              <Avatar $color={avatarColor}>
                 {profile.photoUrl ? (
                   <img
                     src={profile.photoUrl}
@@ -267,7 +276,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     }}
                   />
                 ) : (
-                  <User size={20} />
+                  avatarInitials
                 )}
               </Avatar>
               <DropdownIcon>
@@ -284,7 +293,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   exit="exit"
                 >
                   <ProfileHeader>
-                    <Avatar style={{ width: "48px", height: "48px" }}>
+                    <Avatar
+                      $color={avatarColor}
+                      style={{ width: "48px", height: "48px" }}
+                    >
                       {profile.photoUrl ? (
                         <img
                           src={profile.photoUrl}
@@ -297,7 +309,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                           }}
                         />
                       ) : (
-                        <User size={24} />
+                        avatarInitials
                       )}
                     </Avatar>
                     <div className="info">
@@ -306,14 +318,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     </div>
                   </ProfileHeader>
                   <DropdownMenuList>
-                    <DropdownMenuItem
-                      onClick={() => handleMenuClick("perfil")}
-                    >
+                    <DropdownMenuItem onClick={() => handleMenuClick("perfil")}>
                       <UserCircle />
                       Perfil
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => navigate('/admin')}
+                      onClick={() => navigate("/admin-dashboard")}
                     >
                       <Settings />
                       Administração

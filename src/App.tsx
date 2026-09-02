@@ -12,6 +12,7 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
+import Setpassword from "./pages/setPassword";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/set-password" element={<Setpassword />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/confirmation-email" element={<EmailConfirmation />} />
             <Route path="*" element={<div> Página não encontrada</div>} />
@@ -38,7 +40,7 @@ function App() {
                 path="/confirmation-email"
                 element={<EmailConfirmation />}
               />
-              <Route path="/dashboard" element={<StudentDashboard />} />
+              <Route path="/student-dashboard" element={<StudentDashboard />} />
               <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
               <Route
                 path="/politica-de-privacidade"

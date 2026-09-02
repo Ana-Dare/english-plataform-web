@@ -10,7 +10,7 @@ export const SidebarStyle = styled.div`
   flex-direction: column;
   color: #ffffff;
   position: relative;
-  width: 45%;
+  width: 100vh%;
   height: 100%;
   font-family: "Rubik", sans-serif;
   gap: 3rem;
@@ -24,19 +24,33 @@ export const SidebarStyle = styled.div`
   }
 `;
 
-export const CreativeCircle = styled.div<{ $size: string; $top: string; $right: string; $borderWidth?: string; $opacity?: number }>`
+export const CreativeCircle = styled.div<{
+  $size: string;
+  $top: string;
+  $right: string;
+  $borderWidth?: string;
+  $opacity?: number;
+}>`
   position: absolute;
   top: ${({ $top }) => $top};
   right: ${({ $right }) => $right};
   width: ${({ $size }) => $size};
   height: ${({ $size }) => $size};
   border-radius: 50%;
-  border: ${({ $borderWidth }) => $borderWidth || '1px'} solid rgba(245, 230, 211, ${({ $opacity }) => $opacity || 0.1});
+  border: ${({ $borderWidth }) => $borderWidth || "1px"} solid
+    rgba(245, 230, 211, ${({ $opacity }) => $opacity || 0.1});
   pointer-events: none;
   z-index: 1;
 `;
 
-export const FloatingElement = styled.div<{ $top: string; $left?: string; $right?: string; $size: string; $opacity: number; $delay: number }>`
+export const FloatingElement = styled.div<{
+  $top: string;
+  $left?: string;
+  $right?: string;
+  $size: string;
+  $opacity: number;
+  $delay: number;
+}>`
   position: absolute;
   top: ${({ $top }) => $top};
   ${({ $left }) => $left && `left: ${$left};`}
@@ -53,8 +67,12 @@ export const FloatingElement = styled.div<{ $top: string; $left?: string; $right
   animation-delay: ${({ $delay }) => $delay}s;
 
   @keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(20px, -30px) scale(1.1); }
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(20px, -30px) scale(1.1);
+    }
   }
 `;
 
@@ -65,12 +83,14 @@ export const SidebarTitle = styled.div`
   align-items: center;
   gap: 1rem;
   z-index: 999;
-  img {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  }
+`;
+
+export const IconWrapper = styled.div`
+  font-size: 2.8rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+  color: #f5e6d3;
 `;
 
 export const SidebarTitleText = styled.div`

@@ -40,3 +40,23 @@ export const postForgotPassword = async (email: string): Promise<string> => {
 
   return res.data;
 };
+
+export interface UpdateUserParams {
+  name?: string;
+  email?: string;
+  phone?: string;
+  photo?: string;
+}
+
+export const updateUser = async (
+  userId: number,
+  params: UpdateUserParams,
+): Promise<{
+  id: number;
+  name: string;
+  email: string;
+  role: "student" | "teacher" | "admin";
+}> => {
+  const res = await api.patch(`/users/${userId}`, params);
+  return res.data;
+};

@@ -21,7 +21,7 @@ export const ToggleButton = styled.button<{ $collapsed: boolean }>`
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   border: 2.5px solid rgba(255, 255, 255, 0.15);
-  color: #FFA38C;
+  color: #ffa38c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,16 +58,17 @@ export const LogoContainer = styled.div<{ $collapsed: boolean }>`
   margin-bottom: 0.5rem;
 `;
 
-export const LogoCircle = styled.div`
+export const LogoCircle = styled.div<{ $color?: string }>`
   width: 40px;
   height: 40px;
   min-width: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #C57A67, #FFA38C);
+  background: ${(props) =>
+    props.$color || "linear-gradient(135deg, #C57A67, #FFA38C)"};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1F2B45;
+  color: #ffffff;
   font-weight: bold;
   font-family: serif;
   font-size: 1.1rem;
@@ -138,9 +139,7 @@ export const MenuItem = styled.li<{ $active?: boolean; $collapsed?: boolean }>`
 
   &:hover {
     background: ${({ $active }) =>
-      $active
-        ? "rgba(197, 122, 103, 0.3)"
-        : "rgba(255, 255, 255, 0.06)"};
+      $active ? "rgba(197, 122, 103, 0.3)" : "rgba(255, 255, 255, 0.06)"};
     color: #ffffff;
   }
 
@@ -155,7 +154,8 @@ export const MenuItem = styled.li<{ $active?: boolean; $collapsed?: boolean }>`
   }
 
   &:hover svg {
-    color: ${({ $active }) => ($active ? "#FFA38C" : "rgba(255, 255, 255, 0.8)")};
+    color: ${({ $active }) =>
+      $active ? "#FFA38C" : "rgba(255, 255, 255, 0.8)"};
   }
 `;
 
@@ -175,7 +175,7 @@ export const MenuLabel = styled.span<{ $collapsed: boolean }>`
 export const Tooltip = styled.div`
   position: absolute;
   left: calc(100% + 12px);
-  background: #1F2B45;
+  background: #1f2b45;
   color: #ffffff;
   padding: 6px 12px;
   border-radius: 8px;
@@ -199,7 +199,7 @@ export const Tooltip = styled.div`
     transform: translateY(-50%);
     border-width: 5px 5px 5px 0;
     border-style: solid;
-    border-color: transparent #1F2B45 transparent transparent;
+    border-color: transparent #1f2b45 transparent transparent;
   }
 `;
 

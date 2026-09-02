@@ -53,12 +53,18 @@ export const PhotoSection = styled.div`
   backdrop-filter: blur(16px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow:
+    0 10px 40px -10px rgba(15, 23, 42, 0.08),
+    0 1px 3px rgba(15, 23, 42, 0.05);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.05);
+    box-shadow:
+      0 20px 40px -10px rgba(15, 23, 42, 0.12),
+      0 1px 3px rgba(15, 23, 42, 0.05);
   }
 `;
 
@@ -187,7 +193,9 @@ export const FormSection = styled.div`
   backdrop-filter: blur(16px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+  box-shadow:
+    0 10px 40px -10px rgba(15, 23, 42, 0.08),
+    0 1px 3px rgba(15, 23, 42, 0.05);
   padding: 2.5rem;
 `;
 
@@ -284,7 +292,7 @@ export const InputWrapper = styled.div`
     pointer-events: none;
     transition: color 0.2s ease;
   }
-  
+
   &:focus-within svg.input-icon {
     color: #64748b;
   }
@@ -303,6 +311,8 @@ export const FormTextarea = styled.textarea`
   outline: none;
   resize: vertical;
   min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
   line-height: 1.5;
 
   &:focus {
@@ -329,7 +339,7 @@ export const TextareaWrapper = styled.div`
     pointer-events: none;
     transition: color 0.2s ease;
   }
-  
+
   &:focus-within svg.input-icon {
     color: #64748b;
   }
@@ -397,7 +407,8 @@ export const SuccessToast = styled.div<{ $visible: boolean }>`
   align-items: center;
   gap: 0.6rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  transform: ${({ $visible }) => ($visible ? "translateY(0)" : "translateY(100px)")};
+  transform: ${({ $visible }) =>
+    $visible ? "translateY(0)" : "translateY(100px)"};
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 9999;

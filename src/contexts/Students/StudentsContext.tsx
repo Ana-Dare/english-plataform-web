@@ -3,7 +3,7 @@ import type {
   IStudents,
   RegisterStudentParams,
   UpdateStudentParams,
-} from "../../pages/TeacherDashboard/types";
+} from "../../interfaces/students";
 
 /**
  * View-model de aluno usado pela UI (derivado de IStudents).
@@ -29,7 +29,7 @@ export interface Student {
 
 /** Callbacks opcionais para reagir ao resultado de uma operação assíncrona. */
 export interface MutationCallbacks {
-  onSuccess?: () => void;
+  onSuccess?: (data: { student_id: number }) => void;
   onError?: () => void;
 }
 

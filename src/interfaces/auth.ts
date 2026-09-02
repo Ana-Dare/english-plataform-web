@@ -7,6 +7,7 @@ export interface ILoginResponse {
   id: string;
   nome: string;
   email: string;
+  role: "student" | "teacher" | "admin";
   //token: string;
 }
 

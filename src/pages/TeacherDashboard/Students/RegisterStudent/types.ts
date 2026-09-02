@@ -1,9 +1,10 @@
-import type { RegisterStudentParams } from "../../types";
+import type { RegisterStudentParams } from "../../../../interfaces/students";
 
 /** Campos extras coletados no formulário que não fazem parte do payload da API */
 export interface StudentFormExtras {
   gender: string;
-  photoUrl: string | null;
+  photoUrl?: string | null; // data URL para preview
+  photoBlob?: Blob | null; // blob para envio
   turma: string;
 }
 

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const ResetPasswordStyle = styled.div`
+export const SetPasswordStyle = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   width: 100%;

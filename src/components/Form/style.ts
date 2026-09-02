@@ -25,8 +25,10 @@ export const FormWrapper = styled.div`
   box-sizing: border-box;
   background-color: transparent;
   width: 100%;
-  max-width: 440px;
+  max-width: 80%;
   height: fit-content;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: 768px) {
     padding: 2rem 1.5rem;

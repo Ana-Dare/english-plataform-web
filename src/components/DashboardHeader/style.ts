@@ -68,16 +68,18 @@ export const ProfileSection = styled.div`
   transition: background-color 0.2s;
 `;
 
-export const Avatar = styled.div`
+export const Avatar = styled.div<{ $color?: string }>`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid #d4957f;
+  border: 2px solid ${(props) => props.$color || "#d4957f"};
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0ebe7;
-  color: #d4957f;
+  background-color: ${(props) => props.$color || "#f0ebe7"};
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 0.875rem;
 `;
 
 export const DropdownIcon = styled.div`
@@ -99,7 +101,7 @@ export const DropdownContainer = styled.div`
   overflow: hidden;
   padding: 1rem;
   width: fit-content;
-  max-width: ;
+  max-width:;
 `;
 
 export const ProfileDropdown = styled(DropdownContainer)`
