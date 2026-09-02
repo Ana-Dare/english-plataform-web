@@ -25,6 +25,7 @@ export interface Student {
   rawEnrollDate: string;
   observations: string;
   progress?: number;
+  classId?: number | null;
 }
 
 /** Callbacks opcionais para reagir ao resultado de uma operação assíncrona. */

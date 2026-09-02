@@ -8,6 +8,7 @@ export interface RegisterStudentParams {
   active: 0 | 1;
   level_id: number;
   notes?: string;
+  class_id?: number | null;
 }
 
 export interface RegisterStudentRes {
@@ -29,6 +30,7 @@ export interface IStudents {
     levelId: number | null;
     vip: boolean;
     notes: string | null;
+    classId?: number | null;
   };
 }
 
@@ -45,6 +47,7 @@ export interface UpdateStudentParams {
   level_id?: number | null;
   vip?: 0 | 1;
   notes?: string;
+  class_id?: number | null;
 }
 
 export interface UpdateStudentVariables {

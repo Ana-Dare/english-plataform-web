@@ -16,6 +16,8 @@ import {
   registerStudent,
   updateStudent as updateStudentService,
 } from "../../pages/TeacherDashboard/services/student";
+import { listClasses } from "../../pages/TeacherDashboard/services/class";
+import { listLevels } from "../../pages/TeacherDashboard/services/level";
 
 const STUDENTS_QUERY_KEY = ["studentsList"] as const;
 
@@ -37,27 +39,50 @@ const formatDate = (value: string) => {
     : date.toLocaleDateString("pt-BR");
 };
 
-const formatLevel = (levelId: number | null) =>
-  levelId === null ? "Não definido" : `Nível ${levelId}`;
+const formatLevel = (
+  levelId: number | null,
+  levelMap?: Record<number, string>,
+) => {
+  if (levelId === null) return "Não definido";
+  if (levelMap && levelMap[levelId]) {
+    return levelMap[levelId];
+  }
+  return `Nível ${levelId}`;
+};
+
+const truncateText = (text: string, maxLength: number = 20) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+};
 
 /** Converte o formato da API (IStudents) para o view-model consumido pela UI. */
-const toStudent = (student: IStudents): Student => ({
-  id: student.id,
-  name: student.name,
-  email: student.email,
-  phone: student.phone ?? "",
-  birthdate: toDateInputValue(student.birthdate),
-  isActive: student.active,
-  avatarColor: avatarColors[student.id % avatarColors.length],
-  level: formatLevel(student.profile.levelId),
-  levelId: student.profile.levelId,
-  plan: student.profile.vip ? 1 : 0,
-  turma: "Não atribuída",
-  enrollDate: formatDate(student.createdAt),
-  rawEnrollDate: student.createdAt,
-  observations: student.profile.notes ?? "",
-  progress: Math.floor(Math.random() * 40) + 60,
-});
+const toStudent = (
+  student: IStudents,
+  classNameMap?: Record<number, string>,
+  levelMap?: Record<number, string>,
+): Student => {
+  const classId = student.profile.classId;
+  const turmaName = classId && classNameMap ? classNameMap[classId] : null;
+
+  return {
+    id: student.id,
+    name: student.name,
+    email: student.email,
+    phone: student.phone ?? "",
+    birthdate: toDateInputValue(student.birthdate),
+    isActive: student.active,
+    avatarColor: avatarColors[student.id % avatarColors.length],
+    level: formatLevel(student.profile.levelId, levelMap),
+    levelId: student.profile.levelId,
+    plan: student.profile.vip ? 1 : 0,
+    turma: turmaName ? truncateText(turmaName) : "Não atribuída",
+    classId: classId,
+    enrollDate: formatDate(student.createdAt),
+    rawEnrollDate: student.createdAt,
+    observations: student.profile.notes ?? "",
+    progress: Math.floor(Math.random() * 40) + 60,
+  };
+};
 
 export interface StudentsProviderProps {
   children: React.ReactNode;
@@ -71,9 +96,48 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
     queryFn: listStudent,
   });
 
+  const { data: classesData } = useQuery({
+    queryKey: ["classes"],
+    queryFn: listClasses,
+  });
+
+  const { data: levelsData } = useQuery({
+    queryKey: ["levels"],
+    queryFn: listLevels,
+  });
+
   const rawStudents = useMemo(() => data?.students ?? [], [data]);
 
-  const students = useMemo(() => rawStudents.map(toStudent), [rawStudents]);
+  // Criar mapa de class_id -> nome da turma
+  const classNameMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    if (classesData?.classes) {
+      classesData.classes.forEach((cls) => {
+        map[cls.id] = cls.name;
+      });
+    }
+    return map;
+  }, [classesData]);
+
+  // Criar mapa de level_id -> nome do nível
+  const levelNameMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    if (levelsData?.levels) {
+      levelsData.levels.forEach((level) => {
+        map[level.id] = level.name;
+      });
+    }
+    return map;
+  }, [levelsData]);
+
+  // Mapear estudantes com os mapas de classes e níveis
+  const students = useMemo(
+    () =>
+      rawStudents.map((student) =>
+        toStudent(student, classNameMap, levelNameMap),
+      ),
+    [rawStudents, classNameMap, levelNameMap],
+  );
 
   const invalidateStudents = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: STUDENTS_QUERY_KEY });
@@ -109,16 +173,27 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   const addStudent = useCallback(
     (
       params: RegisterStudentParams,
-      photoBlob?: Blob,
-      callbacks?: MutationCallbacks,
+      callbacks?: MutationCallbacks | Blob,
+      callbacks2?: MutationCallbacks,
     ) => {
+      // Suportar ambos os casos: (params, callbacks) e (params, photoBlob, callbacks)
+      let photoBlob: Blob | undefined;
+      let finalCallbacks: MutationCallbacks | undefined;
+
+      if (callbacks instanceof Blob) {
+        photoBlob = callbacks;
+        finalCallbacks = callbacks2;
+      } else {
+        finalCallbacks = callbacks;
+      }
+
       registerMutation.mutate(
         { params, photoBlob },
         {
           onSuccess: (response) => {
-            callbacks?.onSuccess?.({ student_id: response.student_id });
+            finalCallbacks?.onSuccess?.({ student_id: response.student_id });
           },
-          onError: () => callbacks?.onError?.(),
+          onError: () => finalCallbacks?.onError?.(),
         },
       );
     },

@@ -29,6 +29,7 @@ interface StepClassInfoProps {
   turmas: { value: string; label: string }[];
   onChange: (patch: Partial<StudentFormState>) => void;
   onAddLevel: (name: string) => void;
+  isAddingLevel?: boolean;
 }
 
 const StepClassInfo: React.FC<StepClassInfoProps> = ({
@@ -37,15 +38,16 @@ const StepClassInfo: React.FC<StepClassInfoProps> = ({
   turmas,
   onChange,
   onAddLevel,
+  isAddingLevel = false,
 }) => {
-  const [isAddingLevel, setIsAddingLevel] = useState(false);
+  const [showAddLevelForm, setShowAddLevelForm] = useState(false);
   const [newLevelName, setNewLevelName] = useState("");
 
   const handleAddLevel = () => {
     if (!newLevelName.trim()) return;
     onAddLevel(newLevelName.trim());
     setNewLevelName("");
-    setIsAddingLevel(false);
+    setShowAddLevelForm(false);
   };
 
   return (
@@ -101,17 +103,17 @@ const StepClassInfo: React.FC<StepClassInfoProps> = ({
                   }))}
                 />
               </DropdownFit>
-              {!isAddingLevel && (
+              {!showAddLevelForm && (
                 <AddLevelBtn
                   type="button"
-                  onClick={() => setIsAddingLevel(true)}
+                  onClick={() => setShowAddLevelForm(true)}
                   title="Adicionar Nível"
                 >
                   <Plus size={18} />
                 </AddLevelBtn>
               )}
             </LevelRow>
-            {isAddingLevel && (
+            {showAddLevelForm && (
               <AddLevelInline>
                 <RegisterInput
                   type="text"
@@ -120,16 +122,23 @@ const StepClassInfo: React.FC<StepClassInfoProps> = ({
                   onChange={(e) => setNewLevelName(e.target.value)}
                   style={{ flex: 1, height: "44px" }}
                   autoFocus
+                  disabled={isAddingLevel}
                 />
-                <SaveLevelBtn type="button" onClick={handleAddLevel}>
-                  <Save size={14} /> Salvar
+                <SaveLevelBtn
+                  type="button"
+                  onClick={handleAddLevel}
+                  disabled={isAddingLevel}
+                  title={isAddingLevel ? "Criando nível..." : "Salvar nível"}
+                >
+                  <Save size={14} /> {isAddingLevel ? "..." : "Salvar"}
                 </SaveLevelBtn>
                 <CancelLevelBtn
                   type="button"
                   onClick={() => {
-                    setIsAddingLevel(false);
+                    setShowAddLevelForm(false);
                     setNewLevelName("");
                   }}
+                  disabled={isAddingLevel}
                 >
                   <X size={18} />
                 </CancelLevelBtn>

@@ -16,6 +16,7 @@ import {
   UserX,
   Power,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import CustomDropdown from "../../../components/CustomDropdown";
 import {
   ActionsWrapper,
@@ -60,6 +61,7 @@ import type {
 import { useStudents } from "../../../contexts/Students/hooks/useStudents";
 import type { Student } from "../../../contexts/Students/StudentsContext";
 import useToast from "../../../contexts/Toast/useToast";
+import { listLevels } from "../services/level";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -77,8 +79,14 @@ const formatDate = (value: string) => {
     : date.toLocaleDateString("pt-BR");
 };
 
-const formatLevel = (levelId: number | null) =>
-  levelId === null ? "Não definido" : `Nível ${levelId}`;
+const formatLevel = (
+  levelId: number | null,
+  levelMap: Record<number, string>,
+) => {
+  if (levelId === null) return "Não definido";
+  const levelName = levelMap[levelId];
+  return levelName ? levelName : `Nível ${levelId}`;
+};
 
 const buildUpdatePayload = (
   current: Student,
@@ -120,6 +128,13 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     deactivateStudent,
     isDeactivating,
   } = useStudents();
+
+  // Buscar níveis da API
+  const { data: levelsData } = useQuery({
+    queryKey: ["levels"],
+    queryFn: () => listLevels(),
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filterLevel, setFilterLevel] = useState("todos");
   const [filterTurma] = useState("todas");
@@ -132,6 +147,17 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Student | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+
+  // Criar mapa de levelId -> nome do nível
+  const levelMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    if (levelsData?.levels) {
+      levelsData.levels.forEach((level) => {
+        map[level.id] = level.name;
+      });
+    }
+    return map;
+  }, [levelsData]);
 
   const filteredStudents = useMemo(() => {
     const filtered = students.filter((student) => {
@@ -425,7 +451,11 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                         const levelId = value === "" ? null : Number(value);
                         setEditForm((form) =>
                           form
-                            ? { ...form, levelId, level: formatLevel(levelId) }
+                            ? {
+                                ...form,
+                                levelId,
+                                level: formatLevel(levelId, levelMap),
+                              }
                             : null,
                         );
                       }}
@@ -578,8 +608,10 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
             onChange={setFilterLevel}
             options={[
               { value: "todos", label: "Nível: Todos" },
-              { value: "1", label: "Nível: 1" },
-              { value: "2", label: "Nível: 2" },
+              ...(levelsData?.levels?.map((level) => ({
+                value: String(level.id),
+                label: `Nível: ${level.name}`,
+              })) || []),
             ]}
           />
 
@@ -638,7 +670,17 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                     </PlanBadge>
                   </Td>
                   <Td>{student.level}</Td>
-                  <Td>{student.turma}</Td>
+                  <Td>
+                    <span
+                      title={
+                        student.turma !== "Não atribuída"
+                          ? student.turma
+                          : undefined
+                      }
+                    >
+                      {student.turma}
+                    </span>
+                  </Td>
                   <Td>
                     <div
                       style={{

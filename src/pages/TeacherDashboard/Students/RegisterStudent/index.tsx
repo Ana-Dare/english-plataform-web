@@ -27,8 +27,8 @@ import { isValidEmail } from "../helpers/validateEmail";
 import { isValidPhone } from "../helpers/validatePhone";
 import { isValidBirthdate } from "../helpers/validateBirthdate";
 import useToast from "../../../../contexts/Toast/useToast";
-import { useQuery } from "@tanstack/react-query";
-import { listLevels } from "../../services/level";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { listLevels, createLevel } from "../../services/level";
 
 interface RegisterStudentProps {
   onBack: () => void;
@@ -95,6 +95,23 @@ const RegisterStudent = ({
     queryFn: () => listLevels(),
   });
 
+  // Mutation para criar novo nível
+  const createLevelMutation = useMutation({
+    mutationFn: (name: string) => createLevel(name, ""),
+    onSuccess: (newLevel) => {
+      const levelOption: LevelOption = {
+        id: newLevel.id,
+        name: newLevel.name,
+      };
+      setLevels((prev) => [...prev, levelOption]);
+      handleChange({ level_id: newLevel.id });
+      addToast(`Nível "${newLevel.name}" criado com sucesso!`, "success");
+    },
+    onError: () => {
+      addToast("Erro ao criar nível. Tente novamente.", "error");
+    },
+  });
+
   // Atualiza níveis quando dados da API chegam
   useEffect(() => {
     if (dataLevels?.levels && dataLevels.levels.length > 0) {
@@ -133,10 +150,11 @@ const RegisterStudent = ({
   };
 
   const handleAddLevel = (name: string) => {
-    const newLevel: LevelOption = { id: Date.now(), name };
-    setLevels((prev) => [...prev, newLevel]);
-    handleChange({ level_id: newLevel.id });
-    addToast("Nível adicionado com sucesso!", "success");
+    if (!name.trim()) {
+      addToast("O nome do nível é obrigatório.", "warning");
+      return;
+    }
+    createLevelMutation.mutate(name.trim());
   };
 
   /** Valida a etapa 1 (dados pessoais). Retorna true se válida. */
@@ -237,6 +255,7 @@ const RegisterStudent = ({
               turmas={TURMAS}
               onChange={handleChange}
               onAddLevel={handleAddLevel}
+              isAddingLevel={createLevelMutation.isPending}
             />
           )}
         </RegisterBody>
