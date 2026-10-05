@@ -1,11 +1,8 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 
 export const HeaderContainer = styled.header`
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
+  display: flex; justify-content: flex-end; align-items: center; height: 100%;
   width: 100%;
   background: linear-gradient(180deg, #1e2a3a 0%, #2b3a4e 50%, #1e2a3a 100%);
   background-size: 100% 100vh;
@@ -18,7 +15,10 @@ export const HeaderContent = styled.div`
   width: 100%;
   max-width: 1200px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; gap: 24px;
+  @media (max-width: 1024px) {
+    justify-content: space-between;
+  }
   align-items: center;
   color: #f0ebe7;
 
@@ -231,7 +231,10 @@ export const NotificationDropdown = styled(DropdownContainer)`
 
 export const NotifHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; gap: 24px;
+  @media (max-width: 1024px) {
+    justify-content: space-between;
+  }
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid #e8e0db;
@@ -292,7 +295,10 @@ export const NotifItem = styled.div<{ $unread: boolean }>`
 
   .title-row {
     display: flex;
+    justify-content: flex-end; gap: 24px;
+  @media (max-width: 1024px) {
     justify-content: space-between;
+  }
     align-items: center;
     margin-bottom: 6px;
     gap: 8px;
@@ -337,3 +343,8 @@ export const NotifItem = styled.div<{ $unread: boolean }>`
     background-color: #d4957f;
   }
 `;
+
+
+
+
+

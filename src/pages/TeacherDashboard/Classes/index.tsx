@@ -33,6 +33,20 @@ const ClassesTab = () => {
     );
   }, [classes, searchQuery]);
 
+  // Turma de demonstração só no front, para visualizar o novo layout sem alterar o banco.
+  const visibleClasses =
+    filteredClasses.length > 0
+      ? filteredClasses
+      : [
+          {
+            id: -1,
+            name: "Turma Intermediate A",
+            level_id: 2,
+            vip: false,
+            status: "active" as const,
+          },
+        ];
+
   const handleCreateClass = (data: { name: string; level: string }) => {
     // data.level agora é o ID do nível (string), não o nome
     const levelId = parseInt(data.level, 10);
@@ -97,7 +111,7 @@ const ClassesTab = () => {
       </HeaderActions>
 
       <ClassesGrid variants={containerVariants} initial="hidden" animate="show">
-        {filteredClasses.map((c) => (
+        {visibleClasses.map((c) => (
           <ClassCard
             key={c.id}
             onClick={() => setSelectedClass(c)}

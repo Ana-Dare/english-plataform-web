@@ -1,189 +1,195 @@
-import React, { useState, useRef } from "react";
-import { X, UploadCloud } from "lucide-react";
-import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css";
+import React, { useMemo, useRef, useState } from "react";
+import { X, UploadCloud, Plus, Download, Pencil, Trash2, FileText } from "lucide-react";
 import {
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  FieldGroup,
-  CloseBtn,
-  PrimaryBtn,
-  SecondaryBtn,
-  DropzoneContainer,
-  RichTextWrapper,
-} from "./style";
-import useToast from "../../../contexts/Toast/useToast";
+  CompactOverlay,
+  CompactModal,
+  CompactHeader,
+  CompactBody,
+  CompactLabel,
+  CompactSelect,
+  MaterialRow,
+  FileGlyph,
+  FileMeta,
+  RowActions,
+  RowIconBtn,
+  RenameBox,
+  SaveMini,
+  DropzoneMini,
+  AddMaterialPill,
+} from "./classDetail.styles";
 
 export interface MaterialData {
+  id: string;
   title: string;
-  type: "pdf" | "video" | "link";
+  type: "pdf" | "docx" | "video" | "link";
   url: string;
-  description: string;
+  lessonId: string;
+  addedAt: string;
+}
+
+interface LessonOption {
+  id: string;
+  label: string;
+  selectLabel: string;
 }
 
 interface AddMaterialModalProps {
   onClose: () => void;
-  onSave: (data: MaterialData) => void;
-  initialData?: MaterialData;
+  lessons: LessonOption[];
+  materials: MaterialData[];
+  onAddFiles: (lessonId: string, files: File[]) => void;
+  onRename: (id: string, title: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   onClose,
-  onSave,
-  initialData,
+  lessons,
+  materials,
+  onAddFiles,
+  onRename,
+  onDelete,
 }) => {
-  const { addToast } = useToast();
-  const [title, setTitle] = useState(initialData?.title || "");
-  const [type, setType] = useState<"pdf" | "video" | "link">(
-    initialData?.type || "pdf",
-  );
-  const [url, setUrl] = useState(initialData?.url || "");
-  const [description, setDescription] = useState(
-    initialData?.description || "",
-  );
-
-  const [fileName, setFileName] = useState("");
+  const [lessonId, setLessonId] = useState(lessons[0]?.id || "");
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(true);
-  };
+  const lessonMaterials = useMemo(
+    () => materials.filter((m) => m.lessonId === lessonId),
+    [materials, lessonId],
+  );
 
-  const handleDragLeave = () => {
-    setIsDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      setFileName(file.name);
-      setUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setFileName(file.name);
-      setUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSave = () => {
-    if (!title.trim()) {
-      addToast("Por favor, informe o título do material.", "warning");
-      return;
-    }
-    onSave({ title, type, url, description });
+  const takeFiles = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    onAddFiles(lessonId, Array.from(fileList));
   };
 
   return (
-    <ModalOverlay>
-      <ModalContent $expanded>
-        <ModalHeader>
-          <h3>{initialData ? "Editar Material" : "Adicionar Material"}</h3>
-          <CloseBtn onClick={onClose}>
-            <X size={20} />
-          </CloseBtn>
-        </ModalHeader>
-        <ModalBody>
-          <FieldGroup>
-            <label>Título do Material</label>
-            <input
-              type="text"
-              placeholder="Ex: Apostila Módulo 1"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </FieldGroup>
-          <FieldGroup>
-            <label>Tipo de Arquivo</label>
-            <select
-              value={type}
+    <CompactOverlay onClick={onClose}>
+      <CompactModal onClick={(e) => e.stopPropagation()}>
+        <CompactHeader>
+          <h3>Adicionar material</h3>
+          <button type="button" onClick={onClose} aria-label="Fechar">
+            <X size={18} />
+          </button>
+        </CompactHeader>
+        <CompactBody>
+          <div>
+            <CompactLabel>Para qual aula deseja adicionar este material?</CompactLabel>
+            <CompactSelect
+              value={lessonId}
               onChange={(e) => {
-                setType(e.target.value as "pdf" | "video" | "link");
-                setUrl("");
-                setFileName("");
+                setLessonId(e.target.value);
+                setRenamingId(null);
               }}
             >
-              <option value="pdf">Documento PDF</option>
-              <option value="video">Vídeo (YouTube/Vimeo)</option>
-              <option value="link">Link Externo</option>
-            </select>
-          </FieldGroup>
+              {lessons.map((lesson) => (
+                <option key={lesson.id} value={lesson.id}>
+                  {lesson.selectLabel}
+                </option>
+              ))}
+            </CompactSelect>
+          </div>
 
-          {type === "pdf" ? (
-            <FieldGroup>
-              <label>Arquivo</label>
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-                accept=".pdf,.doc,.docx"
-              />
-              <DropzoneContainer
-                $isDragActive={isDragActive}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <UploadCloud />
-                {fileName ? (
-                  <p>
-                    Arquivo selecionado: <strong>{fileName}</strong>
-                  </p>
-                ) : (
-                  <>
-                    <p>
-                      Arraste seu arquivo para cá ou{" "}
-                      <strong>clique para buscar</strong>
-                    </p>
-                    <span>Formatos suportados: PDF, DOC, DOCX</span>
-                  </>
-                )}
-              </DropzoneContainer>
-            </FieldGroup>
-          ) : (
-            <FieldGroup>
-              <label>Link / URL</label>
-              <input
-                type="url"
-                placeholder="https://..."
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            </FieldGroup>
-          )}
+          {lessonMaterials.map((mat) => (
+            <div key={mat.id}>
+              <MaterialRow>
+                <FileGlyph>
+                  <FileText size={16} />
+                </FileGlyph>
+                <FileMeta>
+                  <strong>{mat.title}</strong>
+                  <span>Adicionado em {mat.addedAt}</span>
+                </FileMeta>
+                <RowActions>
+                  <RowIconBtn type="button" title="Baixar">
+                    <Download size={16} />
+                  </RowIconBtn>
+                  <RowIconBtn
+                    type="button"
+                    title="Renomear"
+                    onClick={() => {
+                      setRenamingId(mat.id);
+                      setRenameValue(mat.title);
+                    }}
+                  >
+                    <Pencil size={16} />
+                  </RowIconBtn>
+                  <RowIconBtn
+                    $danger
+                    type="button"
+                    title="Excluir"
+                    onClick={() => onDelete(mat.id)}
+                  >
+                    <Trash2 size={16} />
+                  </RowIconBtn>
+                </RowActions>
+              </MaterialRow>
+              {renamingId === mat.id && (
+                <RenameBox>
+                  <span>Renomear Material</span>
+                  <input
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                  />
+                  <SaveMini
+                    type="button"
+                    onClick={() => {
+                      if (renameValue.trim()) {
+                        onRename(mat.id, renameValue.trim());
+                      }
+                      setRenamingId(null);
+                    }}
+                  >
+                    Salvar
+                  </SaveMini>
+                </RenameBox>
+              )}
+            </div>
+          ))}
 
-          <FieldGroup>
-            <label>Descrição Avançada (Opcional)</label>
-            <RichTextWrapper>
-              <ReactQuill
-                theme="snow"
-                value={description}
-                onChange={setDescription}
-                placeholder="Escreva detalhes adicionais ou instruções..."
-              />
-            </RichTextWrapper>
-          </FieldGroup>
-        </ModalBody>
-        <ModalFooter>
-          <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-          <PrimaryBtn onClick={handleSave}>
-            {initialData ? "Salvar Alterações" : "Adicionar Material"}
-          </PrimaryBtn>
-        </ModalFooter>
-      </ModalContent>
-    </ModalOverlay>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            hidden
+            accept=".pdf,.doc,.docx"
+            onChange={(e) => {
+              takeFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <DropzoneMini
+            $active={isDragActive}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragActive(true);
+            }}
+            onDragLeave={() => setIsDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragActive(false);
+              takeFiles(e.dataTransfer.files);
+            }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <UploadCloud size={28} />
+            <p>Arraste novos materiais ou selecione do computador</p>
+            <AddMaterialPill
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+            >
+              <Plus size={14} /> Adicionar Material
+            </AddMaterialPill>
+          </DropzoneMini>
+        </CompactBody>
+      </CompactModal>
+    </CompactOverlay>
   );
 };
 

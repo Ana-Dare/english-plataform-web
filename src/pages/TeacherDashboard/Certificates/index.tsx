@@ -45,6 +45,7 @@ import {
   MaterialInfo,
   MaterialTitle,
   MaterialMeta,
+  ActionButtonsWrapper,
 } from "./style";
 import {
   ChevronLeft,
@@ -391,14 +392,7 @@ const CertificatesTab: React.FC = () => {
             </DetailSection>
           </PremiumCard>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "1.5rem",
-              marginTop: "1.5rem",
-            }}
-          >
+          <ActionButtonsWrapper>
             <SendCertificateBtn
               onClick={() =>
                 addToast(
@@ -428,8 +422,8 @@ const CertificatesTab: React.FC = () => {
             >
               <Download size={20} /> Baixar Certificado
             </SendCertificateBtn>
-          </div>
-        </DetailContainer>
+          </ActionButtonsWrapper>
+          </DetailContainer>
       </Container>
     );
   }

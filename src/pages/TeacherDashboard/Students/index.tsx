@@ -52,6 +52,8 @@ import {
   Td,
   Th,
   Tr,
+  LevelBadge,
+  PageNumber
 } from "./style";
 import RegisterStudent from "./RegisterStudent";
 import type {
@@ -86,6 +88,18 @@ const formatLevel = (
   if (levelId === null) return "Não definido";
   const levelName = levelMap[levelId];
   return levelName ? levelName : `Nível ${levelId}`;
+};
+
+const getLevelColor = (level: string) => {
+  if (level.includes('A1') || level.includes('A2')) return '#22C55E';
+  if (level.includes('B1') || level.includes('B2')) return '#8B5CF6';
+  if (level.includes('C1') || level.includes('C2')) return '#F59E0B';
+  return '#64748B';
+};
+
+const getLevelShort = (level: string) => {
+  const match = level.match(/[A-C][1-2]/);
+  return match ? match[0] : 'A1';
 };
 
 const buildUpdatePayload = (
@@ -129,7 +143,6 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     isDeactivating,
   } = useStudents();
 
-  // Buscar níveis da API
   const { data: levelsData } = useQuery({
     queryKey: ["levels"],
     queryFn: () => listLevels(),
@@ -148,7 +161,6 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
   const [editForm, setEditForm] = useState<Student | null>(null);
   const [showRegister, setShowRegister] = useState(false);
 
-  // Criar mapa de levelId -> nome do nível
   const levelMap = useMemo(() => {
     const map: Record<number, string> = {};
     if (levelsData?.levels) {
@@ -257,18 +269,24 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     );
   };
 
-  const handleDeactivate = (id: number) => {
-    deactivateStudent(id, {
-      onSuccess: () => {
-        setSelectedStudent(null);
-        addToast("Status do aluno atualizado com sucesso!", "success");
+  const handleToggleActive = (student: any) => {
+    updateStudent(
+      {
+        userId: student.id,
+        params: { active: student.isActive ? 0 : 1 },
       },
-      onError: () =>
-        addToast(
-          "Não foi possível desativar o aluno. Tente novamente.",
-          "error",
-        ),
-    });
+      {
+        onSuccess: () => {
+          setSelectedStudent(null);
+          addToast("Status do aluno atualizado com sucesso!", "success");
+        },
+        onError: () =>
+          addToast(
+            "Não foi possível atualizar o status do aluno. Tente novamente.",
+            "error",
+          ),
+      }
+    );
   };
 
   const handleSaveEdit = () => {
@@ -339,224 +357,191 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
 
           <DetailBody>
             <DetailSection>
-              <DetailSectionTitle>
-                <User size={18} /> Informações Pessoais
+              <DetailSectionTitle $bg="#EEF2FF" $color="#4F46E5">
+                <div className="icon-box"><User size={18} /></div>
+                Informações Pessoais
               </DetailSectionTitle>
               <DetailGrid>
                 <DetailField>
-                  <DetailFieldLabel>Nome Completo</DetailFieldLabel>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editForm!.name}
-                      onChange={(event) =>
-                        setEditForm((form) =>
-                          form ? { ...form, name: event.target.value } : null,
-                        )
-                      }
-                    />
-                  ) : (
-                    <DetailFieldValue>{displayData.name}</DetailFieldValue>
-                  )}
+                  <div className="field-icon"><User size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Nome Completo</DetailFieldLabel>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm!.name}
+                        onChange={(e) => setEditForm(f => f ? { ...f, name: e.target.value } : null)}
+                      />
+                    ) : (
+                      <DetailFieldValue>{displayData.name}</DetailFieldValue>
+                    )}
+                  </div>
                 </DetailField>
                 <DetailField>
-                  <DetailFieldLabel>
-                    <Mail size={14} /> E-mail
-                  </DetailFieldLabel>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      value={editForm!.email}
-                      onChange={(event) =>
-                        setEditForm((form) =>
-                          form ? { ...form, email: event.target.value } : null,
-                        )
-                      }
-                    />
-                  ) : (
-                    <DetailFieldValue>{displayData.email}</DetailFieldValue>
-                  )}
+                  <div className="field-icon"><Mail size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>E-mail</DetailFieldLabel>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        value={editForm!.email}
+                        onChange={(e) => setEditForm(f => f ? { ...f, email: e.target.value } : null)}
+                      />
+                    ) : (
+                      <DetailFieldValue>{displayData.email}</DetailFieldValue>
+                    )}
+                  </div>
                 </DetailField>
                 <DetailField>
-                  <DetailFieldLabel>
-                    <Phone size={14} /> Telefone
-                  </DetailFieldLabel>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editForm!.phone}
-                      onChange={(event) =>
-                        setEditForm((form) =>
-                          form ? { ...form, phone: event.target.value } : null,
-                        )
-                      }
-                    />
-                  ) : (
-                    <DetailFieldValue>
-                      {displayData.phone || "Não informado"}
-                    </DetailFieldValue>
-                  )}
+                  <div className="field-icon"><Phone size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Telefone</DetailFieldLabel>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm!.phone}
+                        onChange={(e) => setEditForm(f => f ? { ...f, phone: e.target.value } : null)}
+                      />
+                    ) : (
+                      <DetailFieldValue>{displayData.phone || "Não informado"}</DetailFieldValue>
+                    )}
+                  </div>
                 </DetailField>
                 <DetailField>
-                  <DetailFieldLabel>Data de nascimento</DetailFieldLabel>
-                  {isEditing ? (
-                    <input
-                      type="date"
-                      value={editForm!.birthdate}
-                      onChange={(event) =>
-                        setEditForm((form) =>
-                          form
-                            ? { ...form, birthdate: event.target.value }
-                            : null,
-                        )
-                      }
-                    />
-                  ) : (
-                    <DetailFieldValue>
-                      {displayData.birthdate
-                        ? formatDate(displayData.birthdate)
-                        : "Não informada"}
-                    </DetailFieldValue>
-                  )}
+                  <div className="field-icon"><Calendar size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Data de nascimento</DetailFieldLabel>
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        value={editForm!.birthdate}
+                        onChange={(e) => setEditForm(f => f ? { ...f, birthdate: e.target.value } : null)}
+                      />
+                    ) : (
+                      <DetailFieldValue>
+                        {displayData.birthdate ? formatDate(displayData.birthdate) : "Não informada"}
+                      </DetailFieldValue>
+                    )}
+                  </div>
                 </DetailField>
                 <DetailField>
-                  <DetailFieldLabel>
-                    <Calendar size={14} /> Data de Matrícula
-                  </DetailFieldLabel>
-                  <DetailFieldValue>{displayData.enrollDate}</DetailFieldValue>
+                  <div className="field-icon"><Calendar size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Data de Matrícula</DetailFieldLabel>
+                    <DetailFieldValue>{displayData.enrollDate}</DetailFieldValue>
+                  </div>
                 </DetailField>
               </DetailGrid>
             </DetailSection>
 
             <DetailSection>
-              <DetailSectionTitle>
-                <BookOpen size={18} /> Informações Acadêmicas
+              <DetailSectionTitle $bg="#FEF6F5" $color="#C57A67">
+                <div className="icon-box"><BookOpen size={18} /></div>
+                Informações Acadêmicas
               </DetailSectionTitle>
               <DetailGrid>
                 <DetailField>
-                  <DetailFieldLabel>Turma</DetailFieldLabel>
-                  <DetailFieldValue>{displayData.turma}</DetailFieldValue>
+                  <div className="field-icon"><BookOpen size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Turma</DetailFieldLabel>
+                    <DetailFieldValue>{displayData.turma}</DetailFieldValue>
+                  </div>
                 </DetailField>
                 <DetailField>
-                  <DetailFieldLabel>
-                    <Award size={14} /> Nível
-                  </DetailFieldLabel>
-                  {isEditing ? (
-                    <input
-                      type="number"
-                      min="1"
-                      value={editForm!.levelId ?? ""}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        const levelId = value === "" ? null : Number(value);
-                        setEditForm((form) =>
-                          form
-                            ? {
-                                ...form,
-                                levelId,
-                                level: formatLevel(levelId, levelMap),
-                              }
-                            : null,
-                        );
-                      }}
-                    />
-                  ) : (
-                    <DetailFieldValue>{displayData.level}</DetailFieldValue>
-                  )}
+                  <div className="field-icon"><Award size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Nível</DetailFieldLabel>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        min="1"
+                        value={editForm!.levelId ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const levelId = val === "" ? null : Number(val);
+                          setEditForm(f => f ? { ...f, levelId, level: formatLevel(levelId, levelMap) } : null);
+                        }}
+                      />
+                    ) : (
+                      <DetailFieldValue>{displayData.level}</DetailFieldValue>
+                    )}
+                  </div>
                 </DetailField>
                 <DetailField>
-                  <DetailFieldLabel>Plano</DetailFieldLabel>
-                  {isEditing ? (
-                    <select
-                      value={editForm!.plan}
-                      onChange={(event) =>
-                        setEditForm((form) =>
-                          form
-                            ? {
-                                ...form,
-                                plan: Number(event.target.value) as 0 | 1,
-                              }
-                            : null,
-                        )
-                      }
-                    >
-                      <option value={0}>Regular</option>
-                      <option value={1}>VIP</option>
-                    </select>
-                  ) : (
+                  <div className="field-icon"><Award size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Plano</DetailFieldLabel>
+                    {isEditing ? (
+                      <select
+                        value={editForm!.plan}
+                        onChange={(e) => setEditForm(f => f ? { ...f, plan: Number(e.target.value) as 0 | 1 } : null)}
+                      >
+                        <option value={0}>Regular</option>
+                        <option value={1}>VIP</option>
+                      </select>
+                    ) : (
+                      <DetailFieldValue>
+                        <PlanBadge $plan={displayData.plan}>
+                          {displayData.plan === 1 ? "VIP" : "Regular"}
+                        </PlanBadge>
+                      </DetailFieldValue>
+                    )}
+                  </div>
+                </DetailField>
+                <DetailField>
+                  <div className="field-icon"><Award size={20} /></div>
+                  <div className="field-content">
+                    <DetailFieldLabel>Status</DetailFieldLabel>
                     <DetailFieldValue>
-                      <PlanBadge $plan={displayData.plan}>
-                        {displayData.plan === 1 ? "VIP" : "Regular"}
-                      </PlanBadge>
+                      <StatusBadge $status={displayData.isActive ? 'Ativo' : 'Inativo'}>
+                        {displayData.isActive ? "Ativo" : "Inativo"}
+                      </StatusBadge>
                     </DetailFieldValue>
-                  )}
-                </DetailField>
-                <DetailField>
-                  <DetailFieldLabel>Status</DetailFieldLabel>
-                  <DetailFieldValue>
-                    <StatusBadge $active={displayData.isActive}>
-                      {displayData.isActive ? "Ativo" : "Inativo"}
-                    </StatusBadge>
-                  </DetailFieldValue>
+                  </div>
                 </DetailField>
               </DetailGrid>
             </DetailSection>
 
             <DetailSection>
-              <DetailSectionTitle>Observações</DetailSectionTitle>
-              <DetailField>
-                {isEditing ? (
-                  <textarea
-                    value={editForm!.observations}
-                    onChange={(event) =>
-                      setEditForm((form) =>
-                        form
-                          ? { ...form, observations: event.target.value }
-                          : null,
-                      )
-                    }
-                    placeholder="Adicionar observações sobre o aluno..."
-                  />
-                ) : (
-                  <DetailFieldValue
-                    style={{
-                      color: displayData.observations ? "#1a1a1a" : "#aaa",
-                    }}
-                  >
-                    {displayData.observations ||
-                      "Nenhuma observação registrada."}
-                  </DetailFieldValue>
-                )}
-              </DetailField>
+              <DetailSectionTitle $bg="#F1F5F9" $color="#475569">
+                <div className="icon-box"><BookOpen size={18} /></div>
+                Observações
+              </DetailSectionTitle>
+              <div style={{ padding: '24px' }}>
+                <DetailField className="align-top">
+                  <div className="field-icon"><BookOpen size={20} /></div>
+                  <div className="field-content">
+                    {isEditing ? (
+                      <textarea
+                        value={editForm!.observations}
+                        onChange={(e) => setEditForm(f => f ? { ...f, observations: e.target.value } : null)}
+                        placeholder="Adicionar observações sobre o aluno..."
+                      />
+                    ) : (
+                      <DetailFieldValue style={{ color: displayData.observations ? "#1E293B" : "#94A3B8" }}>
+                        {displayData.observations || "Nenhuma observação registrada."}
+                      </DetailFieldValue>
+                    )}
+                  </div>
+                </DetailField>
+              </div>
             </DetailSection>
           </DetailBody>
 
           <DetailActions>
             {isEditing ? (
               <>
-                <DetailActionBtn
-                  $variant="secondary"
-                  onClick={handleCancelEdit}
-                  disabled={isUpdating}
-                >
+                <DetailActionBtn $variant="secondary" onClick={handleCancelEdit} disabled={isUpdating}>
                   Cancelar
                 </DetailActionBtn>
-                <DetailActionBtn
-                  $variant="primary"
-                  onClick={handleSaveEdit}
-                  disabled={isUpdating}
-                >
+                <DetailActionBtn $variant="primary" onClick={handleSaveEdit} disabled={isUpdating}>
                   {isUpdating ? "Salvando..." : "Salvar Alterações"}
                 </DetailActionBtn>
               </>
             ) : (
               <>
                 {selectedStudent.isActive && (
-                  <DetailActionBtn
-                    $variant="danger"
-                    disabled={isDeactivating}
-                    onClick={() => handleDeactivate(selectedStudent.id)}
-                  >
+                  <DetailActionBtn $variant="danger" disabled={isDeactivating} onClick={() => handleDeactivate(selectedStudent.id)}>
                     <UserX size={16} />
                     {isDeactivating ? "Desativando..." : "Desativar Aluno"}
                   </DetailActionBtn>
@@ -635,42 +620,44 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Aluno</Th>
-              <Th>Plano</Th>
+              <Th>Nome</Th>
               <Th>Nível</Th>
               <Th>Turma</Th>
               <Th>Andamento</Th>
-              <Th>Telefone</Th>
               <Th>Status</Th>
               <Th>Ações</Th>
             </tr>
           </thead>
           <tbody>
             {currentStudents.length > 0 ? (
-              currentStudents.map((student) => (
+              currentStudents.map((student) => {
+                let statusText = student.isActive ? 'Ativo' : 'Inativo';
+                if (!student.isActive && student.progress && student.progress > 0 && student.progress < 100) {
+                    if (student.observations?.includes('Trancado')) statusText = 'Trancado';
+                }
+
+                return (
                 <Tr
                   key={student.id}
                   onClick={() => handleOpenDetail(student)}
                   style={{ cursor: "pointer" }}
                 >
-                  <Td>
+                  <Td data-label="Nome">
                     <StudentCell>
                       <Avatar $color={student.avatarColor}>
                         {getInitials(student.name)}
                       </Avatar>
                       <StudentInfo>
                         <strong>{student.name}</strong>
-                        <span>{student.email}</span>
                       </StudentInfo>
                     </StudentCell>
                   </Td>
-                  <Td>
-                    <PlanBadge $plan={student.plan}>
-                      {student.plan === 1 ? "VIP" : "Regular"}
-                    </PlanBadge>
+                  <Td data-label="Nível">
+                    <LevelBadge $color={getLevelColor(student.level)}>
+                      {getLevelShort(student.level)}
+                    </LevelBadge>
                   </Td>
-                  <Td>{student.level}</Td>
-                  <Td>
+                  <Td data-label="Turma">
                     <span
                       title={
                         student.turma !== "Não atribuída"
@@ -681,29 +668,30 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                       {student.turma}
                     </span>
                   </Td>
-                  <Td>
+                  <Td data-label="Andamento">
                     <div
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "4px",
+                        gap: "6px",
+                        width: "80px"
                       }}
                     >
                       <span
                         style={{
-                          fontSize: "0.8rem",
-                          fontWeight: 600,
-                          color: "#333",
+                          fontSize: "0.85rem",
+                          fontWeight: 800,
+                          color: "#1F2B45",
                         }}
                       >
                         {student.progress}%
                       </span>
                       <div
                         style={{
-                          width: "60px",
-                          height: "4px",
-                          background: "#e0e0e0",
-                          borderRadius: "4px",
+                          width: "100%",
+                          height: "3px",
+                          background: "#F1F5F9",
+                          borderRadius: "3px",
                           overflow: "hidden",
                         }}
                       >
@@ -711,20 +699,19 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                           style={{
                             width: `${student.progress}%`,
                             height: "100%",
-                            background: "#f59e0b",
-                            borderRadius: "4px",
+                            background: "#C57A67",
+                            borderRadius: "3px",
                           }}
                         />
                       </div>
                     </div>
                   </Td>
-                  <Td>{student.phone || "Não informado"}</Td>
-                  <Td>
-                    <StatusBadge $active={student.isActive}>
-                      {student.isActive ? "Ativo" : "Inativo"}
+                  <Td data-label="Status">
+                    <StatusBadge $status={statusText}>
+                      {statusText}
                     </StatusBadge>
                   </Td>
-                  <Td onClick={(e) => e.stopPropagation()}>
+                  <Td data-label="Ações" onClick={(e) => e.stopPropagation()}>
                     <ActionsWrapper>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
                         <IconButton
@@ -741,10 +728,10 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                           title={
                             student.isActive
                               ? "Desativar Aluno"
-                              : "Aluno inativo"
+                              : "Ativar Aluno"
                           }
-                          disabled={!student.isActive || isDeactivating}
-                          onClick={() => handleDeactivate(student.id)}
+                          disabled={isUpdating}
+                          onClick={() => handleToggleActive(student)}
                           style={{
                             color: student.isActive ? "#ef4444" : "#22c55e",
                           }}
@@ -755,11 +742,11 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                     </ActionsWrapper>
                   </Td>
                 </Tr>
-              ))
+              )})
             ) : (
               <tr>
                 <Td
-                  colSpan={8}
+                  colSpan={6}
                   style={{
                     textAlign: "center",
                     color: "#888",
@@ -778,34 +765,26 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
         </Table>
       </TableContainer>
 
-      <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}
-      >
-        <PaginationContainer>
-          <span>
-            Mostrando {(validCurrentPage - 1) * ITEMS_PER_PAGE + 1} a{" "}
-            {Math.min(
-              validCurrentPage * ITEMS_PER_PAGE,
-              filteredStudents.length,
-            )}{" "}
-            de {filteredStudents.length} alunos
-          </span>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <IconButton
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              disabled={validCurrentPage === 1}
-            >
-              <ChevronLeft size={18} />
-            </IconButton>
-            <IconButton
-              onClick={() =>
-                setCurrentPage((page) => Math.min(totalPages, page + 1))
-              }
-              disabled={validCurrentPage >= totalPages}
-            >
-              <ChevronRight size={18} />
-            </IconButton>
-          </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
+        <span style={{ color: "#64748B", fontSize: "0.9rem" }}>
+          Mostrando {(validCurrentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(validCurrentPage * ITEMS_PER_PAGE, filteredStudents.length)} de {filteredStudents.length} resultados
+        </span>
+        
+        <PaginationContainer style={{ marginTop: 0 }}>
+          <IconButton onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={validCurrentPage === 1}>
+            <ChevronLeft size={18} />
+          </IconButton>
+          
+          {[...Array(Math.min(5, totalPages))].map((_, i) => (
+             <PageNumber key={i} $active={validCurrentPage === i + 1} onClick={() => setCurrentPage(i + 1)}>
+               {i + 1}
+             </PageNumber>
+          ))}
+          {totalPages > 5 && <span style={{ padding: "0 4px" }}>..</span>}
+          
+          <IconButton onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={validCurrentPage === totalPages || totalPages === 0}>
+            <ChevronRight size={18} />
+          </IconButton>
         </PaginationContainer>
       </div>
     </Container>

@@ -1,10 +1,10 @@
-import styled, { css } from 'styled-components';
+﻿import styled, { css } from 'styled-components';
 
 /* ====== PAGE LAYOUT: Calendar (left) + Upcoming Events (right) ====== */
 export const AgendaPageLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr 380px;
-  gap: 1.5rem;
+  gap: 2rem;
   width: 100%;
 
   @media (max-width: 1100px) {
@@ -18,11 +18,18 @@ export const AgendaContainer = styled.div`
   flex-direction: column;
   gap: 1rem;
   width: 100%;
+  min-width: 0;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(31, 43, 69, 0.05);
   padding: 1.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 export const AgendaHeader = styled.div`
   display: flex;
@@ -33,11 +40,23 @@ export const AgendaHeader = styled.div`
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(0,0,0,0.06);
 
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: 1;
+    min-width: 300px;
+  }
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
-    button {
-      width: 100%;
+    .right-actions {
+      flex-direction: column;
+      align-items: stretch;
+      min-width: 100%;
     }
   }
 `;
@@ -147,41 +166,41 @@ export const SearchWrapper = styled.div`
   background-color: #fff;
   border-radius: 50px;
   padding: 0.6rem 1.2rem;
-  width: 100%;
-  min-width: 260px;
+  flex: 1;
+  min-width: 200px;
   max-width: 320px;
-  flex-shrink: 0;
   border: 1px solid #1F2B45;
+  box-sizing: border-box;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
 
+  @media (max-width: 768px) {
+    max-width: 100%;
+    width: 100%;
+  }
+
   &:focus-within {
     border-color: #C57A67;
-    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.15);
+    box-shadow: 0 0 0 2px rgba(197, 122, 103, 0.1);
   }
 
   svg {
-    color: #C57A67;
-    margin-right: 0.8rem;
-    flex-shrink: 0;
+    color: #94a3b8;
+    margin-right: 0.5rem;
   }
 
   input {
     border: none;
     outline: none;
-    font-size: 0.95rem;
-    font-family: inherit;
-    width: 100%;
-    color: #1e293b;
     background: transparent;
+    width: 100%;
+    font-size: 0.95rem;
+    color: #1F2B45;
+    font-family: 'Rubik', sans-serif;
 
     &::placeholder {
       color: #94a3b8;
     }
-  }
-
-  @media (max-width: 768px) {
-    max-width: 100%;
   }
 `;
 
@@ -193,18 +212,32 @@ export const CalendarGridContainer = styled.div<{ $isWeekly?: boolean }>`
   background-color: rgba(31, 43, 69, 0.08);
   border: 1px solid rgba(31, 43, 69, 0.08);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
-  @media (max-width: 600px) {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  @media (max-width: 768px) {
+    min-width: 600px; /* Force minimum width to enable scrolling */
     border-radius: 8px;
     padding-bottom: 8px;
-    min-width: 100%;
-    
-    > div {
-      min-width: 50px;
-    }
+  }
+`;
+
+export const ScrollWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Scrollbar styles for calendar */
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #F1F5F9;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
   }
 `;
 
@@ -313,6 +346,7 @@ export const UpcomingContainer = styled.div`
   flex-direction: column;
   overflow: hidden;
   height: fit-content;
+  min-width: 0;
 `;
 
 export const UpcomingHeader = styled.div`
@@ -481,8 +515,8 @@ export const ModalOverlay = styled.div`
   padding: 1rem;
 
   @media (max-width: 600px) {
-    align-items: flex-end;
-    padding: 0;
+    align-items: center;
+    padding: 1rem;
   }
 `;
 
@@ -502,8 +536,7 @@ export const ModalContent = styled.div`
   @media (max-width: 600px) {
     max-width: 100%;
     max-height: 94vh;
-    border-radius: 16px 16px 0 0;
-    border-bottom: none;
+    border-radius: 16px;
   }
 `;
 
@@ -844,3 +877,6 @@ export const ModalButton = styled.button<{ $variant: 'primary' | 'secondary' | '
     }
   }}
 `;
+
+
+

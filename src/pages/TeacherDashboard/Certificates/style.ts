@@ -536,6 +536,24 @@ export const SendCertificateBtn = styled.button`
   }
 `;
 
+export const ActionButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 1rem;
+
+    button {
+      width: 100%;
+      justify-content: center;
+      margin-top: 0;
+    }
+  }
+`;
+
 export const InfoGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, format, isSameDay, isAfter, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Clock, CalendarDays, Search } from 'lucide-react';
@@ -129,19 +129,21 @@ const AgendaTab: React.FC = () => {
             <ViewToggleButton $active={viewMode === 'semanal'} onClick={() => setViewMode('semanal')}>Semanal</ViewToggleButton>
           </ViewToggle>
 
-          <SearchWrapper>
-            <Search size={22} />
-            <input 
-              type="text" 
-              placeholder="Pesquisar eventos..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </SearchWrapper>
+                                  <div className="right-actions">
+              <SearchWrapper>
+                <Search size={22} />
+                <input 
+                  type="text" 
+                  placeholder="Pesquisar eventos..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </SearchWrapper>
 
-          <PrimaryButton onClick={openNewEventModal}>
-            <Plus size={16} /> Novo
-          </PrimaryButton>
+              <PrimaryButton onClick={openNewEventModal}>
+                <Plus size={16} /> Novo
+              </PrimaryButton>
+            </div>
         </AgendaHeader>
 
         <CalendarGrid 
@@ -207,3 +209,5 @@ const AgendaTab: React.FC = () => {
 };
 
 export default AgendaTab;
+
+

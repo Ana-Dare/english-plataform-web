@@ -1,140 +1,217 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ArrowLeft,
   MessageSquare,
   FileText,
   Calendar,
-  ExternalLink,
-  FileUp,
   Users,
   Stethoscope,
   Paperclip,
   Clock,
   CheckCircle,
-  Edit2,
+  MoreHorizontal,
+  Plus,
+  Download,
+  Pencil,
+  Trash2,
+  Video,
 } from "lucide-react";
+import { Check, X } from "lucide-react";
+import { motion } from "framer-motion";
+import AddMaterialModal from "./AddMaterialModal";
+import type { MaterialData } from "./AddMaterialModal";
+import EvaluateJustificationModal from "./EvaluateJustificationModal";
+import useToast from "../../../contexts/Toast/useToast";
+import { getInitials } from "../../../utils/avatar";
 import {
-  DetailContainer,
-  DetailHeader,
-  DetailBackBtn,
-  DetailHeaderTitle,
-  LevelBadge,
-  DetailTabs,
-  TabBtn,
-  DetailContent,
-  PostCard,
-  PostHeader,
-  CreatePostBox,
-  PrimaryBtn,
-  MaterialsGrid,
-  MaterialCard,
-  MaterialIcon,
-  MaterialInfo,
-  ClassAgendaList,
-  AgendaItem,
-  AgendaDateBox,
-  AgendaContent,
-  StudentsGrid,
   JustificationList,
   JustificationItem,
   JustificationInfo,
   JustificationStatus,
   ActionGroup,
   JustificationActionBtn,
-  SectionHeader,
-  SectionTitle,
-  PostList,
-  PostAuthor,
-  PostContent,
-  StudentAvatarSmall,
 } from "./style";
-import AddMaterialModal from "./AddMaterialModal";
-import type { MaterialData } from "./AddMaterialModal";
-import AddClassEventModal from "./AddClassEventModal";
-import type { ClassEventData } from "./AddClassEventModal";
-import EvaluateJustificationModal from "./EvaluateJustificationModal";
-import { Check, X } from "lucide-react";
-import { motion } from "framer-motion";
-import useToast from "../../../contexts/Toast/useToast";
+import {
+  ClassWorkspace,
+  ClassBanner,
+  ClassBannerTop,
+  ClassBannerTitle,
+  ClassBannerMeta,
+  SoftBadge,
+  CefrBadge,
+  ExtraBadge,
+  StudentsCount,
+  AvatarStack,
+  StackAvatar,
+  TabsBar,
+  ClassTab,
+  WorkspaceBody,
+  PanelTitle,
+  PanelHeaderRow,
+  ComposeRow,
+  PublishBtn,
+  NoticeList,
+  NoticeCard,
+  NoticeHead,
+  NoticeAuthor,
+  IconGhostBtn,
+  NoticeText,
+  ScheduleCard,
+  ScheduleIcon,
+  ScheduleCol,
+  UpcomingList,
+  UpcomingRow,
+  DateChip,
+  UpcomingInfo,
+  UpcomingActions,
+  StatusHint,
+  ConfirmBtn,
+  HistoryWrap,
+  HistoryTable,
+  DoneBadge,
+  AddPill,
+  LessonBlock,
+  MaterialRow,
+  FileGlyph,
+  FileMeta,
+  RowActions,
+  RowIconBtn,
+  StudentList,
+  StudentRow,
+  BackLink,
+} from "./classDetail.styles";
 
 interface ClassDetailProps {
-  classData: any;
+  classData: {
+    id?: number;
+    name?: string;
+    level_id?: number;
+  };
   onBack: () => void;
 }
 
-const getInitials = (name: string) => {
-  const parts = name.split(" ");
-  return parts.length > 1
-    ? `${parts[0][0]}${parts[parts.length - 1][0]}`
-    : parts[0][0];
+type TabId = "mural" | "materiais" | "agenda" | "alunos" | "atestados";
+
+const MOCK_STUDENTS = [
+  { id: 1, name: "Ana Souza", color: "#3B82F6" },
+  { id: 2, name: "Carlos Silva", color: "#F59E0B" },
+];
+
+const LESSONS = [
+  { id: "aula-2", label: "Aula 2", selectLabel: "Terça, 01/09 - 19:00" },
+  { id: "aula-1", label: "Aula 1", selectLabel: "Quinta, 27/08 - 19:00" },
+];
+
+const CEFR_BY_LEVEL: Record<number, string> = {
+  1: "A1",
+  2: "A2",
+  3: "B1",
+  4: "B2",
+  5: "C1",
 };
 
 const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
   const { addToast } = useToast();
-  const [activeTab, setActiveTab] = useState<
-    "mural" | "materiais" | "agenda" | "alunos" | "atestados"
-  >("mural");
+  const [activeTab, setActiveTab] = useState<TabId>("mural");
   const [newPost, setNewPost] = useState("");
   const [posts, setPosts] = useState([
     {
       id: 1,
-      author: "Ms. Charantola",
-      date: "Hoje, 10:30",
+      author: "Prof.ª Lara Charantola",
+      date: "Hoje, 10:32",
       content:
-        "Bem-vindos à turma! Não se esqueçam de revisar o material da primeira aula que já está na aba de materiais.",
+        "Pessoal, nesta aula vamos revisar os tempos verbais após a atividade da aula passada.",
+    },
+    {
+      id: 2,
+      author: "Prof.ª Lara Charantola",
+      date: "2 set 2026, 19:15",
+      content:
+        "O material complementar da última aula já está disponível. Recomendo a leitura antes da nossa próxima aula.",
     },
   ]);
-
-  const handleCreatePost = () => {
-    if (!newPost.trim()) return;
-    setPosts([
-      {
-        id: Date.now(),
-        author: "Ms. Charantola",
-        date: "Agora",
-        content: newPost,
-      },
-      ...posts,
-    ]);
-    setNewPost("");
-  };
 
   const [showMaterialModal, setShowMaterialModal] = useState(false);
-  const [editingMaterialIndex, setEditingMaterialIndex] = useState<
-    number | null
-  >(null);
   const [materials, setMaterials] = useState<MaterialData[]>([
     {
-      title: "Guia de Estudos - Módulo 1",
-      type: "pdf",
+      id: "m1",
+      title: "Vocabulary List — Travel.docx",
+      type: "docx",
       url: "#",
-      description: "PDF • 2.4 MB • Adicionado ontem",
+      lessonId: "aula-2",
+      addedAt: "22/08",
     },
     {
-      title: "Vídeo: Tempos Verbais (Revisão)",
-      type: "video",
+      id: "m2",
+      title: "Verbs activity — Weather.docx",
+      type: "docx",
       url: "#",
-      description: "Link do YouTube • Adicionado há 3 dias",
+      lessonId: "aula-2",
+      addedAt: "22/08",
+    },
+    {
+      id: "m3",
+      title: "Present perfect.docx",
+      type: "docx",
+      url: "#",
+      lessonId: "aula-1",
+      addedAt: "22/08",
     },
   ]);
 
-  const [showEventModal, setShowEventModal] = useState(false);
-  const [events, setEvents] = useState<ClassEventData[]>([
+  const [upcoming] = useState([
     {
-      title: "Aula 01 - Introdução",
-      date: "2026-08-15",
-      startTime: "14:00",
-      endTime: "15:30",
-      syncAgenda: true,
+      id: 1,
+      day: "12",
+      month: "SET",
+      weekday: "Terça-feira",
+      time: "18:30 – 19:30",
+      confirmed: 2,
+      total: 2,
+      status: "ready" as const,
     },
     {
-      title: "Aula 02 - Prática de Conversação",
-      date: "2026-08-17",
-      startTime: "14:00",
-      endTime: "15:30",
-      syncAgenda: true,
+      id: 2,
+      day: "14",
+      month: "SET",
+      weekday: "Quinta-feira",
+      time: "18:30 – 19:30",
+      confirmed: 1,
+      total: 2,
+      status: "partial" as const,
+    },
+    {
+      id: 3,
+      day: "04",
+      month: "SET",
+      weekday: "Terça-feira",
+      time: "18:30 – 19:30",
+      confirmed: 0,
+      total: 2,
+      status: "waiting" as const,
     },
   ]);
+
+  const history = [
+    {
+      date: "07 set 2026",
+      time: "18:30 – 19:30",
+      presence: "2 presentes",
+      status: "Concluída",
+    },
+    {
+      date: "05 set 2026",
+      time: "18:30 – 19:30",
+      presence: "1 presente • 1 falta",
+      status: "Concluída",
+    },
+    {
+      date: "31 ago 2026",
+      time: "18:30 – 19:30",
+      presence: "2 presentes",
+      status: "Concluída",
+    },
+  ];
 
   const [justifications, setJustifications] = useState([
     {
@@ -163,18 +240,39 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
     student: string;
   } | null>(null);
 
+  const cefr = CEFR_BY_LEVEL[classData.level_id || 2] || "A2";
+  const className = classData.name || "Turma Intermediate A";
+
+  const materialsByLesson = useMemo(() => {
+    return LESSONS.map((lesson) => ({
+      ...lesson,
+      items: materials.filter((m) => m.lessonId === lesson.id),
+    })).filter((g) => g.items.length > 0);
+  }, [materials]);
+
+  const handleCreatePost = () => {
+    if (!newPost.trim()) return;
+    setPosts([
+      {
+        id: Date.now(),
+        author: "Prof.ª Lara Charantola",
+        date: "Agora",
+        content: newPost,
+      },
+      ...posts,
+    ]);
+    setNewPost("");
+  };
+
   const handleEvaluateJustification = (message: string) => {
     if (!evaluatingJustification) return;
-
     const { id, action } = evaluatingJustification;
     const newStatus = action === "approve" ? "Aceito" : "Recusado";
-
     setJustifications((prev) =>
       prev.map((j) =>
         j.id === id ? { ...j, status: newStatus, feedback: message } : j,
       ),
     );
-
     addToast(
       `Atestado ${newStatus.toLowerCase()} com sucesso! Feedback enviado ao aluno.`,
       "success",
@@ -182,326 +280,262 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
     setEvaluatingJustification(null);
   };
 
-  const handleAddMaterial = (data: MaterialData) => {
-    if (editingMaterialIndex !== null) {
-      const newMaterials = [...materials];
-      newMaterials[editingMaterialIndex] = data;
-      setMaterials(newMaterials);
-      setEditingMaterialIndex(null);
-    } else {
-      setMaterials([data, ...materials]);
-    }
-    setShowMaterialModal(false);
-  };
-
-  const handleAddEvent = (data: ClassEventData) => {
-    setEvents([data, ...events]);
-    setShowEventModal(false);
-    if (data.syncAgenda) {
-      addToast(
-        `Aula "${data.title}" agendada e adicionada à sua agenda pessoal com sucesso!`,
-        "success",
-      );
-    } else {
-      addToast(`Aula "${data.title}" agendada com sucesso!`, "success");
-    }
-  };
+  const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+    { id: "mural", label: "Mural de Avisos", icon: <MessageSquare /> },
+    { id: "materiais", label: "Materiais & atividades", icon: <FileText /> },
+    { id: "agenda", label: "Agenda da Turma", icon: <Calendar /> },
+    { id: "alunos", label: "Alunos da Turma", icon: <Users /> },
+    { id: "atestados", label: "Atestados Médicos", icon: <Stethoscope /> },
+  ];
 
   return (
-    <DetailContainer>
-      <DetailHeader>
-        <DetailBackBtn onClick={onBack}>
-          <ArrowLeft size={16} /> Voltar para turmas
-        </DetailBackBtn>
-        <DetailHeaderTitle>
+    <ClassWorkspace>
+      <ClassBanner>
+        <ClassBannerTop>
           <div>
-            <h1>{classData.name}</h1>
-            <div
-              style={{
-                marginTop: "0.8rem",
-                display: "flex",
-                gap: "1rem",
-                alignItems: "center",
-              }}
-            >
-              <LevelBadge>{classData.level_id || 1}</LevelBadge>
-              <span
-                style={{
-                  marginLeft: "12px",
-                  fontSize: "0.85rem",
-                  color: "rgba(255,255,255,0.8)",
-                }}
-              >
-                Turma ativa
-              </span>
-            </div>
+            <BackLink onClick={onBack}>
+              <ArrowLeft size={14} /> Voltar
+            </BackLink>
+            <ClassBannerTitle style={{ marginTop: "0.4rem" }}>{className}</ClassBannerTitle>
+            <ClassBannerMeta>
+              <SoftBadge>Intermediate</SoftBadge>
+              <CefrBadge>{cefr}</CefrBadge>
+              <ExtraBadge>+</ExtraBadge>
+              <StudentsCount>
+                <AvatarStack>
+                  {MOCK_STUDENTS.map((s, i) => (
+                    <StackAvatar key={s.id} $color={s.color} $index={i}>
+                      {getInitials(s.name)}
+                    </StackAvatar>
+                  ))}
+                </AvatarStack>
+                {MOCK_STUDENTS.length} alunos
+              </StudentsCount>
+            </ClassBannerMeta>
           </div>
-        </DetailHeaderTitle>
-      </DetailHeader>
+        </ClassBannerTop>
 
-      <DetailTabs>
-        <TabBtn
-          $active={activeTab === "mural"}
-          onClick={() => setActiveTab("mural")}
-        >
-          <MessageSquare size={18} /> Mural de Avisos
-        </TabBtn>
-        <TabBtn
-          $active={activeTab === "materiais"}
-          onClick={() => setActiveTab("materiais")}
-        >
-          <FileText size={18} /> Materiais & Atividades
-        </TabBtn>
-        <TabBtn
-          $active={activeTab === "agenda"}
-          onClick={() => setActiveTab("agenda")}
-        >
-          <Calendar size={18} /> Agenda da Turma
-        </TabBtn>
-        <TabBtn
-          $active={activeTab === "alunos"}
-          onClick={() => setActiveTab("alunos")}
-        >
-          <Users size={18} /> Alunos da Turma
-        </TabBtn>
-        <TabBtn
-          $active={activeTab === "atestados"}
-          onClick={() => setActiveTab("atestados")}
-        >
-          <Stethoscope size={18} /> Atestados Médicos
-        </TabBtn>
-      </DetailTabs>
+        <TabsBar>
+          {tabs.map((tab) => (
+            <ClassTab
+              key={tab.id}
+              $active={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.icon}
+              {tab.label}
+            </ClassTab>
+          ))}
+        </TabsBar>
+      </ClassBanner>
 
-      <DetailContent>
+      <WorkspaceBody>
         {activeTab === "mural" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SectionHeader>
-              <SectionTitle>
-                <MessageSquare size={24} /> Mural de Avisos
-              </SectionTitle>
-            </SectionHeader>
-            <CreatePostBox>
-              <textarea
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <PanelTitle>Avisos para a turma</PanelTitle>
+            <ComposeRow>
+              <input
                 placeholder="Escreva um aviso para a turma..."
                 value={newPost}
                 onChange={(e) => setNewPost(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreatePost()}
               />
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <PrimaryBtn onClick={handleCreatePost}>Publicar</PrimaryBtn>
-              </div>
-            </CreatePostBox>
-
-            <PostList>
+              <PublishBtn onClick={handleCreatePost}>Publicar</PublishBtn>
+            </ComposeRow>
+            <NoticeList>
               {posts.map((post) => (
-                <PostCard key={post.id}>
-                  <PostHeader>
-                    <PostAuthor>
-                      <StudentAvatarSmall
-                        $color="#08142c"
-                        $index={0}
-                        style={{ width: "40px", height: "40px" }}
-                      >
-                        {getInitials(post.author)}
-                      </StudentAvatarSmall>
+                <NoticeCard key={post.id}>
+                  <NoticeHead>
+                    <NoticeAuthor>
+                      <div className="avatar">{getInitials(post.author)}</div>
                       <div>
                         <strong>{post.author}</strong>
-                        <br />
                         <span>{post.date}</span>
                       </div>
-                    </PostAuthor>
-                  </PostHeader>
-                  <PostContent>{post.content}</PostContent>
-                </PostCard>
+                    </NoticeAuthor>
+                    <IconGhostBtn
+                      type="button"
+                      aria-label="Mais opções"
+                      onClick={() =>
+                        setPosts((prev) => prev.filter((p) => p.id !== post.id))
+                      }
+                    >
+                      <MoreHorizontal size={18} />
+                    </IconGhostBtn>
+                  </NoticeHead>
+                  <NoticeText>{post.content}</NoticeText>
+                </NoticeCard>
               ))}
-            </PostList>
+            </NoticeList>
           </motion.div>
         )}
 
         {activeTab === "materiais" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SectionHeader>
-              <SectionTitle>
-                <FileText size={24} /> Materiais & Atividades
-              </SectionTitle>
-              <PrimaryBtn
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-                onClick={() =>
-                  addToast("Em breve: Upload de materiais", "info")
-                }
-              >
-                <FileUp size={16} /> Novo Material
-              </PrimaryBtn>
-            </SectionHeader>
-            <MaterialsGrid>
-              {materials.map((mat, idx) => (
-                <MaterialCard
-                  key={idx}
-                  onClick={() => {
-                    if (mat.url && mat.url !== "#") {
-                      window.open(mat.url, "_blank");
-                    } else {
-                      addToast(
-                        "Este material é apenas um exemplo e não possui link válido.",
-                        "info",
-                      );
-                    }
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      width: "100%",
-                    }}
-                  >
-                    <MaterialIcon $type={mat.type}>
-                      {mat.type === "pdf" ? (
-                        <FileText size={24} />
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <PanelHeaderRow>
+              <PanelTitle style={{ margin: 0 }}>Materiais & atividades</PanelTitle>
+              <AddPill onClick={() => setShowMaterialModal(true)}>
+                <Plus size={14} /> Adicionar
+              </AddPill>
+            </PanelHeaderRow>
+            {materialsByLesson.map((group) => (
+              <LessonBlock key={group.id}>
+                <h3>{group.label}</h3>
+                {group.items.map((mat) => (
+                  <MaterialRow key={mat.id}>
+                    <FileGlyph>
+                      {mat.type === "video" ? (
+                        <Video size={16} />
                       ) : (
-                        <ExternalLink size={24} />
+                        <FileText size={16} />
                       )}
-                    </MaterialIcon>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingMaterialIndex(idx);
-                        setShowMaterialModal(true);
-                      }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "#888",
-                        padding: "4px",
-                      }}
-                      title="Editar Material"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                  </div>
-                  <MaterialInfo
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.4rem",
-                    }}
-                  >
-                    <h4>{mat.title}</h4>
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "#666",
-                        lineHeight: 1.4,
-                        margin: 0,
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: mat.description || "Nenhuma descrição",
-                      }}
-                    />
-                  </MaterialInfo>
-                </MaterialCard>
-              ))}
-            </MaterialsGrid>
+                    </FileGlyph>
+                    <FileMeta>
+                      <strong>{mat.title}</strong>
+                      <span>Adicionado em {mat.addedAt}</span>
+                    </FileMeta>
+                    <RowActions>
+                      <RowIconBtn
+                        type="button"
+                        title="Baixar"
+                        onClick={() => addToast("Download iniciado (demo).", "info")}
+                      >
+                        <Download size={16} />
+                      </RowIconBtn>
+                      <RowIconBtn
+                        type="button"
+                        title="Editar"
+                        onClick={() => setShowMaterialModal(true)}
+                      >
+                        <Pencil size={16} />
+                      </RowIconBtn>
+                      <RowIconBtn
+                        $danger
+                        type="button"
+                        title="Excluir"
+                        onClick={() =>
+                          setMaterials((prev) => prev.filter((m) => m.id !== mat.id))
+                        }
+                      >
+                        <Trash2 size={16} />
+                      </RowIconBtn>
+                    </RowActions>
+                  </MaterialRow>
+                ))}
+              </LessonBlock>
+            ))}
           </motion.div>
         )}
 
         {activeTab === "agenda" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SectionHeader>
-              <SectionTitle>
-                <Calendar size={24} /> Próximas Aulas
-              </SectionTitle>
-              <PrimaryBtn
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-                onClick={() =>
-                  addToast("Em breve: Agendamento de aulas", "info")
-                }
-              >
-                <Calendar size={16} /> Nova Aula
-              </PrimaryBtn>
-            </SectionHeader>
-            <ClassAgendaList>
-              {events.map((ev, idx) => {
-                const dateObj = new Date(ev.date + "T00:00:00");
-                const day = isNaN(dateObj.getTime())
-                  ? ev.date.split("-")[2] || "?"
-                  : dateObj.getDate().toString().padStart(2, "0");
-                const month = isNaN(dateObj.getTime())
-                  ? "Mês"
-                  : dateObj.toLocaleString("pt-BR", { month: "short" });
-                return (
-                  <AgendaItem key={idx}>
-                    <AgendaDateBox>
-                      <strong>{day}</strong>
-                      <span>{month}</span>
-                    </AgendaDateBox>
-                    <AgendaContent>
-                      <strong>{ev.title}</strong>
-                      <span>
-                        <Clock size={14} /> {ev.startTime} - {ev.endTime}
-                      </span>
-                    </AgendaContent>
-                  </AgendaItem>
-                );
-              })}
-            </ClassAgendaList>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <PanelTitle>Agenda da Turma</PanelTitle>
+            <ScheduleCard>
+              <ScheduleIcon>
+                <Calendar size={20} />
+              </ScheduleIcon>
+              <ScheduleCol>
+                <small>Horário fixo</small>
+                <strong>Terça e Quinta</strong>
+              </ScheduleCol>
+              <ScheduleCol>
+                <small>Início — Fim</small>
+                <strong>18:30 — 19:30</strong>
+              </ScheduleCol>
+            </ScheduleCard>
+
+            <PanelTitle>Próximas Aulas</PanelTitle>
+            <UpcomingList>
+              {upcoming.map((ev) => (
+                <UpcomingRow key={ev.id}>
+                  <DateChip>
+                    <strong>{ev.day}</strong>
+                    <span>{ev.month}</span>
+                  </DateChip>
+                  <UpcomingInfo>
+                    <strong>{ev.weekday}</strong>
+                    <span>{ev.time}</span>
+                  </UpcomingInfo>
+                  <UpcomingActions>
+                    {ev.status === "ready" && (
+                      <>
+                        <StatusHint $tone="ok">
+                          {ev.confirmed}/{ev.total} confirmados
+                        </StatusHint>
+                        <ConfirmBtn
+                          onClick={() =>
+                            addToast("Presença confirmada (demo).", "success")
+                          }
+                        >
+                          Confirmar presença
+                        </ConfirmBtn>
+                      </>
+                    )}
+                    {ev.status === "partial" && (
+                      <StatusHint $tone="warn">
+                        <Video size={14} /> {ev.confirmed}/{ev.total} confirmado
+                      </StatusHint>
+                    )}
+                    {ev.status === "waiting" && (
+                      <StatusHint $tone="wait">Aguardando respostas</StatusHint>
+                    )}
+                  </UpcomingActions>
+                </UpcomingRow>
+              ))}
+            </UpcomingList>
+
+            <PanelTitle>Histórico de Aulas</PanelTitle>
+            <HistoryWrap>
+              <HistoryTable>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Presenças</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((row) => (
+                    <tr key={row.date}>
+                      <td>{row.date}</td>
+                      <td>{row.time}</td>
+                      <td>{row.presence}</td>
+                      <td>
+                        <DoneBadge>{row.status}</DoneBadge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </HistoryTable>
+            </HistoryWrap>
           </motion.div>
         )}
 
         {activeTab === "alunos" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SectionHeader>
-              <SectionTitle>
-                <Users size={24} /> Alunos Matriculados
-              </SectionTitle>
-            </SectionHeader>
-            <StudentsGrid>
-              <div
-                style={{ textAlign: "center", color: "#999", padding: "2rem" }}
-              >
-                <Users
-                  size={48}
-                  style={{ opacity: 0.3, marginBottom: "1rem" }}
-                />
-                <p>
-                  Alunos desta turma serão exibidos aqui quando disponíveis na
-                  API.
-                </p>
-              </div>
-            </StudentsGrid>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <PanelTitle>Alunos da Turma</PanelTitle>
+            <StudentList>
+              {MOCK_STUDENTS.map((s) => (
+                <StudentRow key={s.id}>
+                  <StackAvatar $color={s.color} $index={0}>
+                    {getInitials(s.name)}
+                  </StackAvatar>
+                  <div>
+                    <strong style={{ color: "#1f2b45" }}>{s.name}</strong>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                      Aluno ativo
+                    </div>
+                  </div>
+                </StudentRow>
+              ))}
+            </StudentList>
           </motion.div>
         )}
 
         {activeTab === "atestados" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SectionHeader>
-              <SectionTitle>
-                <Stethoscope size={24} /> Atestados e Justificativas de Faltas
-              </SectionTitle>
-            </SectionHeader>
-
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <PanelTitle>Atestados Médicos</PanelTitle>
             <JustificationList>
               {justifications.map((just) => (
                 <JustificationItem key={just.id}>
@@ -526,7 +560,9 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "1.5rem",
+                        gap: "1rem",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
                       }}
                     >
                       <span
@@ -536,46 +572,25 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
                           display: "flex",
                           alignItems: "center",
                           gap: "0.4rem",
-                          cursor: "pointer",
-                          textDecoration: "underline",
                         }}
                       >
                         <Paperclip size={14} /> {just.document}
                       </span>
                       <JustificationStatus $status={just.status}>
                         {just.status === "Aceito" ? (
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                             <CheckCircle size={14} /> Aceito
                           </span>
                         ) : just.status === "Recusado" ? (
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                             <X size={14} /> Recusado
                           </span>
                         ) : (
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                             <Clock size={14} /> Em Análise
                           </span>
                         )}
                       </JustificationStatus>
-
                       {just.status === "Em Análise" && (
                         <ActionGroup>
                           <JustificationActionBtn
@@ -613,8 +628,6 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
                           background: "#f8f9fc",
                           padding: "0.4rem 0.8rem",
                           borderRadius: "8px",
-                          maxWidth: "300px",
-                          textAlign: "right",
                         }}
                       >
                         <strong>Feedback:</strong> {just.feedback}
@@ -626,27 +639,38 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
             </JustificationList>
           </motion.div>
         )}
-      </DetailContent>
+      </WorkspaceBody>
 
       {showMaterialModal && (
         <AddMaterialModal
-          onClose={() => {
-            setShowMaterialModal(false);
-            setEditingMaterialIndex(null);
+          lessons={LESSONS}
+          materials={materials}
+          onClose={() => setShowMaterialModal(false)}
+          onAddFiles={(lessonId, files) => {
+            const added = files.map((file) => ({
+              id: `${Date.now()}-${file.name}`,
+              title: file.name,
+              type: file.name.toLowerCase().endsWith(".pdf")
+                ? ("pdf" as const)
+                : ("docx" as const),
+              url: URL.createObjectURL(file),
+              lessonId,
+              addedAt: new Date().toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              }),
+            }));
+            setMaterials((prev) => [...added, ...prev]);
+            addToast("Material adicionado (somente nesta tela).", "success");
           }}
-          onSave={handleAddMaterial}
-          initialData={
-            editingMaterialIndex !== null
-              ? materials[editingMaterialIndex]
-              : undefined
+          onRename={(id, title) =>
+            setMaterials((prev) =>
+              prev.map((m) => (m.id === id ? { ...m, title } : m)),
+            )
           }
-        />
-      )}
-
-      {showEventModal && (
-        <AddClassEventModal
-          onClose={() => setShowEventModal(false)}
-          onSave={handleAddEvent}
+          onDelete={(id) =>
+            setMaterials((prev) => prev.filter((m) => m.id !== id))
+          }
         />
       )}
 
@@ -658,7 +682,7 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
           onConfirm={handleEvaluateJustification}
         />
       )}
-    </DetailContainer>
+    </ClassWorkspace>
   );
 };
 

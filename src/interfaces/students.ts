@@ -46,6 +46,7 @@ export interface UpdateStudentParams {
   birthdate?: string | null;
   level_id?: number | null;
   vip?: 0 | 1;
+  active?: 0 | 1;
   notes?: string;
   class_id?: number | null;
 }

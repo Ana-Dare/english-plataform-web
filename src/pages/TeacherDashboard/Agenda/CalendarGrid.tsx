@@ -17,6 +17,7 @@ import {
   DayCell,
   DayNumber,
   EventChip,
+  ScrollWrapper
 } from "./style";
 import type { CalendarEvent } from "./EventModal";
 
@@ -56,7 +57,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const monthStart = startOfMonth(currentMonth);
 
   return (
-    <CalendarGridContainer $isWeekly={viewMode === 'semanal'}>
+    <ScrollWrapper>
+      <CalendarGridContainer $isWeekly={viewMode === 'semanal'}>
       {weekDays.map((day) => (
         <WeekDayHeader key={day}>{day}</WeekDayHeader>
       ))}
@@ -98,6 +100,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         );
       })}
     </CalendarGridContainer>
+    </ScrollWrapper>
   );
 };
 

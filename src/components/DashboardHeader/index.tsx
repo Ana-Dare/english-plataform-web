@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+﻿import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   HeaderContainer,
   HeaderContent,
@@ -26,20 +26,20 @@ import {
   LogOut,
   Menu,
   UserCircle,
-  Settings,
+  Settings, Trash2, X,
 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useProfile } from "../../contexts/ProfileContext";
 import { useAuth } from "../../contexts/Auth/AuthContext";
 import { getInitials, getAvatarColorByName } from "../../utils/avatar";
 
-const notificationsData = [
+const INITIAL_NOTIFS = [
   {
     id: 1,
     title: "Nova atividade",
     time: "17:32",
     deadline: "Prazo de envio: 9 de junho",
-    desc: "Análise e produção textual",
+    desc: "Análise e produção textual. A atividade requer a leitura do capítulo 4 do livro base e elaboração de uma resenha crítica contendo introdução, desenvolvimento e conclusão.",
     unread: true,
   },
   {
@@ -47,7 +47,7 @@ const notificationsData = [
     title: "Nova atividade",
     time: "18:00",
     deadline: "Prazo de envio: 17 de junho",
-    desc: "Análise e produção textual",
+    desc: "Análise e produção textual. Exercício de fixação sobre os verbos modais e estruturas de condicionais. Deve ser entregue via plataforma em formato PDF.",
     unread: false,
   },
   {
@@ -55,7 +55,7 @@ const notificationsData = [
     title: "Nova prova 24 de junho",
     time: "02/06",
     deadline: "Data de aplicação:",
-    desc: "Análise e produção textual",
+    desc: "Análise e produção textual. A prova cobrirá todo o conteúdo visto no primeiro bimestre. O teste terá duração de 2 horas e será realizado no laboratório de informática.",
     unread: false,
   },
   {
@@ -63,7 +63,7 @@ const notificationsData = [
     title: "Feedback recebido",
     time: "30/05",
     deadline: "Desempenho no primeiro bimestre",
-    desc: "Notas, Atividades e Participação",
+    desc: "Notas, Atividades e Participação. Seu desempenho foi excelente! A professora destacou sua ótima participação nas aulas de speaking.",
     unread: false,
   },
 ];
@@ -82,39 +82,29 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onNavigate,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile } = useProfile();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
-  const [notifications, setNotifications] = useState(notificationsData);
+  const [notifs, setNotifs] = useState(INITIAL_NOTIFS);
+  const [selectedNotif, setSelectedNotif] = useState<any>(null);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Use auth user data first, then profile data, then fallback to props
-  const displayName =
-    user?.name ||
-    (profile.firstName && profile.lastName
-      ? `${profile.firstName} ${profile.lastName}`
-      : userName);
+  const displayName = user?.name || profile.name || userName;
   const displayEmail = user?.email || profile.email || userEmail;
   const avatarColor = user ? getAvatarColorByName(user.name) : "#1F2B45";
   const avatarInitials = user ? getInitials(user.name) : "US";
 
-  // Close modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        notifRef.current &&
-        !notifRef.current.contains(event.target as Node)
-      ) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
       }
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
       }
     };
@@ -136,62 +126,41 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const filteredNotifs = showOnlyUnread
-    ? notifications.filter((n) => n.unread)
-    : notifications;
+    ? notifs.filter((n) => n.unread)
+    : notifs;
 
-  const handleNotifClick = (notif: any) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notif.id ? { ...n, unread: false } : n)),
-    );
-    setIsNotifOpen(false);
-    // Wait, onNavigate doesn't take an ID parameter currently. I'll need to update the prop definition if I want it.
-    // For now, I can just use a generic 'notificacoes' tab and TeacherDashboard can manage it, or I can update the prop.
-    onNavigate?.("notificacoes");
-
-    // I will fire a custom event with the notification ID so the NotificationsTab can intercept it
-    const event = new CustomEvent("openNotification", { detail: notif.id });
-    window.dispatchEvent(event);
+  const handleDeleteNotif = (id: number) => {
+    setNotifs(notifs.filter(n => n.id !== id));
+    setSelectedNotif(null);
   };
 
-  const dropdownVariants = {
+  const handleNotifClick = (notif: any) => {
+    setSelectedNotif(notif);
+    setIsNotifOpen(false);
+    if (notif.unread) {
+      setNotifs(notifs.map(n => n.id === notif.id ? { ...n, unread: false } : n));
+    }
+  };
+
+  const dropdownVariants: Variants = {
     hidden: { opacity: 0, y: -10, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.2, ease: "easeOut" },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-      transition: { duration: 0.15, ease: "easeIn" },
-    },
-  } satisfies Variants;
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } },
+    exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.2 } }
+  };
 
   return (
     <HeaderContainer>
       <HeaderContent>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {onOpenMenu && (
-            <button
-              onClick={onOpenMenu}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                alignItems: "center",
-                color: "#ffffff",
-              }}
-              className="mobile-menu-btn"
-            >
+            <button className="mobile-menu-btn" style={{ background: "transparent", border: "none", color: "white", cursor: "pointer" }} onClick={onOpenMenu}>
               <Menu size={24} />
             </button>
           )}
+          <Greeting>Good evening, {displayName}</Greeting>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Greeting>Good evening, {displayName}</Greeting>
           {/* Notifications */}
           <div ref={notifRef}>
             <NotificationIcon
@@ -201,6 +170,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               }}
             >
               <Bell size={20} />
+              {notifs.some((n) => n.unread) && <div className="badge" />}
             </NotificationIcon>
             <AnimatePresence>
               {isNotifOpen && (
@@ -228,13 +198,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                           key={notif.id}
                           $unread={notif.unread}
                           onClick={() => handleNotifClick(notif)}
+                          style={{ cursor: "pointer" }}
                         >
                           <div className="title-row">
                             <h4>{notif.title}</h4>
                             <span className="time">{notif.time}</span>
                           </div>
                           <p className="deadline">{notif.deadline}</p>
-                          <p className="desc">{notif.desc}</p>
+                          <p className="desc" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{notif.desc}</p>
                           {notif.unread && <div className="indicator" />}
                         </NotifItem>
                       ))
@@ -322,12 +293,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       <UserCircle />
                       Perfil
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => navigate("/admin-dashboard")}
-                    >
-                      <Settings />
-                      Administração
-                    </DropdownMenuItem>
+                    {!location.pathname.includes('/student-dashboard') && user?.role !== "student" && role !== "student" && (
+                      <DropdownMenuItem onClick={() => navigate("/admin-dashboard")}>
+                        <Settings />
+                        Administração
+                      </DropdownMenuItem>
+                    )}
                     <DropdownDivider />
                     <LogoutButton onClick={handleLogout}>
                       <LogOut />
@@ -340,6 +311,95 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
         </div>
       </HeaderContent>
+
+      <AnimatePresence>
+        {selectedNotif && (
+          <div style={{
+            position: "fixed",
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: "rgba(31, 43, 69, 0.5)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999
+          }} onClick={() => setSelectedNotif(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: "white",
+                borderRadius: "16px",
+                width: "90%",
+                maxWidth: "500px",
+                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column"
+              }}
+            >
+              <div style={{
+                padding: "24px",
+                borderBottom: "1px solid #F1F5F9",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start"
+              }}>
+                <div>
+                  <h2 style={{ margin: "0 0 8px 0", fontSize: "1.25rem", color: "#1E293B", fontWeight: 700 }}>{selectedNotif.title}</h2>
+                  <span style={{ fontSize: "0.85rem", color: "#64748B", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Bell size={14} /> {selectedNotif.deadline}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setSelectedNotif(null)}
+                  style={{ background: "transparent", border: "none", cursor: "pointer", color: "#94A3B8", padding: "4px" }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div style={{ padding: "24px", color: "#475569", fontSize: "0.95rem", lineHeight: "1.6" }}>
+                <p style={{ margin: 0 }}>{selectedNotif.desc}</p>
+              </div>
+              
+              <div style={{
+                padding: "16px 24px",
+                backgroundColor: "#F8FAFC",
+                borderTop: "1px solid #F1F5F9",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}>
+                <span style={{ fontSize: "0.8rem", color: "#94A3B8" }}>Recebido às {selectedNotif.time}</span>
+                <button
+                  onClick={() => handleDeleteNotif(selectedNotif.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    background: "#FEF2F2",
+                    color: "#EF4444",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "background-color 0.2s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#FEE2E2"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FEF2F2"}
+                >
+                  <Trash2 size={16} /> Excluir
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </HeaderContainer>
   );
 };
