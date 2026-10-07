@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   MessageSquare,
@@ -12,17 +12,30 @@ import {
   MoreHorizontal,
   Plus,
   Download,
-  Pencil,
   Trash2,
   Video,
+  Loader2,
 } from "lucide-react";
 import { Check, X } from "lucide-react";
 import { motion } from "framer-motion";
 import AddMaterialModal from "./AddMaterialModal";
-import type { MaterialData } from "./AddMaterialModal";
+import AddClassEventModal from "./AddClassEventModal";
+import type { ClassEventData } from "./AddClassEventModal";
 import EvaluateJustificationModal from "./EvaluateJustificationModal";
 import useToast from "../../../contexts/Toast/useToast";
 import { getInitials } from "../../../utils/avatar";
+import {
+  listClassLessons,
+  listLessonMaterials,
+  uploadLessonMaterial,
+  deleteLessonMaterial,
+  createClassLesson,
+  type Lesson,
+  type LessonMaterial,
+  type LessonStatus,
+} from "../services/material";
+import { listClassStudents, type ClassStudent } from "../services/class";
+import { listLevels } from "../services/level";
 import {
   JustificationList,
   JustificationItem,
@@ -65,7 +78,6 @@ import {
   UpcomingInfo,
   UpcomingActions,
   StatusHint,
-  ConfirmBtn,
   HistoryWrap,
   HistoryTable,
   DoneBadge,
@@ -92,15 +104,103 @@ interface ClassDetailProps {
 
 type TabId = "mural" | "materiais" | "agenda" | "alunos" | "atestados";
 
-const MOCK_STUDENTS = [
+// Alunos fictícios usados apenas na turma de demonstração (id <= 0).
+const DEMO_STUDENTS = [
   { id: 1, name: "Ana Souza", color: "#3B82F6" },
   { id: 2, name: "Carlos Silva", color: "#F59E0B" },
 ];
 
-const LESSONS = [
-  { id: "aula-2", label: "Aula 2", selectLabel: "Terça, 01/09 - 19:00" },
-  { id: "aula-1", label: "Aula 1", selectLabel: "Quinta, 27/08 - 19:00" },
+const AVATAR_COLORS = [
+  "#3B82F6",
+  "#F59E0B",
+  "#8B5CF6",
+  "#10B981",
+  "#EF4444",
+  "#0EA5E9",
 ];
+
+const WEEKDAYS = [
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
+];
+
+const MONTHS_SHORT = [
+  "JAN",
+  "FEV",
+  "MAR",
+  "ABR",
+  "MAI",
+  "JUN",
+  "JUL",
+  "AGO",
+  "SET",
+  "OUT",
+  "NOV",
+  "DEZ",
+];
+
+const WEEKDAYS_FULL = [
+  "Domingo",
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+];
+
+function formatLessonLabel(lesson: Lesson): string {
+  const date = new Date(lesson.startTime);
+  if (Number.isNaN(date.valueOf())) return lesson.title;
+  const weekday = WEEKDAYS[date.getDay()];
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const time = date.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${lesson.title} — ${weekday}, ${day}/${month} ${time}`;
+}
+
+// Soma a duração HH:MM:SS ao horário inicial para obter o fim da aula.
+function lessonTimeRange(lesson: Lesson): string {
+  const start = new Date(lesson.startTime);
+  if (Number.isNaN(start.valueOf())) return "";
+  const [h = "0", m = "0"] = lesson.duration.split(":");
+  const end = new Date(start.getTime() + (Number(h) * 60 + Number(m)) * 60000);
+  const fmt = (d: Date) =>
+    d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${fmt(start)} – ${fmt(end)}`;
+}
+
+interface LessonCardView {
+  id: number;
+  day: string;
+  month: string;
+  weekday: string;
+  time: string;
+  title: string;
+  status: LessonStatus;
+}
+
+function toLessonCard(lesson: Lesson): LessonCardView {
+  const date = new Date(lesson.startTime);
+  const valid = !Number.isNaN(date.valueOf());
+  return {
+    id: lesson.id,
+    day: valid ? String(date.getDate()).padStart(2, "0") : "--",
+    month: valid ? MONTHS_SHORT[date.getMonth()] : "",
+    weekday: valid ? WEEKDAYS_FULL[date.getDay()] : lesson.title,
+    time: lessonTimeRange(lesson),
+    title: lesson.title,
+    status: lesson.status,
+  };
+}
 
 const CEFR_BY_LEVEL: Record<number, string> = {
   1: "A1",
@@ -132,86 +232,14 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
   ]);
 
   const [showMaterialModal, setShowMaterialModal] = useState(false);
-  const [materials, setMaterials] = useState<MaterialData[]>([
-    {
-      id: "m1",
-      title: "Vocabulary List — Travel.docx",
-      type: "docx",
-      url: "#",
-      lessonId: "aula-2",
-      addedAt: "22/08",
-    },
-    {
-      id: "m2",
-      title: "Verbs activity — Weather.docx",
-      type: "docx",
-      url: "#",
-      lessonId: "aula-2",
-      addedAt: "22/08",
-    },
-    {
-      id: "m3",
-      title: "Present perfect.docx",
-      type: "docx",
-      url: "#",
-      lessonId: "aula-1",
-      addedAt: "22/08",
-    },
-  ]);
-
-  const [upcoming] = useState([
-    {
-      id: 1,
-      day: "12",
-      month: "SET",
-      weekday: "Terça-feira",
-      time: "18:30 – 19:30",
-      confirmed: 2,
-      total: 2,
-      status: "ready" as const,
-    },
-    {
-      id: 2,
-      day: "14",
-      month: "SET",
-      weekday: "Quinta-feira",
-      time: "18:30 – 19:30",
-      confirmed: 1,
-      total: 2,
-      status: "partial" as const,
-    },
-    {
-      id: 3,
-      day: "04",
-      month: "SET",
-      weekday: "Terça-feira",
-      time: "18:30 – 19:30",
-      confirmed: 0,
-      total: 2,
-      status: "waiting" as const,
-    },
-  ]);
-
-  const history = [
-    {
-      date: "07 set 2026",
-      time: "18:30 – 19:30",
-      presence: "2 presentes",
-      status: "Concluída",
-    },
-    {
-      date: "05 set 2026",
-      time: "18:30 – 19:30",
-      presence: "1 presente • 1 falta",
-      status: "Concluída",
-    },
-    {
-      date: "31 ago 2026",
-      time: "18:30 – 19:30",
-      presence: "2 presentes",
-      status: "Concluída",
-    },
-  ];
+  const [showLessonModal, setShowLessonModal] = useState(false);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [materials, setMaterials] = useState<LessonMaterial[]>([]);
+  const [classStudents, setClassStudents] = useState<ClassStudent[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [creatingLesson, setCreatingLesson] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const [justifications, setJustifications] = useState([
     {
@@ -242,13 +270,194 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
 
   const cefr = CEFR_BY_LEVEL[classData.level_id || 2] || "A2";
   const className = classData.name || "Turma Intermediate A";
+  const [levelName, setLevelName] = useState<string | null>(null);
+  // Turmas de demonstração usam id <= 0 e não aceitam operações reais na API.
+  const canManageLessons = !!classData.id && classData.id > 0;
+
+  // Alunos exibidos: reais quando a turma existe, fictícios na demonstração.
+  const displayStudents = useMemo(() => {
+    if (!canManageLessons) return DEMO_STUDENTS;
+    return classStudents.map((s, i) => ({
+      id: s.studentId,
+      name: s.name,
+      color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+    }));
+  }, [canManageLessons, classStudents]);
+
+  const lessonOptions = useMemo(
+    () =>
+      lessons.map((lesson) => ({
+        id: String(lesson.id),
+        label: lesson.title,
+        selectLabel: formatLessonLabel(lesson),
+      })),
+    [lessons],
+  );
 
   const materialsByLesson = useMemo(() => {
-    return LESSONS.map((lesson) => ({
-      ...lesson,
-      items: materials.filter((m) => m.lessonId === lesson.id),
-    })).filter((g) => g.items.length > 0);
-  }, [materials]);
+    return lessons
+      .map((lesson) => ({
+        id: lesson.id,
+        label: formatLessonLabel(lesson),
+        items: materials.filter((m) => m.lessonId === lesson.id),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [lessons, materials]);
+
+  // Aulas agendadas, exibidas em "Próximas Aulas".
+  const upcoming = useMemo(
+    () => lessons.filter((l) => l.status === "scheduled").map(toLessonCard),
+    [lessons],
+  );
+
+  // Aulas já realizadas ou canceladas, exibidas no "Histórico de Aulas".
+  const history = useMemo(() => {
+    return lessons
+      .filter((l) => l.status === "completed" || l.status === "cancelled")
+      .map((l) => {
+        const date = new Date(l.startTime);
+        const valid = !Number.isNaN(date.valueOf());
+        return {
+          id: l.id,
+          date: valid
+            ? date.toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+            : "--",
+          time: lessonTimeRange(l),
+          title: l.title,
+          status: l.status === "cancelled" ? "Cancelada" : "Concluída",
+        };
+      });
+  }, [lessons]);
+
+  const loadLessonsAndMaterials = useCallback(
+    async (classId: number) => {
+      setMaterialsLoading(true);
+      try {
+        const [classLessons, students] = await Promise.all([
+          listClassLessons(classId),
+          listClassStudents(classId),
+        ]);
+        setLessons(classLessons);
+        setClassStudents(students);
+        const perLesson = await Promise.all(
+          classLessons.map((lesson) => listLessonMaterials(lesson.id)),
+        );
+        setMaterials(perLesson.flat());
+      } catch {
+        addToast("Não foi possível carregar os dados da turma.", "error");
+      } finally {
+        setMaterialsLoading(false);
+      }
+    },
+    [addToast],
+  );
+
+  // Busca o nome real do nível da turma para exibir no banner.
+  useEffect(() => {
+    const levelId = classData.level_id;
+    if (!levelId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLevelName(null);
+      return;
+    }
+    let active = true;
+    (async () => {
+      try {
+        const { levels } = await listLevels();
+        if (!active) return;
+        const match = levels.find((l) => l.id === levelId);
+        setLevelName(match?.name ?? null);
+      } catch {
+        if (active) setLevelName(null);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [classData.level_id]);
+
+  useEffect(() => {
+    const classId = classData.id;
+    // Turmas de demonstração usam id <= 0 e não têm aulas reais no banco.
+    if (!classId || classId <= 0) return;
+    let active = true;
+    (async () => {
+      if (active) await loadLessonsAndMaterials(classId);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [classData.id, loadLessonsAndMaterials]);
+
+  const handleCreateLesson = async (data: ClassEventData) => {
+    const classId = classData.id;
+    if (!classId || classId <= 0) {
+      addToast(
+        "Salve a turma antes de agendar aulas (turma de demonstração).",
+        "warning",
+      );
+      return;
+    }
+    setCreatingLesson(true);
+    try {
+      const lesson = await createClassLesson(classId, {
+        title: data.title,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+      });
+      setLessons((prev) =>
+        [...prev, lesson].sort(
+          (a, b) =>
+            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+        ),
+      );
+      addToast("Aula agendada com sucesso!", "success");
+      setShowLessonModal(false);
+    } catch {
+      addToast("Não foi possível agendar a aula. Tente novamente.", "error");
+    } finally {
+      setCreatingLesson(false);
+    }
+  };
+
+  const handleUploadMaterials = async (lessonId: number, files: File[]) => {
+    setUploading(true);
+    try {
+      const created: LessonMaterial[] = [];
+      for (const file of files) {
+        created.push(await uploadLessonMaterial(lessonId, file));
+      }
+      setMaterials((prev) => [...created, ...prev]);
+      addToast(
+        files.length > 1
+          ? "Materiais enviados com sucesso!"
+          : "Material enviado com sucesso!",
+        "success",
+      );
+    } catch {
+      addToast("Não foi possível enviar o material. Tente novamente.", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteMaterial = async (material: LessonMaterial) => {
+    setDeletingId(material.id);
+    try {
+      await deleteLessonMaterial(material.lessonId, material.id);
+      setMaterials((prev) => prev.filter((m) => m.id !== material.id));
+      addToast("Material removido.", "success");
+    } catch {
+      addToast("Não foi possível remover o material.", "error");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
@@ -296,20 +505,23 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
             <BackLink onClick={onBack}>
               <ArrowLeft size={14} /> Voltar
             </BackLink>
-            <ClassBannerTitle style={{ marginTop: "0.4rem" }}>{className}</ClassBannerTitle>
+            <ClassBannerTitle style={{ marginTop: "0.4rem" }}>
+              {className}
+            </ClassBannerTitle>
             <ClassBannerMeta>
-              <SoftBadge>Intermediate</SoftBadge>
+              <SoftBadge>{levelName || "Sem nível"}</SoftBadge>
               <CefrBadge>{cefr}</CefrBadge>
               <ExtraBadge>+</ExtraBadge>
               <StudentsCount>
                 <AvatarStack>
-                  {MOCK_STUDENTS.map((s, i) => (
+                  {displayStudents.slice(0, 5).map((s, i) => (
                     <StackAvatar key={s.id} $color={s.color} $index={i}>
                       {getInitials(s.name)}
                     </StackAvatar>
                   ))}
                 </AvatarStack>
-                {MOCK_STUDENTS.length} alunos
+                {displayStudents.length}{" "}
+                {displayStudents.length === 1 ? "aluno" : "alunos"}
               </StudentsCount>
             </ClassBannerMeta>
           </div>
@@ -331,7 +543,10 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
 
       <WorkspaceBody>
         {activeTab === "mural" && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <PanelTitle>Avisos para a turma</PanelTitle>
             <ComposeRow>
               <input
@@ -371,64 +586,106 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
         )}
 
         {activeTab === "materiais" && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <PanelHeaderRow>
-              <PanelTitle style={{ margin: 0 }}>Materiais & atividades</PanelTitle>
-              <AddPill onClick={() => setShowMaterialModal(true)}>
+              <PanelTitle style={{ margin: 0 }}>
+                Materiais & atividades
+              </PanelTitle>
+              <AddPill
+                onClick={() => setShowMaterialModal(true)}
+                disabled={!canManageLessons || lessons.length === 0}
+              >
                 <Plus size={14} /> Adicionar
               </AddPill>
             </PanelHeaderRow>
-            {materialsByLesson.map((group) => (
-              <LessonBlock key={group.id}>
-                <h3>{group.label}</h3>
-                {group.items.map((mat) => (
-                  <MaterialRow key={mat.id}>
-                    <FileGlyph>
-                      {mat.type === "video" ? (
-                        <Video size={16} />
-                      ) : (
-                        <FileText size={16} />
-                      )}
-                    </FileGlyph>
-                    <FileMeta>
-                      <strong>{mat.title}</strong>
-                      <span>Adicionado em {mat.addedAt}</span>
-                    </FileMeta>
-                    <RowActions>
-                      <RowIconBtn
-                        type="button"
-                        title="Baixar"
-                        onClick={() => addToast("Download iniciado (demo).", "info")}
-                      >
-                        <Download size={16} />
-                      </RowIconBtn>
-                      <RowIconBtn
-                        type="button"
-                        title="Editar"
-                        onClick={() => setShowMaterialModal(true)}
-                      >
-                        <Pencil size={16} />
-                      </RowIconBtn>
-                      <RowIconBtn
-                        $danger
-                        type="button"
-                        title="Excluir"
-                        onClick={() =>
-                          setMaterials((prev) => prev.filter((m) => m.id !== mat.id))
-                        }
-                      >
-                        <Trash2 size={16} />
-                      </RowIconBtn>
-                    </RowActions>
-                  </MaterialRow>
-                ))}
+            {materialsLoading ? (
+              <LessonBlock>
+                <p
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    color: "#64748b",
+                  }}
+                >
+                  <Loader2 size={16} className="spin" /> Carregando materiais...
+                </p>
               </LessonBlock>
-            ))}
+            ) : materialsByLesson.length === 0 ? (
+              <LessonBlock>
+                <p style={{ color: "#64748b", marginBottom: "0.75rem" }}>
+                  {!canManageLessons
+                    ? "Turma de demonstração — salve a turma para gerenciar aulas e materiais."
+                    : lessons.length === 0
+                      ? "Nenhuma aula cadastrada ainda. Agende uma aula para poder enviar materiais."
+                      : "Nenhum material enviado. Use o botão Adicionar para enviar o primeiro."}
+                </p>
+                {canManageLessons && lessons.length === 0 && (
+                  <AddPill
+                    onClick={() => setShowLessonModal(true)}
+                    disabled={creatingLesson}
+                  >
+                    <Plus size={14} /> Agendar aula
+                  </AddPill>
+                )}
+              </LessonBlock>
+            ) : (
+              materialsByLesson.map((group) => (
+                <LessonBlock key={group.id}>
+                  <h3>{group.label}</h3>
+                  {group.items.map((mat) => (
+                    <MaterialRow key={mat.id}>
+                      <FileGlyph>
+                        {mat.type === "image" ? (
+                          <Video size={16} />
+                        ) : (
+                          <FileText size={16} />
+                        )}
+                      </FileGlyph>
+                      <FileMeta>
+                        <strong>{mat.file}</strong>
+                        <span>{mat.type.toUpperCase()}</span>
+                      </FileMeta>
+                      <RowActions>
+                        <RowIconBtn
+                          as="a"
+                          href={mat.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Baixar"
+                        >
+                          <Download size={16} />
+                        </RowIconBtn>
+                        <RowIconBtn
+                          $danger
+                          type="button"
+                          title="Excluir"
+                          disabled={deletingId === mat.id}
+                          onClick={() => handleDeleteMaterial(mat)}
+                        >
+                          {deletingId === mat.id ? (
+                            <Loader2 size={16} className="spin" />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
+                        </RowIconBtn>
+                      </RowActions>
+                    </MaterialRow>
+                  ))}
+                </LessonBlock>
+              ))
+            )}
           </motion.div>
         )}
 
         {activeTab === "agenda" && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <PanelTitle>Agenda da Turma</PanelTitle>
             <ScheduleCard>
               <ScheduleIcon>
@@ -444,97 +701,120 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
               </ScheduleCol>
             </ScheduleCard>
 
-            <PanelTitle>Próximas Aulas</PanelTitle>
-            <UpcomingList>
-              {upcoming.map((ev) => (
-                <UpcomingRow key={ev.id}>
-                  <DateChip>
-                    <strong>{ev.day}</strong>
-                    <span>{ev.month}</span>
-                  </DateChip>
-                  <UpcomingInfo>
-                    <strong>{ev.weekday}</strong>
-                    <span>{ev.time}</span>
-                  </UpcomingInfo>
-                  <UpcomingActions>
-                    {ev.status === "ready" && (
-                      <>
-                        <StatusHint $tone="ok">
-                          {ev.confirmed}/{ev.total} confirmados
-                        </StatusHint>
-                        <ConfirmBtn
-                          onClick={() =>
-                            addToast("Presença confirmada (demo).", "success")
-                          }
-                        >
-                          Confirmar presença
-                        </ConfirmBtn>
-                      </>
-                    )}
-                    {ev.status === "partial" && (
-                      <StatusHint $tone="warn">
-                        <Video size={14} /> {ev.confirmed}/{ev.total} confirmado
+            <PanelHeaderRow>
+              <PanelTitle style={{ margin: 0 }}>Próximas Aulas</PanelTitle>
+              <AddPill
+                onClick={() => setShowLessonModal(true)}
+                disabled={creatingLesson || !canManageLessons}
+              >
+                <Plus size={14} /> Agendar aula
+              </AddPill>
+            </PanelHeaderRow>
+            {materialsLoading ? (
+              <StatusHint $tone="wait">
+                <Loader2 size={14} className="spin" /> Carregando aulas...
+              </StatusHint>
+            ) : upcoming.length === 0 ? (
+              <StatusHint $tone="wait">
+                {canManageLessons
+                  ? "Nenhuma aula agendada. Use o botão Agendar aula."
+                  : "Turma de demonstração — salve a turma para agendar aulas."}
+              </StatusHint>
+            ) : (
+              <UpcomingList>
+                {upcoming.map((ev) => (
+                  <UpcomingRow key={ev.id}>
+                    <DateChip>
+                      <strong>{ev.day}</strong>
+                      <span>{ev.month}</span>
+                    </DateChip>
+                    <UpcomingInfo>
+                      <strong>{ev.title}</strong>
+                      <span>
+                        {ev.weekday} • {ev.time}
+                      </span>
+                    </UpcomingInfo>
+                    <UpcomingActions>
+                      <StatusHint $tone="ok">
+                        <Video size={14} /> Agendada
                       </StatusHint>
-                    )}
-                    {ev.status === "waiting" && (
-                      <StatusHint $tone="wait">Aguardando respostas</StatusHint>
-                    )}
-                  </UpcomingActions>
-                </UpcomingRow>
-              ))}
-            </UpcomingList>
+                    </UpcomingActions>
+                  </UpcomingRow>
+                ))}
+              </UpcomingList>
+            )}
 
             <PanelTitle>Histórico de Aulas</PanelTitle>
-            <HistoryWrap>
-              <HistoryTable>
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Presenças</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((row) => (
-                    <tr key={row.date}>
-                      <td>{row.date}</td>
-                      <td>{row.time}</td>
-                      <td>{row.presence}</td>
-                      <td>
-                        <DoneBadge>{row.status}</DoneBadge>
-                      </td>
+            {history.length === 0 ? (
+              <StatusHint $tone="wait">Nenhuma aula no histórico.</StatusHint>
+            ) : (
+              <HistoryWrap>
+                <HistoryTable>
+                  <thead>
+                    <tr>
+                      <th>Aula</th>
+                      <th>Data</th>
+                      <th>Horário</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </HistoryTable>
-            </HistoryWrap>
+                  </thead>
+                  <tbody>
+                    {history.map((row) => (
+                      <tr key={row.id}>
+                        <td>{row.title}</td>
+                        <td>{row.date}</td>
+                        <td>{row.time}</td>
+                        <td>
+                          <DoneBadge>{row.status}</DoneBadge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </HistoryTable>
+              </HistoryWrap>
+            )}
           </motion.div>
         )}
 
         {activeTab === "alunos" && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <PanelTitle>Alunos da Turma</PanelTitle>
-            <StudentList>
-              {MOCK_STUDENTS.map((s) => (
-                <StudentRow key={s.id}>
-                  <StackAvatar $color={s.color} $index={0}>
-                    {getInitials(s.name)}
-                  </StackAvatar>
-                  <div>
-                    <strong style={{ color: "#1f2b45" }}>{s.name}</strong>
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-                      Aluno ativo
+            {materialsLoading ? (
+              <StatusHint $tone="wait">
+                <Loader2 size={14} className="spin" /> Carregando alunos...
+              </StatusHint>
+            ) : displayStudents.length === 0 ? (
+              <StatusHint $tone="wait">
+                Nenhum aluno vinculado a esta turma ainda.
+              </StatusHint>
+            ) : (
+              <StudentList>
+                {displayStudents.map((s) => (
+                  <StudentRow key={s.id}>
+                    <StackAvatar $color={s.color} $index={0}>
+                      {getInitials(s.name)}
+                    </StackAvatar>
+                    <div>
+                      <strong style={{ color: "#1f2b45" }}>{s.name}</strong>
+                      <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                        Aluno ativo
+                      </div>
                     </div>
-                  </div>
-                </StudentRow>
-              ))}
-            </StudentList>
+                  </StudentRow>
+                ))}
+              </StudentList>
+            )}
           </motion.div>
         )}
 
         {activeTab === "atestados" && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <PanelTitle>Atestados Médicos</PanelTitle>
             <JustificationList>
               {justifications.map((just) => (
@@ -578,15 +858,33 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
                       </span>
                       <JustificationStatus $status={just.status}>
                         {just.status === "Aceito" ? (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
                             <CheckCircle size={14} /> Aceito
                           </span>
                         ) : just.status === "Recusado" ? (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
                             <X size={14} /> Recusado
                           </span>
                         ) : (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
                             <Clock size={14} /> Em Análise
                           </span>
                         )}
@@ -643,34 +941,20 @@ const ClassDetail: React.FC<ClassDetailProps> = ({ classData, onBack }) => {
 
       {showMaterialModal && (
         <AddMaterialModal
-          lessons={LESSONS}
+          lessons={lessonOptions}
           materials={materials}
+          uploading={uploading}
+          deletingId={deletingId}
           onClose={() => setShowMaterialModal(false)}
-          onAddFiles={(lessonId, files) => {
-            const added = files.map((file) => ({
-              id: `${Date.now()}-${file.name}`,
-              title: file.name,
-              type: file.name.toLowerCase().endsWith(".pdf")
-                ? ("pdf" as const)
-                : ("docx" as const),
-              url: URL.createObjectURL(file),
-              lessonId,
-              addedAt: new Date().toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-              }),
-            }));
-            setMaterials((prev) => [...added, ...prev]);
-            addToast("Material adicionado (somente nesta tela).", "success");
-          }}
-          onRename={(id, title) =>
-            setMaterials((prev) =>
-              prev.map((m) => (m.id === id ? { ...m, title } : m)),
-            )
-          }
-          onDelete={(id) =>
-            setMaterials((prev) => prev.filter((m) => m.id !== id))
-          }
+          onAddFiles={handleUploadMaterials}
+          onDelete={handleDeleteMaterial}
+        />
+      )}
+
+      {showLessonModal && (
+        <AddClassEventModal
+          onClose={() => setShowLessonModal(false)}
+          onSave={handleCreateLesson}
         />
       )}
 

@@ -534,6 +534,12 @@ export const AddPill = styled.button`
   &:hover {
     background: #162033;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #1f2b45;
+  }
 `;
 
 export const LessonBlock = styled.div`
@@ -759,6 +765,11 @@ export const AddMaterialPill = styled.button`
 
   &:hover {
     background: #e2e8f0;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 

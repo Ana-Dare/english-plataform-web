@@ -5,6 +5,18 @@ import type {
   ListClassesRes,
 } from "../../../interfaces/classes";
 
+export interface ClassStudent {
+  id: number;
+  studentId: number;
+  userId: number;
+  name: string;
+  email: string;
+}
+
+interface ListClassStudentsRes {
+  students: ClassStudent[];
+}
+
 export async function createClass(
   params: CreateClassParams,
 ): Promise<CreateClassRes> {
@@ -28,4 +40,15 @@ export async function updateClass(
   params: Partial<CreateClassParams>,
 ): Promise<void> {
   await api.patch(`/classes/${classId}`, params);
+}
+
+// Lista os alunos vinculados a uma turma.
+export async function listClassStudents(
+  classId: number,
+): Promise<ClassStudent[]> {
+  const res = await api.get<ListClassStudentsRes>(
+    `/classes/${classId}/students`,
+  );
+
+  return res.data?.students ?? [];
 }

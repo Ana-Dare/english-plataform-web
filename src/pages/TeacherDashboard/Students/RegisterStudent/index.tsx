@@ -29,6 +29,7 @@ import { isValidBirthdate } from "../helpers/validateBirthdate";
 import useToast from "../../../../contexts/Toast/useToast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { listLevels, createLevel } from "../../services/level";
+import { listClasses } from "../../services/class";
 
 interface RegisterStudentProps {
   onBack: () => void;
@@ -39,13 +40,6 @@ interface RegisterStudentProps {
 const STEPS: StepDefinition[] = [
   { label: "Dados do Aluno", icon: "user" },
   { label: "Dados da Aula", icon: "book" },
-];
-
-const TURMAS = [
-  { value: "", label: "Não atribuída" },
-  { value: "turma-a", label: "Turma A" },
-  { value: "turma-b", label: "Turma B" },
-  { value: "turma-c", label: "Turma C" },
 ];
 
 const INITIAL_FORM: StudentFormState = {
@@ -94,6 +88,23 @@ const RegisterStudent = ({
     queryKey: ["levels"],
     queryFn: () => listLevels(),
   });
+
+  // Turmas reais para o dropdown de atribuição (opcional).
+  const { data: dataClasses } = useQuery({
+    queryKey: ["classes"],
+    queryFn: () => listClasses(),
+  });
+
+  const turmaOptions = React.useMemo(
+    () => [
+      { value: "", label: "Não atribuída" },
+      ...(dataClasses?.classes ?? []).map((c) => ({
+        value: String(c.id),
+        label: c.name,
+      })),
+    ],
+    [dataClasses],
+  );
 
   // Mutation para criar novo nível
   const createLevelMutation = useMutation({
@@ -208,6 +219,9 @@ const RegisterStudent = ({
       return;
     }
 
+    // Turma é opcional: valor vazio no dropdown => sem class_id.
+    const classId = form.turma ? Number(form.turma) : null;
+
     const payload: RegisterStudentParams = {
       name: form.name,
       cpf_hash: form.cpf_hash,
@@ -218,6 +232,7 @@ const RegisterStudent = ({
       level_id: form.level_id,
       notes: form.notes,
       active: form.active,
+      class_id: classId,
     };
 
     onSave(payload, form.photoBlob || undefined);
@@ -252,7 +267,7 @@ const RegisterStudent = ({
             <StepClassInfo
               form={form}
               levels={levels}
-              turmas={TURMAS}
+              turmas={turmaOptions}
               onChange={handleChange}
               onAddLevel={handleAddLevel}
               isAddingLevel={createLevelMutation.isPending}
