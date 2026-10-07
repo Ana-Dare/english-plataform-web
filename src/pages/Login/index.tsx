@@ -2,6 +2,8 @@ import { LoginStyle } from "./style";
 import Sidebar from "../../components/Sidebar";
 import FormLogin from "../../components/Form/login";
 
+// Componente de página de login que combina a barra 
+// lateral e o formulário de login.
 const Login = () => {
   return (
     <LoginStyle>

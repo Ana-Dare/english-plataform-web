@@ -1,6 +1,9 @@
 import { createContext, useContext, type Dispatch } from "react";
 import type { IForgotPassword, IResetPassword } from "../../interfaces/auth";
 
+// Contexto de autenticação que fornece funções de login, 
+// recuperação de senha e redefinição de senha, 
+// além do estado de autenticação, perfil e dados do usuário.
 export type UserRole = "student" | "teacher" | "admin";
 
 export interface IUserData {

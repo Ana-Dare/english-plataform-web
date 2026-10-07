@@ -7,28 +7,39 @@ import { Container, FormHeader, FormWrapper } from "../style";
 import Input from "../components/Input";
 import Button from "../../Button";
 
+// Tipagem para os erros de validação do formulário, 
+// permitindo que cada campo tenha uma mensagem opcional.
 type FieldErrors = {
   email?: string;
   password?: string;
 };
 
+// Expressão regular para validar o formato do email.
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Componente principal do formulário de login,
+// gerenciando estado, validação e envio.
 const FormLogin = () => {
+  // Estados para armazenar email, senha,
+  // visibilidade da senha, erros e status de envio.
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isVisiblePassword, setIsVisiblePassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
 
+  // Hooks para login e navegação, permitindo autenticação e redirecionamento.
   const { login } = useLogin();
   const navigate = useNavigate();
 
+  // Limpa os campos do formulário, útil após um login bem-sucedido.
   const clearForm = () => {
     setPassword("");
     setEmail("");
   };
 
+  // Valida os campos do formulário, 
+  // retornando erros específicos para cada campo.
   const validate = (): FieldErrors => {
     const next: FieldErrors = {};
     if (!email) {
@@ -42,6 +53,8 @@ const FormLogin = () => {
     return next;
   };
 
+  // Mapeia erros da API para mensagens de erro específicas do formulário,
+  // permitindo feedback claro ao usuário.
   const mapApiError = (error: unknown): FieldErrors => {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
@@ -77,13 +90,17 @@ const FormLogin = () => {
     return { password: "Não foi possível entrar. Tente novamente." };
   };
 
+  // Função assíncrona para lidar com o envio do formulário,
+  // incluindo validação, login e redirecionamento baseado no perfil do usuário.
   const handleSubmit = async (): Promise<void> => {
     const validationErrors = validate();
+    // Se houver erros de validação, atualiza o estado de erros e interrompe o envio.
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
+    // Limpa erros anteriores e inicia o estado de envio.
     setErrors({});
     setSubmitting(true);
     try {
