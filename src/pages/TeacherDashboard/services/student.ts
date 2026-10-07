@@ -14,7 +14,8 @@ export async function registerStudent(
 
   // Adiciona todos os parâmetros ao FormData
   formData.append("name", params.name);
-  formData.append("cpf_hash", params.cpf_hash);
+  // A API recebe o CPF cru e o hasheia no servidor; enviamos no campo "cpf".
+  formData.append("cpf", params.cpf_hash);
   formData.append("email", params.email);
   formData.append("phone", params.phone);
   formData.append("birthdate", params.birthdate);
@@ -23,6 +24,10 @@ export async function registerStudent(
   formData.append("level_id", params.level_id.toString());
   if (params.notes) {
     formData.append("notes", params.notes);
+  }
+  // Turma é opcional: só enviamos class_id quando o aluno for atribuído a uma.
+  if (params.class_id != null) {
+    formData.append("class_id", params.class_id.toString());
   }
 
   // Adiciona a foto se fornecida

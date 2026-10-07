@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search, Plus, Users } from "lucide-react";
+import { listLevels } from "../services/level";
 import {
   Container,
   HeaderActions,
@@ -23,7 +25,20 @@ import useToast from "../../../contexts/Toast/useToast";
 const ClassesTab = () => {
   const { classes, addClass, isAdding } = useClasses();
   const { addToast } = useToast();
+  const { data: levelsData } = useQuery({
+    queryKey: ["levels"],
+    queryFn: listLevels,
+  });
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Mapa level_id -> nome do nível para exibir o nome real nos cards.
+  const levelNameMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    (levelsData?.levels ?? []).forEach((l) => {
+      map[l.id] = l.name;
+    });
+    return map;
+  }, [levelsData]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState<any>(null);
 
@@ -120,7 +135,11 @@ const ClassesTab = () => {
           >
             <ClassCardHeader $level={c.level_id?.toString() || "1"}>
               <h3>{c.name}</h3>
-              <LevelBadge>{c.level_id || 1}</LevelBadge>
+              <LevelBadge>
+                {c.level_id
+                  ? levelNameMap[c.level_id] || `Nível ${c.level_id}`
+                  : "Sem nível"}
+              </LevelBadge>
             </ClassCardHeader>
             <ClassCardBody>
               <ClassCardInfo>

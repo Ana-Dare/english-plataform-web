@@ -26,6 +26,7 @@ export interface IStudents {
   active: boolean;
   role: "student";
   createdAt: string;
+  avatar_url?: string | null;
   profile: {
     levelId: number | null;
     vip: boolean;

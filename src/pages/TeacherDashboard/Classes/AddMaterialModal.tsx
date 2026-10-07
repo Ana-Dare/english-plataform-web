@@ -1,5 +1,13 @@
 import React, { useMemo, useRef, useState } from "react";
-import { X, UploadCloud, Plus, Download, Pencil, Trash2, FileText } from "lucide-react";
+import {
+  X,
+  UploadCloud,
+  Plus,
+  Download,
+  Trash2,
+  FileText,
+  Loader2,
+} from "lucide-react";
 import {
   CompactOverlay,
   CompactModal,
@@ -12,20 +20,10 @@ import {
   FileMeta,
   RowActions,
   RowIconBtn,
-  RenameBox,
-  SaveMini,
   DropzoneMini,
   AddMaterialPill,
 } from "./classDetail.styles";
-
-export interface MaterialData {
-  id: string;
-  title: string;
-  type: "pdf" | "docx" | "video" | "link";
-  url: string;
-  lessonId: string;
-  addedAt: string;
-}
+import type { LessonMaterial } from "../services/material";
 
 interface LessonOption {
   id: string;
@@ -36,35 +34,42 @@ interface LessonOption {
 interface AddMaterialModalProps {
   onClose: () => void;
   lessons: LessonOption[];
-  materials: MaterialData[];
-  onAddFiles: (lessonId: string, files: File[]) => void;
-  onRename: (id: string, title: string) => void;
-  onDelete: (id: string) => void;
+  materials: LessonMaterial[];
+  uploading: boolean;
+  deletingId: number | null;
+  onAddFiles: (lessonId: number, files: File[]) => void;
+  onDelete: (material: LessonMaterial) => void;
 }
+
+const ACCEPTED = ".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx";
 
 const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   onClose,
   lessons,
   materials,
+  uploading,
+  deletingId,
   onAddFiles,
-  onRename,
   onDelete,
 }) => {
   const [lessonId, setLessonId] = useState(lessons[0]?.id || "");
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const numericLessonId = Number(lessonId);
+
   const lessonMaterials = useMemo(
-    () => materials.filter((m) => m.lessonId === lessonId),
-    [materials, lessonId],
+    () => materials.filter((m) => m.lessonId === numericLessonId),
+    [materials, numericLessonId],
   );
 
   const takeFiles = (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
-    onAddFiles(lessonId, Array.from(fileList));
+    if (!numericLessonId) return;
+    onAddFiles(numericLessonId, Array.from(fileList));
   };
+
+  const hasLessons = lessons.length > 0;
 
   return (
     <CompactOverlay onClick={onClose}>
@@ -77,77 +82,60 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         </CompactHeader>
         <CompactBody>
           <div>
-            <CompactLabel>Para qual aula deseja adicionar este material?</CompactLabel>
+            <CompactLabel>
+              Para qual aula deseja adicionar este material?
+            </CompactLabel>
             <CompactSelect
               value={lessonId}
-              onChange={(e) => {
-                setLessonId(e.target.value);
-                setRenamingId(null);
-              }}
+              disabled={!hasLessons}
+              onChange={(e) => setLessonId(e.target.value)}
             >
-              {lessons.map((lesson) => (
-                <option key={lesson.id} value={lesson.id}>
-                  {lesson.selectLabel}
-                </option>
-              ))}
+              {hasLessons ? (
+                lessons.map((lesson) => (
+                  <option key={lesson.id} value={lesson.id}>
+                    {lesson.selectLabel}
+                  </option>
+                ))
+              ) : (
+                <option value="">Nenhuma aula cadastrada</option>
+              )}
             </CompactSelect>
           </div>
 
           {lessonMaterials.map((mat) => (
-            <div key={mat.id}>
-              <MaterialRow>
-                <FileGlyph>
-                  <FileText size={16} />
-                </FileGlyph>
-                <FileMeta>
-                  <strong>{mat.title}</strong>
-                  <span>Adicionado em {mat.addedAt}</span>
-                </FileMeta>
-                <RowActions>
-                  <RowIconBtn type="button" title="Baixar">
-                    <Download size={16} />
-                  </RowIconBtn>
-                  <RowIconBtn
-                    type="button"
-                    title="Renomear"
-                    onClick={() => {
-                      setRenamingId(mat.id);
-                      setRenameValue(mat.title);
-                    }}
-                  >
-                    <Pencil size={16} />
-                  </RowIconBtn>
-                  <RowIconBtn
-                    $danger
-                    type="button"
-                    title="Excluir"
-                    onClick={() => onDelete(mat.id)}
-                  >
+            <MaterialRow key={mat.id}>
+              <FileGlyph>
+                <FileText size={16} />
+              </FileGlyph>
+              <FileMeta>
+                <strong>{mat.file}</strong>
+                <span>{mat.type.toUpperCase()}</span>
+              </FileMeta>
+              <RowActions>
+                <RowIconBtn
+                  as="a"
+                  href={mat.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Baixar"
+                >
+                  <Download size={16} />
+                </RowIconBtn>
+                <RowIconBtn
+                  $danger
+                  type="button"
+                  title="Excluir"
+                  disabled={deletingId === mat.id}
+                  onClick={() => onDelete(mat)}
+                >
+                  {deletingId === mat.id ? (
+                    <Loader2 size={16} className="spin" />
+                  ) : (
                     <Trash2 size={16} />
-                  </RowIconBtn>
-                </RowActions>
-              </MaterialRow>
-              {renamingId === mat.id && (
-                <RenameBox>
-                  <span>Renomear Material</span>
-                  <input
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                  />
-                  <SaveMini
-                    type="button"
-                    onClick={() => {
-                      if (renameValue.trim()) {
-                        onRename(mat.id, renameValue.trim());
-                      }
-                      setRenamingId(null);
-                    }}
-                  >
-                    Salvar
-                  </SaveMini>
-                </RenameBox>
-              )}
-            </div>
+                  )}
+                </RowIconBtn>
+              </RowActions>
+            </MaterialRow>
           ))}
 
           <input
@@ -155,7 +143,8 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
             type="file"
             multiple
             hidden
-            accept=".pdf,.doc,.docx"
+            accept={ACCEPTED}
+            disabled={!hasLessons || uploading}
             onChange={(e) => {
               takeFiles(e.target.files);
               e.target.value = "";
@@ -164,6 +153,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
           <DropzoneMini
             $active={isDragActive}
             onDragOver={(e) => {
+              if (!hasLessons || uploading) return;
               e.preventDefault();
               setIsDragActive(true);
             }}
@@ -171,16 +161,32 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
             onDrop={(e) => {
               e.preventDefault();
               setIsDragActive(false);
+              if (!hasLessons || uploading) return;
               takeFiles(e.dataTransfer.files);
             }}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (!hasLessons || uploading) return;
+              fileInputRef.current?.click();
+            }}
           >
-            <UploadCloud size={28} />
-            <p>Arraste novos materiais ou selecione do computador</p>
+            {uploading ? (
+              <Loader2 size={28} className="spin" />
+            ) : (
+              <UploadCloud size={28} />
+            )}
+            <p>
+              {uploading
+                ? "Enviando material..."
+                : hasLessons
+                  ? "Arraste novos materiais ou selecione do computador (PDF, imagem ou DOC/DOCX, até 10 MB)"
+                  : "Cadastre uma aula na agenda para enviar materiais"}
+            </p>
             <AddMaterialPill
               type="button"
+              disabled={!hasLessons || uploading}
               onClick={(e) => {
                 e.stopPropagation();
+                if (!hasLessons || uploading) return;
                 fileInputRef.current?.click();
               }}
             >

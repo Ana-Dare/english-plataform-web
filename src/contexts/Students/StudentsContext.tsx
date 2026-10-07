@@ -17,6 +17,7 @@ export interface Student {
   birthdate: string;
   isActive: boolean;
   avatarColor: string;
+  avatar_url?: string | null;
   level: string;
   levelId: number | null;
   plan: 0 | 1;
@@ -47,6 +48,7 @@ export interface IStudentsContext {
   /** Cadastra um novo aluno (persiste via API). */
   addStudent: (
     params: RegisterStudentParams,
+    photoBlob?: Blob,
     callbacks?: MutationCallbacks,
   ) => void;
   /** Indica cadastro em andamento. */
