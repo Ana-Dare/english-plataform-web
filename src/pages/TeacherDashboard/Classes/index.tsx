@@ -58,6 +58,8 @@ import {
 import CreateClassModal from "./CreateClassModal";
 import ClassDetail from "./ClassDetail";
 import { useClasses } from "../../../contexts/Classes";
+import { useStudents } from "../../../contexts/Students/hooks/useStudents";
+import { getInitials } from "../../../utils/avatar";
 import useToast from "../../../contexts/Toast/useToast";
 
 interface TurmaItem {
@@ -74,117 +76,6 @@ interface TurmaItem {
   next_lesson: string;
   vip?: boolean;
 }
-
-// 6 turmas do modelo fiel às imagens enviadas pelo usuário
-const DEFAULT_TURMAS: TurmaItem[] = [
-  {
-    id: 101,
-    name: "Conversation Club A2",
-    level_id: 2,
-    level_code: "A2",
-    level_color: "#059669",
-    description:
-      "Prática de conversação intermediária com foco em situações cotidianas.",
-    students_count: 4,
-    avatars: [
-      { initials: "MS", bg: "#4A72FF", color: "#ffffff" },
-      { initials: "AC", bg: "#10B981", color: "#ffffff" },
-      { initials: "LG", bg: "#C57A67", color: "#ffffff" },
-    ],
-    status: "active",
-    progress: 68,
-    next_lesson: "Próxima aula: 28/10/2026 • 19:00",
-  },
-  {
-    id: 102,
-    name: "Business English B1",
-    level_id: 3,
-    level_code: "B1",
-    level_color: "#7c3aed",
-    description:
-      "Vocabulário corporativo, apresentações e negociações em inglês.",
-    students_count: 6,
-    avatars: [
-      { initials: "RC", bg: "#8B5CF6", color: "#ffffff" },
-      { initials: "TL", bg: "#0284C7", color: "#ffffff" },
-      { initials: "FB", bg: "#EC4899", color: "#ffffff" },
-    ],
-    status: "active",
-    progress: 45,
-    next_lesson: "Próxima aula: 29/10/2026 • 18:30",
-  },
-  {
-    id: 103,
-    name: "Intermediate A",
-    level_id: 3,
-    level_code: "B1",
-    level_color: "#7c3aed",
-    description: "Gramática avançada, leitura e produção textual integrada.",
-    students_count: 3,
-    avatars: [
-      { initials: "AS", bg: "#4A72FF", color: "#ffffff" },
-      { initials: "LP", bg: "#C57A67", color: "#ffffff" },
-      { initials: "DR", bg: "#10B981", color: "#ffffff" },
-    ],
-    status: "active",
-    progress: 82,
-    next_lesson: "Próxima aula: 30/10/2026 • 20:00",
-  },
-  {
-    id: 104,
-    name: "English for Travel A1",
-    level_id: 1,
-    level_code: "A1",
-    level_color: "#0d9488",
-    description:
-      "Inglês essencial para viagens: aeroporto, hotel, restaurantes e emergências.",
-    students_count: 5,
-    avatars: [
-      { initials: "JL", bg: "#F59E0B", color: "#ffffff" },
-      { initials: "MA", bg: "#0284C7", color: "#ffffff" },
-      { initials: "CS", bg: "#8B5CF6", color: "#ffffff" },
-    ],
-    status: "paused",
-    progress: 25,
-    next_lesson: "Sem aulas agendadas",
-  },
-  {
-    id: 105,
-    name: "Advanced Conversation C1",
-    level_id: 5,
-    level_code: "C1",
-    level_color: "#0891b2",
-    description:
-      "Debates de temas complexos, vocabulário acadêmico e fluência natural.",
-    students_count: 4,
-    avatars: [
-      { initials: "EB", bg: "#8B5CF6", color: "#ffffff" },
-      { initials: "GH", bg: "#10B981", color: "#ffffff" },
-      { initials: "KO", bg: "#C57A67", color: "#ffffff" },
-    ],
-    status: "active",
-    progress: 90,
-    next_lesson: "Próxima aula: 31/10/2026 • 19:30",
-  },
-  {
-    id: 106,
-    name: "Pronunciation Workshop B2",
-    level_id: 4,
-    level_code: "B2",
-    level_color: "#2563eb",
-    description:
-      "Aprimoramento de fonética, ritmo da fala e redução de sotaque.",
-    students_count: 6,
-    avatars: [
-      { initials: "AL", bg: "#4A72FF", color: "#ffffff" },
-      { initials: "RT", bg: "#EC4899", color: "#ffffff" },
-      { initials: "JP", bg: "#F59E0B", color: "#ffffff" },
-    ],
-    status: "active",
-    progress: 55,
-    next_lesson: "Próxima aula: 03/11/2026 • 17:00",
-  },
-];
 
 const extractCefr = (name?: string): string => {
   if (!name) return "A2";
@@ -229,6 +120,7 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
   onNavigateRegisterStudent,
 }) => {
   const { classes, addClass, isAdding } = useClasses();
+  const { students } = useStudents();
   const { addToast } = useToast();
   const { data: levelsData } = useQuery({
     queryKey: ["levels"],
@@ -281,15 +173,11 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
     return map;
   }, [levelsData]);
 
-  // Lista unificada de turmas (API + Modelo das imagens)
-  const allTurmas = useMemo(() => {
+  const allTurmas: TurmaItem[] = useMemo(() => {
     const validApiClasses = classes.filter((c) => c.id !== -1);
 
-    if (validApiClasses.length === 0) {
-      return DEFAULT_TURMAS;
-    }
-
-    const apiItems: TurmaItem[] = validApiClasses.map((c, idx) => {
+    return validApiClasses.map((c) => {
+      const classStudents = students.filter((s) => s.classId === c.id);
       const levelName = c.level_id
         ? levelNameMap[c.level_id] || `Nível ${c.level_id}`
         : "A2";
@@ -306,26 +194,21 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
           (c as any).description ||
           "Aulas em grupo focadas no desenvolvimento e fluência da língua inglesa.",
         students_count:
-          (c as any).students_count || (c as any).students?.length || 4,
-        avatars: [
-          { initials: "AL", bg: "#4A72FF", color: "#ffffff" },
-          { initials: "BR", bg: "#10B981", color: "#ffffff" },
-          { initials: "CA", bg: "#C57A67", color: "#ffffff" },
-        ],
+          (c as any).students_count ||
+          (c as any).students?.length ||
+          classStudents.length,
+        avatars: classStudents.slice(0, 3).map((s) => ({
+          initials: getInitials(s.name),
+          bg: s.avatarColor || "#4A72FF",
+          color: "#ffffff",
+        })),
         status: (c.status as any) === "paused" ? "paused" : "active",
-        progress: (c as any).progress ?? 50 + ((idx * 17) % 45),
-        next_lesson:
-          (c as any).next_lesson || "Próxima aula: 05/11/2026 • 19:00",
+        progress: (c as any).progress ?? 0,
+        next_lesson: (c as any).next_lesson || "Sem aulas agendadas",
         vip: c.vip,
       };
     });
-
-    const existingNames = new Set(apiItems.map((i) => i.name.toLowerCase()));
-    const supplementary = DEFAULT_TURMAS.filter(
-      (t) => !existingNames.has(t.name.toLowerCase()),
-    );
-    return [...apiItems, ...supplementary];
-  }, [classes, levelNameMap]);
+  }, [classes, levelNameMap, students]);
 
   // Filtragem e ordenação
   const filteredClasses = useMemo(() => {

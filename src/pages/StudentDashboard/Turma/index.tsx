@@ -39,7 +39,12 @@ import CustomDropdown from '../../../components/CustomDropdown';
 import MobileCarousel from '../../../components/MobileCarousel';
 import DocumentViewerModal from '../../TeacherDashboard/Classes/DocumentViewerModal';
 import type { LessonMaterial, Lesson } from '../../TeacherDashboard/services/material';
-import { formatMaterialDateTime } from '../../TeacherDashboard/services/material';
+import {
+  formatMaterialDateTime,
+  listClassLessons,
+  listLessonMaterials,
+} from '../../TeacherDashboard/services/material';
+import { listClasses } from '../../TeacherDashboard/services/class';
 import {
   TurmaContainer,
   Banner,
@@ -91,156 +96,10 @@ import {
   ErrorMessage
 } from './style';
 
-const DEFAULT_CLASS_LESSONS: Lesson[] = [
-  {
-    id: 101,
-    classId: 1,
-    teacherId: 1,
-    classTeacherId: 1,
-    title: "Aula 01: Modal Verbs & Present Perfect",
-    description: "Revisão prática dos verbos modais e estruturas do Present Perfect.",
-    startTime: "2026-09-01T18:30:00",
-    duration: "01:00:00",
-    status: "completed",
-    type: "online",
-  },
-  {
-    id: 102,
-    classId: 1,
-    teacherId: 1,
-    classTeacherId: 1,
-    title: "Aula 02: Vocabulary Unit 3 & Phrasal Verbs",
-    description: "Expansão de vocabulário e conversação ativa.",
-    startTime: "2026-09-03T18:30:00",
-    duration: "01:00:00",
-    status: "completed",
-    type: "online",
-  },
-  {
-    id: 103,
-    classId: 1,
-    teacherId: 1,
-    classTeacherId: 1,
-    title: "Aula 03: Business Communication & Email Writing",
-    description: "Prática de e-mails corporativos e apresentações.",
-    startTime: "2026-09-08T18:30:00",
-    duration: "01:00:00",
-    status: "scheduled",
-    type: "online",
-  },
-];
-
 const formatCleanTitle = (title?: string) => {
   if (!title) return 'Material';
   return title.replace(/\.(pdf|pptx|ppt|xlsx|xls|docx|doc|zip|rar|mp4|mp3|png|jpg|jpeg)$/i, '').trim();
 };
-
-const DEFAULT_CLASS_MATERIALS: LessonMaterial[] = [
-  {
-    id: 1,
-    lessonId: 0,
-    classId: 1,
-    title: "Course Syllabus & Grammar Guide B2",
-    description: "Plano pedagógico semestral da turma e guia de referência rápida com tabelas gramaticais.",
-    category: "Apostila / Leitura",
-    type: "pdf",
-    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    file: "Course_Syllabus_B2.pdf",
-    fileSize: 3200000,
-    sizeFormatted: "3.2 MB",
-    createdAt: "2026-08-20T10:00:00",
-    isExternalLink: false,
-  },
-  {
-    id: 2,
-    lessonId: 0,
-    classId: 1,
-    title: "Cambridge English Dictionary & Pronunciation Portal",
-    description: "Portal interativo oficial para consulta de vocabulário e transcrição fonética.",
-    category: "Pronúncia / Phonics",
-    type: "link",
-    link: "https://dictionary.cambridge.org",
-    file: "https://dictionary.cambridge.org",
-    sizeFormatted: "Link externo",
-    createdAt: "2026-08-22T14:30:00",
-    isExternalLink: true,
-  },
-  {
-    id: 3,
-    lessonId: 101,
-    classId: 1,
-    title: "Review - Modal Verbs (Can, Could, Should, Must)",
-    description: "Resumo teórico dos verbos modais com exemplos contextuais e exercícios resolvidos.",
-    category: "Gramática",
-    type: "pdf",
-    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    file: "Review_Modal_Verbs.pdf",
-    fileSize: 2400000,
-    sizeFormatted: "2.4 MB",
-    createdAt: "2026-09-01T17:00:00",
-    isExternalLink: false,
-  },
-  {
-    id: 4,
-    lessonId: 101,
-    classId: 1,
-    title: "Exercícios Práticos de Fixação - Unit 1",
-    description: "Folha de exercícios com gabarito comentado para estudo autônomo.",
-    category: "Exercício / Atividade",
-    type: "pdf",
-    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    file: "Exercicios_Fixacao_Unit_1.pdf",
-    fileSize: 850000,
-    sizeFormatted: "850 KB",
-    createdAt: "2026-09-01T17:15:00",
-    isExternalLink: false,
-  },
-  {
-    id: 5,
-    lessonId: 102,
-    classId: 1,
-    title: "Vocabulary List & Phrasal Verbs - Unit 3",
-    description: "Lista completa de expressões idiomáticas da Unidade 3 com frases de exemplo.",
-    category: "Vocabulário",
-    type: "pdf",
-    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    file: "Vocabulary_List_Unit_3.pdf",
-    fileSize: 1100000,
-    sizeFormatted: "1.1 MB",
-    createdAt: "2026-09-03T16:45:00",
-    isExternalLink: false,
-  },
-  {
-    id: 6,
-    lessonId: 102,
-    classId: 1,
-    title: "Slides da Aula - Presentation & Speaking Unit 3",
-    description: "Apresentação visual utilizada pela professora durante a aula interativa.",
-    category: "Conversação / Speaking",
-    type: "presentation",
-    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    file: "Unit_3_Presentation.pptx",
-    fileSize: 4800000,
-    sizeFormatted: "4.8 MB",
-    createdAt: "2026-09-03T17:00:00",
-    isExternalLink: false,
-  },
-  {
-    id: 7,
-    lessonId: 103,
-    classId: 1,
-    title: "Business Email Templates & Worksheets",
-    description: "Modelos editáveis de comunicação profissional formal para simulações.",
-    category: "Exercício / Atividade",
-    type: "spreadsheet",
-    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    file: "Business_Email_Templates.xlsx",
-    fileSize: 920000,
-    sizeFormatted: "920 KB",
-    createdAt: "2026-09-07T11:20:00",
-    isExternalLink: false,
-  },
-];
 
 const TABS = [
   { id: 'mural', label: 'Mural de Avisos', icon: <MessageSquare /> },
@@ -274,8 +133,7 @@ const Turma: React.FC = () => {
       const stored = localStorage.getItem('@App:student_viewed_materials_1');
       if (stored) return JSON.parse(stored);
     } catch {}
-    // Padrão inicial: 2 visualizados para demonstrar o indicador de progresso e itens pendentes
-    return [1, 2];
+    return [];
   });
 
   const [bookmarkedMaterialIds, setBookmarkedMaterialIds] = useState<number[]>(() => {
@@ -283,7 +141,7 @@ const Turma: React.FC = () => {
       const stored = localStorage.getItem('@App:student_bookmarked_materials_1');
       if (stored) return JSON.parse(stored);
     } catch {}
-    return [3]; // Padrão: 1 marcado para estudo
+    return [];
   });
 
   // Controle de cards expandidos no celular (seguindo o mesmo padrão de Alunos)
@@ -301,60 +159,39 @@ const Turma: React.FC = () => {
   const [viewerMaterials, setViewerMaterials] = useState<LessonMaterial[]>([]);
   const [viewerInitialId, setViewerInitialId] = useState<number | undefined>(undefined);
 
-  const [materials, setMaterials] = useState<LessonMaterial[]>(() => {
-    try {
-      const stored = localStorage.getItem('@App:class_materials_1');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map<number, LessonMaterial>();
-          DEFAULT_CLASS_MATERIALS.forEach(m => map.set(m.id, m));
-          parsed.forEach((m: LessonMaterial) => map.set(m.id, m));
-          return Array.from(map.values());
-        }
-      }
-    } catch {
-      // fallback
-    }
-    return DEFAULT_CLASS_MATERIALS;
-  });
+  const [materials, setMaterials] = useState<LessonMaterial[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
 
-  const [lessons] = useState<Lesson[]>(() => {
-    try {
-      const stored = localStorage.getItem('@App:class_lessons_1');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map<number, Lesson>();
-          DEFAULT_CLASS_LESSONS.forEach(l => map.set(l.id, l));
-          parsed.forEach((l: Lesson) => map.set(l.id, l));
-          return Array.from(map.values());
-        }
-      }
-    } catch {
-      // fallback
-    }
-    return DEFAULT_CLASS_LESSONS;
-  });
-
-  // Listener para sincronizar materiais se a professora publicar algo
   useEffect(() => {
-    const handleStorage = () => {
+    let active = true;
+    (async () => {
       try {
-        const stored = localStorage.getItem('@App:class_materials_1');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            const map = new Map<number, LessonMaterial>();
-            DEFAULT_CLASS_MATERIALS.forEach(m => map.set(m.id, m));
-            parsed.forEach((m: LessonMaterial) => map.set(m.id, m));
-            setMaterials(Array.from(map.values()));
+        const { classes } = await listClasses();
+        const classId = classes.find((c) => c.id > 0)?.id;
+        if (!classId || !active) {
+          if (active) {
+            setLessons([]);
+            setMaterials([]);
           }
+          return;
         }
-      } catch {}
+        const classLessons = await listClassLessons(classId);
+        const perLesson = await Promise.all(
+          classLessons.map((lesson) => listLessonMaterials(lesson.id)),
+        );
+        if (!active) return;
+        setLessons(classLessons);
+        setMaterials(perLesson.flat());
+      } catch {
+        if (active) {
+          setLessons([]);
+          setMaterials([]);
+        }
+      }
+    })();
+    return () => {
+      active = false;
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const markAsViewed = (id: number) => {

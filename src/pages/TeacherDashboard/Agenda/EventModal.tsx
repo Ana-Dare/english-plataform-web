@@ -26,6 +26,7 @@ import {
 } from "./style";
 import CustomSelect from "./CustomSelect";
 import useToast from "../../../contexts/Toast/useToast";
+import { useClasses } from "../../../contexts/Classes";
 
 export type EventType = "aula" | "reuniao" | "pessoal";
 export type ClassMode = "individual" | "grupo";
@@ -53,14 +54,6 @@ interface EventModalProps {
   eventToEdit?: CalendarEvent | null;
   selectedDate: Date | null;
 }
-
-const mockTurmas = [
-  "Turma Beginner 1",
-  "Particular - Camila",
-  "Turma Advanced",
-  "Particular - Marcos",
-  "Turma Intermediate",
-];
 
 const WEEKDAYS = [
   { id: 1, label: "S" },
@@ -108,6 +101,10 @@ const EventModal: React.FC<EventModalProps> = ({
   selectedDate,
 }) => {
   const { addToast } = useToast();
+  const { classes } = useClasses();
+  const turmaOptions = classes
+    .filter((c) => c.id > 0)
+    .map((c) => ({ value: c.name, label: c.name }));
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
   const [type, setType] = useState<EventType>("aula");
@@ -325,7 +322,7 @@ const EventModal: React.FC<EventModalProps> = ({
                   clearError("title");
                   setTitle(val);
                 }}
-                options={mockTurmas.map((t) => ({ value: t, label: t }))}
+                options={turmaOptions}
                 placeholder="Selecione uma turma..."
               />
               {errors.title && <FieldError>{errors.title}</FieldError>}

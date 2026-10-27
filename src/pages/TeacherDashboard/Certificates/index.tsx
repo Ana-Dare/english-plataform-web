@@ -23,6 +23,7 @@ import CustomDropdown from "../../../components/CustomDropdown";
 import MobileCarousel from "../../../components/MobileCarousel";
 import DocumentViewerModal from "../Classes/DocumentViewerModal";
 import type { LessonMaterial } from "../services/material";
+import { formatMaterialDateTime } from "../services/material";
 import {
   Container,
   HeaderActions,
@@ -82,200 +83,55 @@ import {
   DownloadCertificateBtn,
 } from "./style";
 import useToast from "../../../contexts/Toast/useToast";
+import { useStudents } from "../../../contexts/Students/hooks/useStudents";
+import { getInitials } from "../../../utils/avatar";
 
-const MOCK_CERTIFICATES = [
-  {
-    id: 1,
-    name: "Ana Clara Silva",
-    email: "ana.clara@example.com",
-    phone: "(11) 98765-4321",
-    cpf: "123.456.789-00",
-    birthdate: "15/05/2000",
-    enrollmentDate: "10/01/2023",
-    status: "Ativo",
-    level: "Intermediate 2",
-    initials: "AC",
-    bg: "#cce0ff",
-    color: "#1F2B45",
-    progress: 100,
-    attendance: 95,
-    durationMonths: 6,
-    classesAttended: 42,
-    plan: "VIP",
-    pastClasses: [
-      { name: "Grammar Fundamentals", date: "10/02/2023", score: 95 },
-      { name: "Speaking Practice 1", date: "15/03/2023", score: 88 },
-      { name: "Reading Comprehension", date: "20/04/2023", score: 92 },
-      { name: "Vocabulary Building", date: "25/05/2023", score: 100 },
-      { name: "Listening Exercises B1", date: "30/06/2023", score: 90 },
-    ],
-    materials: [
-      {
-        id: 101,
-        lessonId: 0,
-        title: "Workbook 2",
-        type: "pdf" as const,
-        date: "12/02/2023",
-        category: "Gramática",
-        file: "workbook_2.pdf",
-        sizeFormatted: "2.4 MB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-02-12T10:00:00",
-        description: "Apostila com exercícios práticos e revisão gramatical nível intermediário.",
-      },
-      {
-        id: 102,
-        lessonId: 0,
-        title: "Audio Exercises - Intermediate",
-        type: "audio" as const,
-        date: "18/03/2023",
-        category: "Listening",
-        file: "audio_exercises_intermediate.mp3",
-        sizeFormatted: "4.8 MB",
-        link: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-        createdAt: "2023-03-18T14:30:00",
-        description: "Exercícios de escuta e pronúncia com diálogos do dia a dia.",
-      },
-      {
-        id: 103,
-        lessonId: 0,
-        title: "Grammar Cheat Sheet",
-        type: "document" as const,
-        date: "22/04/2023",
-        category: "Gramática",
-        file: "grammar_cheat_sheet.docx",
-        sizeFormatted: "1.2 MB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-04-22T09:15:00",
-        description: "Guia rápido de consulta para tempos verbais e conectivos.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Pedro Henrique Santos",
-    email: "pedro.hs@example.com",
-    phone: "(21) 99888-7777",
-    cpf: "098.765.432-11",
-    birthdate: "22/10/1995",
-    enrollmentDate: "15/02/2023",
-    status: "Ativo",
-    level: "Beginner 2",
-    initials: "PH",
-    bg: "#d4f5d4",
-    color: "#1F2B45",
-    progress: 100,
-    attendance: 85,
-    durationMonths: 3,
-    classesAttended: 20,
-    plan: "Regular",
-    pastClasses: [
-      { name: "Verb to be", date: "20/02/2023", score: 85 },
-      { name: "Basic Vocabulary", date: "25/03/2023", score: 70 },
-      { name: "Listening 1", date: "10/04/2023", score: 90 },
-      { name: "Simple Present", date: "15/05/2023", score: 65 },
-    ],
-    materials: [
-      {
-        id: 201,
-        lessonId: 0,
-        title: "Starter Guide",
-        type: "pdf" as const,
-        date: "22/02/2023",
-        category: "Iniciante",
-        file: "starter_guide.pdf",
-        sizeFormatted: "3.1 MB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-02-22T08:00:00",
-        description: "Guia introdutório com vocabulário essencial e primeiras frases.",
-      },
-      {
-        id: 202,
-        lessonId: 0,
-        title: "Flashcards",
-        type: "document" as const,
-        date: "28/03/2023",
-        category: "Vocabulário",
-        file: "flashcards_beginner.docx",
-        sizeFormatted: "950 KB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-03-28T11:20:00",
-        description: "Cartões para fixação e memorização de vocabulário básico.",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Maria Eduarda Costa",
-    email: "maria.eduarda@example.com",
-    phone: "(31) 91234-5678",
-    cpf: "456.789.123-22",
-    birthdate: "10/08/2001",
-    enrollmentDate: "20/03/2023",
-    status: "Ativo",
-    level: "Advanced 1",
-    initials: "ME",
-    bg: "#fff3cc",
-    color: "#1F2B45",
-    progress: 100,
-    attendance: 98,
-    durationMonths: 12,
-    classesAttended: 88,
-    plan: "VIP",
-    pastClasses: [
-      { name: "Business English", date: "25/03/2023", score: 98 },
-      { name: "Advanced Speaking", date: "10/05/2023", score: 95 },
-      { name: "Idioms and Phrasal Verbs", date: "15/06/2023", score: 100 },
-      { name: "Debate Prep", date: "20/07/2023", score: 96 },
-    ],
-    materials: [
-      {
-        id: 301,
-        lessonId: 0,
-        title: "Business Cases PDF",
-        type: "pdf" as const,
-        date: "28/03/2023",
-        category: "Business",
-        file: "business_cases.pdf",
-        sizeFormatted: "2.5 MB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-03-28T14:00:00",
-        description: "Estudos de caso reais para negociações e apresentações em inglês corporativo.",
-      },
-      {
-        id: 302,
-        lessonId: 0,
-        title: "Advanced Grammar Book",
-        type: "pdf" as const,
-        date: "12/05/2023",
-        category: "Gramática",
-        file: "advanced_grammar_book.pdf",
-        sizeFormatted: "5.1 MB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-05-12T16:30:00",
-        description: "Livro de gramática avançada com foco em fluência e estruturas complexas.",
-      },
-      {
-        id: 303,
-        lessonId: 0,
-        title: "TED Talks Transcripts",
-        type: "document" as const,
-        date: "18/06/2023",
-        category: "Listening",
-        file: "ted_talks_transcripts.docx",
-        sizeFormatted: "1.8 MB",
-        link: "/sample-material.pdf",
-        createdAt: "2023-06-18T10:45:00",
-        description: "Transcrições anotadas de palestras do TED Talks para análise discursiva.",
-      },
-    ],
-  },
-];
-
-type StudentMock = (typeof MOCK_CERTIFICATES)[0];
+interface StudentMock {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  cpf: string;
+  birthdate: string;
+  enrollmentDate: string;
+  status: string;
+  level: string;
+  initials: string;
+  bg: string;
+  color: string;
+  progress: number;
+  attendance: number;
+  durationMonths: number;
+  classesAttended: number;
+  plan: string;
+  pastClasses: Array<{ name: string; date: string; score: number }>;
+  materials: LessonMaterial[];
+}
 
 const CertificatesTab: React.FC = () => {
   const { addToast } = useToast();
+  const { students } = useStudents();
+  const certificateStudents: StudentMock[] = students.map((s) => ({
+    id: s.id,
+    name: s.name,
+    email: s.email,
+    phone: s.phone,
+    cpf: "",
+    birthdate: s.birthdate,
+    enrollmentDate: s.enrollDate,
+    status: s.isActive ? "Ativo" : "Inativo",
+    level: s.level,
+    initials: getInitials(s.name),
+    bg: s.avatarColor || "#cce0ff",
+    color: "#1F2B45",
+    progress: s.progress ?? 0,
+    attendance: 0,
+    durationMonths: 0,
+    classesAttended: 0,
+    plan: s.plan === 1 ? "VIP" : "Regular",
+    pastClasses: [],
+    materials: [],
+  }));
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recentes");
   const [levelFilter, setLevelFilter] = useState("all");
@@ -314,7 +170,7 @@ const CertificatesTab: React.FC = () => {
     }
   };
 
-  const filteredStudents = MOCK_CERTIFICATES.filter((student) => {
+  const filteredStudents = certificateStudents.filter((student) => {
     const matchesSearch = student.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -504,7 +360,9 @@ const CertificatesTab: React.FC = () => {
                   </MaterialIcon>
                   <MaterialInfo>
                     <MaterialTitle>{mat.title}</MaterialTitle>
-                    <MaterialMeta>Acessado em {mat.date}</MaterialMeta>
+                    <MaterialMeta>
+                      Acessado em {formatMaterialDateTime(mat.createdAt) || "--"}
+                    </MaterialMeta>
                   </MaterialInfo>
                   <MaterialActionBtn
                     type="button"

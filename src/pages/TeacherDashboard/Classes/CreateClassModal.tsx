@@ -32,34 +32,6 @@ interface CreateClassModalProps {
   isLoading?: boolean;
 }
 
-// Fallback demo students matching screenshot when context is empty
-const DEMO_STUDENTS: StudentMock[] = [
-  {
-    id: "demo-1",
-    name: "Marjorie Talberg",
-    email: "marjorie@email.com",
-    avatarColor: "#bfdbfe",
-  },
-  {
-    id: "demo-2",
-    name: "Lucas Mendes",
-    email: "lucas.mendes@email.com",
-    avatarColor: "#ddd6fe",
-  },
-  {
-    id: "demo-3",
-    name: "Camila Rodrigues",
-    email: "camila.r@email.com",
-    avatarColor: "#fbcfe8",
-  },
-  {
-    id: "demo-4",
-    name: "Pedro Almeida",
-    email: "pedro.almeida@email.com",
-    avatarColor: "#bbf7d0",
-  },
-];
-
 const AVATAR_PALETTES = [
   { bg: "#bfdbfe", text: "#1e40af" }, // Azul suave
   { bg: "#ddd6fe", text: "#6d28d9" }, // Roxo suave
@@ -692,17 +664,13 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
     fetchLevels();
   }, [addToast]);
 
-  // Lista de estudantes: usa os alunos do contexto ou mock fallback matching o screenshot
   const studentsList: StudentMock[] = useMemo(() => {
-    if (students && students.length > 0) {
-      return students.map((s) => ({
-        id: s.id.toString(),
-        name: s.name,
-        email: s.email,
-        avatarColor: s.avatarColor,
-      }));
-    }
-    return DEMO_STUDENTS;
+    return (students ?? []).map((s) => ({
+      id: s.id.toString(),
+      name: s.name,
+      email: s.email,
+      avatarColor: s.avatarColor,
+    }));
   }, [students]);
 
 

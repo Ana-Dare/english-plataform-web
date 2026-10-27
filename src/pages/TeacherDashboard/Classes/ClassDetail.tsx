@@ -52,7 +52,6 @@ import {
   uploadLessonMaterial,
   deleteLessonMaterial,
   createClassLesson,
-  formatBytes,
   formatMaterialDateTime,
   loadCustomCategories,
   type Lesson,
@@ -143,158 +142,6 @@ interface ClassDetailProps {
 }
 
 type TabId = "mural" | "materiais" | "agenda" | "alunos" | "atestados";
-
-const DEFAULT_STUDENT_PROFILES: Record<
-  string,
-  { name: string; email: string; color: string; phone?: string; gender?: string }
-> = {
-  EB: {
-    name: "Eduardo Barros",
-    email: "eduardo.barros@email.com",
-    color: "#8B5CF6",
-    phone: "(11) 98765-4321",
-    gender: "Masculino",
-  },
-  GH: {
-    name: "Gabriela Helena",
-    email: "gabriela.helena@email.com",
-    color: "#10B981",
-    phone: "(11) 97654-3210",
-    gender: "Feminino",
-  },
-  KO: {
-    name: "Kauê Oliveira",
-    email: "kaue.oliveira@email.com",
-    color: "#C57A67",
-    phone: "(11) 96543-2109",
-    gender: "Masculino",
-  },
-  MS: {
-    name: "Mariana Santos",
-    email: "mariana.santos@email.com",
-    color: "#4A72FF",
-    phone: "(11) 95432-1098",
-    gender: "Feminino",
-  },
-  AC: {
-    name: "Arthur Carvalho",
-    email: "arthur.carvalho@email.com",
-    color: "#10B981",
-    phone: "(11) 94321-0987",
-    gender: "Masculino",
-  },
-  LG: {
-    name: "Luiza Gomes",
-    email: "luiza.gomes@email.com",
-    color: "#C57A67",
-    phone: "(11) 93210-9876",
-    gender: "Feminino",
-  },
-  RC: {
-    name: "Rafael Costa",
-    email: "rafael.costa@email.com",
-    color: "#8B5CF6",
-    phone: "(11) 92109-8765",
-    gender: "Masculino",
-  },
-  TL: {
-    name: "Thiago Lima",
-    email: "thiago.lima@email.com",
-    color: "#0284C7",
-    phone: "(11) 91098-7654",
-    gender: "Masculino",
-  },
-  FB: {
-    name: "Fernanda Barbosa",
-    email: "fernanda.barbosa@email.com",
-    color: "#EC4899",
-    phone: "(11) 90987-6543",
-    gender: "Feminino",
-  },
-  AS: {
-    name: "Ana Souza",
-    email: "ana.souza@email.com",
-    color: "#4A72FF",
-    phone: "(11) 99876-5432",
-    gender: "Feminino",
-  },
-  LP: {
-    name: "Lucas Pereira",
-    email: "lucas.pereira@email.com",
-    color: "#C57A67",
-    phone: "(11) 98765-4321",
-    gender: "Masculino",
-  },
-  DR: {
-    name: "Daniela Rocha",
-    email: "daniela.rocha@email.com",
-    color: "#10B981",
-    phone: "(11) 97654-3210",
-    gender: "Feminino",
-  },
-  JL: {
-    name: "Juliana Lopes",
-    email: "juliana.lopes@email.com",
-    color: "#F59E0B",
-    phone: "(11) 96543-2109",
-    gender: "Feminino",
-  },
-  MA: {
-    name: "Matheus Alves",
-    email: "matheus.alves@email.com",
-    color: "#0284C7",
-    phone: "(11) 95432-1098",
-    gender: "Masculino",
-  },
-  CS: {
-    name: "Carlos Silva",
-    email: "carlos.silva@email.com",
-    color: "#8B5CF6",
-    phone: "(11) 94321-0987",
-    gender: "Masculino",
-  },
-  AL: {
-    name: "Alexandre Lima",
-    email: "alexandre.lima@email.com",
-    color: "#4A72FF",
-    phone: "(11) 93210-9876",
-    gender: "Masculino",
-  },
-  RT: {
-    name: "Renata Teixeira",
-    email: "renata.teixeira@email.com",
-    color: "#EC4899",
-    phone: "(11) 92109-8765",
-    gender: "Feminino",
-  },
-  JP: {
-    name: "João Pedro",
-    email: "joao.pedro@email.com",
-    color: "#F59E0B",
-    phone: "(11) 91098-7654",
-    gender: "Masculino",
-  },
-};
-
-// Alunos fictícios usados quando a turma não possui alunos cadastrados no banco.
-const DEMO_STUDENTS = [
-  {
-    id: 1,
-    name: "Ana Souza",
-    email: "ana.souza@email.com",
-    color: "#4A72FF",
-    phone: "(11) 99876-5432",
-    gender: "Feminino",
-  },
-  {
-    id: 2,
-    name: "Lucas Pereira",
-    email: "lucas.pereira@email.com",
-    color: "#C57A67",
-    phone: "(11) 98765-4321",
-    gender: "Masculino",
-  },
-];
 
 const AVATAR_COLORS = [
   "#4A72FF",
@@ -396,117 +243,6 @@ function toLessonCard(lesson: Lesson): LessonCardView {
   };
 }
 
-function getLessonsStorageKey(classId: number) {
-  return `@App:class_lessons_${classId}`;
-}
-
-function getMaterialsStorageKey(classId: number) {
-  return `@App:class_materials_${classId}`;
-}
-
-function loadStoredLessons(classId: number): Lesson[] {
-  try {
-    const raw = localStorage.getItem(getLessonsStorageKey(classId));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveStoredLessons(classId: number, lessons: Lesson[]) {
-  try {
-    localStorage.setItem(getLessonsStorageKey(classId), JSON.stringify(lessons));
-  } catch (e) {
-    console.warn("Failed to save lessons in localStorage:", e);
-  }
-}
-
-function loadStoredMaterials(classId: number): LessonMaterial[] {
-  try {
-    const raw = localStorage.getItem(getMaterialsStorageKey(classId));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveStoredMaterials(classId: number, materials: LessonMaterial[]) {
-  try {
-    localStorage.setItem(
-      getMaterialsStorageKey(classId),
-      JSON.stringify(materials),
-    );
-  } catch (e) {
-    console.warn("Failed to save materials in localStorage:", e);
-  }
-}
-
-function getClassStudentsStorageKey(classId: number) {
-  return `@App:class_students_${classId}`;
-}
-
-function loadStoredClassStudents(classId: number): ClassStudent[] {
-  try {
-    const raw = localStorage.getItem(getClassStudentsStorageKey(classId));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveStoredClassStudents(classId: number, students: ClassStudent[]) {
-  try {
-    localStorage.setItem(
-      getClassStudentsStorageKey(classId),
-      JSON.stringify(students),
-    );
-  } catch (e) {
-    console.warn("Failed to save class students in localStorage:", e);
-  }
-}
-
-function getClassTeacherStorageKey(classId: number) {
-  return `@App:class_teacher_${classId}`;
-}
-
-function loadStoredClassTeacher(
-  classId: number,
-): { name: string; email: string } | null {
-  try {
-    const raw = localStorage.getItem(getClassTeacherStorageKey(classId));
-    if (raw === "none") return null;
-    return raw
-      ? JSON.parse(raw)
-      : {
-          name: "Prof.ª Lara Charantola",
-          email: "lara.charantola@plataforma.com",
-        };
-  } catch {
-    return {
-      name: "Prof.ª Lara Charantola",
-      email: "lara.charantola@plataforma.com",
-    };
-  }
-}
-
-function saveStoredClassTeacher(
-  classId: number,
-  teacher: { name: string; email: string } | null,
-) {
-  try {
-    if (teacher === null) {
-      localStorage.setItem(getClassTeacherStorageKey(classId), "none");
-    } else {
-      localStorage.setItem(
-        getClassTeacherStorageKey(classId),
-        JSON.stringify(teacher),
-      );
-    }
-  } catch (e) {
-    console.warn("Failed to save class teacher in localStorage:", e);
-  }
-}
-
 const CEFR_BY_LEVEL: Record<number, string> = {
   1: "A1",
   2: "A2",
@@ -599,12 +335,10 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
   } | null>(null);
 
   const cefr = CEFR_BY_LEVEL[classData.level_id || 2] || "A2";
-  const className = classData.name || "Turma Intermediate A";
+  const className = classData.name || "Turma";
   const [levelName, setLevelName] = useState<string | null>(null);
-  // Identificador efetivo para persistência mesmo em turmas de demonstração
-  const effectiveClassId =
-    classData.id && classData.id > 0 ? classData.id : 999;
-  const canManageLessons = true;
+  const effectiveClassId = classData.id && classData.id > 0 ? classData.id : 0;
+  const canManageLessons = effectiveClassId > 0;
 
   const displayLevel =
     levelName ||
@@ -645,99 +379,30 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
   const [classTeacher, setClassTeacher] = useState<{
     name: string;
     email: string;
-  } | null>(() => loadStoredClassTeacher(effectiveClassId));
+  } | null>(null);
 
-  // Alunos exibidos: reais quando a turma existe com alunos, ou da lista de demonstração.
   const displayStudents: DisplayStudent[] = useMemo(() => {
-    if (classStudents.length > 0) {
-      return classStudents.map((s: any, i: number) => {
-        const matching = students.find(
-          (std) =>
-            std.id === s.studentId ||
-            std.name.toLowerCase() === (s.name || "").toLowerCase(),
-        );
-        const studentName = s.name || matching?.name || "Aluno";
-        return {
-          id: s.studentId || s.id || (matching ? matching.id : i + 1),
-          name: studentName,
-          email:
-            s.email ||
-            matching?.email ||
-            `${studentName.toLowerCase().replace(/[^a-z0-9]/g, ".")}@email.com`,
-          color:
-            matching?.avatarColor || AVATAR_COLORS[i % AVATAR_COLORS.length],
-          phone: matching?.phone,
-          gender: (matching as any)?.gender,
-          level: matching?.level || displayLevel,
-          turma: matching?.turma || className,
-          isActive: matching ? matching.isActive : true,
-        };
-      });
-    }
-
-    if ((classData as any).avatars && (classData as any).avatars.length > 0) {
-      return (classData as any).avatars.map((av: any, i: number) => {
-        const strongColor =
-          av.bg &&
-          !av.bg.toLowerCase().startsWith("#e") &&
-          !av.bg.toLowerCase().startsWith("#f") &&
-          !av.bg.toLowerCase().startsWith("#d")
-            ? av.bg
-            : AVATAR_COLORS[i % AVATAR_COLORS.length];
-
-        const preset = av.initials
-          ? DEFAULT_STUDENT_PROFILES[av.initials]
-          : null;
-        const fallbackName =
-          preset?.name ||
-          (av.initials === "AS"
-            ? "Ana Souza"
-            : av.initials === "LP"
-            ? "Lucas Pereira"
-            : av.name || av.initials || `Aluno ${i + 1}`);
-
-        const matching = students.find(
-          (std) =>
-            (av.initials && getAvatarInitials(std.name) === av.initials) ||
-            std.name.toLowerCase() === fallbackName.toLowerCase(),
-        );
-
-        const finalName = matching?.name || preset?.name || fallbackName;
-        const finalEmail =
-          matching?.email ||
-          preset?.email ||
-          av.email ||
-          `${finalName.toLowerCase().replace(/[^a-z0-9]/g, ".")}@email.com`;
-        const finalColor =
-          matching?.avatarColor || preset?.color || strongColor;
-
-        return {
-          id: matching?.id || 1000 + i + 1,
-          name: finalName,
-          email: finalEmail,
-          color: finalColor,
-          phone: matching?.phone || preset?.phone,
-          gender: (matching as any)?.gender || preset?.gender,
-          level: matching?.level || displayLevel,
-          turma: matching?.turma || className,
-          isActive: matching ? matching.isActive : true,
-        };
-      });
-    }
-
-    return DEMO_STUDENTS.map((demo) => {
+    return classStudents.map((s: any, i: number) => {
       const matching = students.find(
-        (std) => std.name.toLowerCase() === demo.name.toLowerCase(),
+        (std) =>
+          std.id === s.studentId ||
+          std.id === s.userId ||
+          std.name.toLowerCase() === (s.name || "").toLowerCase(),
       );
+      const studentName = s.name || matching?.name || "Aluno";
       return {
-        ...demo,
-        id: matching?.id || demo.id,
+        id: s.studentId || s.userId || s.id || matching?.id || i + 1,
+        name: studentName,
+        email: s.email || matching?.email || "",
+        color: matching?.avatarColor || AVATAR_COLORS[i % AVATAR_COLORS.length],
+        phone: matching?.phone,
+        gender: (matching as any)?.gender,
         level: matching?.level || displayLevel,
         turma: matching?.turma || className,
         isActive: matching ? matching.isActive : true,
       };
     });
-  }, [classStudents, classData, students, displayLevel, className]);
+  }, [classStudents, students, displayLevel, className]);
 
   const handleStudentClick = (student: DisplayStudent) => {
     const matching = students.find(
@@ -750,18 +415,14 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
       id: student.id,
       name: student.name,
       email: student.email,
-      phone: student.phone || "(11) 98765-4321",
-      cpf: "123.456.789-00",
-      birthdate: "1998-05-15",
+      phone: student.phone || "",
       isActive: student.isActive !== false,
       avatarColor: student.color,
       level: student.level || displayLevel,
       turma: student.turma || className,
-      progress: 75,
-      enrollDate: "10/02/2026",
-      observations: "Aluno matriculado nesta turma.",
-      plan: 1,
-      frequency: "Semanal",
+      enrollDate: "",
+      observations: "",
+      plan: 0,
       gender: student.gender || "Não informado",
     };
 
@@ -789,9 +450,7 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
         name: enrolledStudent.name,
         email: enrolledStudent.email,
       };
-      const updated = [...baseList, newEntry];
-      saveStoredClassStudents(effectiveClassId, updated);
-      return updated;
+      return [...baseList, newEntry];
     });
   };
 
@@ -814,18 +473,14 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
         });
       }
 
-      // 2. Atualizar lista de alunos da turma e persistir no localStorage
-      setClassStudents((prev) => {
-        const baseList = prev.length > 0 ? prev : (displayStudents as any[]);
-        const updated = baseList.filter(
+      setClassStudents((prev) =>
+        prev.filter(
           (s: any) =>
             s.id !== studentId &&
             s.studentId !== studentId &&
             s.name.toLowerCase() !== studentName.toLowerCase(),
-        );
-        saveStoredClassStudents(effectiveClassId, updated);
-        return updated;
-      });
+        ),
+      );
 
       addToast(
         `Aluno(a) "${studentName}" foi removido(a) da turma com sucesso!`,
@@ -845,7 +500,6 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
     setIsRemovingTeacher(true);
     try {
       setClassTeacher(null);
-      saveStoredClassTeacher(effectiveClassId, null);
       addToast(
         `Professora "${teacherToRemove.name}" foi desvinculada desta turma.`,
         "success",
@@ -865,7 +519,6 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
       email: "lara.charantola@plataforma.com",
     };
     setClassTeacher(defaultTeacher);
-    saveStoredClassTeacher(effectiveClassId, defaultTeacher);
     addToast("Professora vinculada com sucesso à turma!", "success");
   };
 
@@ -987,68 +640,41 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
 
   const loadLessonsAndMaterials = useCallback(
     async (classId: number) => {
+      if (!classId) {
+        setLessons([]);
+        setClassStudents([]);
+        setMaterials([]);
+        return;
+      }
+
       setMaterialsLoading(true);
       try {
-        let classLessons: Lesson[] = [];
-        let students: ClassStudent[] = [];
+        const [classLessons, apiStudents] = await Promise.all([
+          listClassLessons(classId),
+          listClassStudents(classId),
+        ]);
 
-        if (classData.id && classData.id > 0) {
-          try {
-            const [resLessons, resStudents] = await Promise.all([
-              listClassLessons(classData.id),
-              listClassStudents(classData.id),
-            ]);
-            classLessons = resLessons;
-            students = resStudents;
-          } catch (e) {
-            console.warn("API load fallback to local storage:", e);
-          }
-        }
-
-        const storedLessons = loadStoredLessons(classId);
-        const allLessonsMap = new Map<number, Lesson>();
-        storedLessons.forEach((l) => allLessonsMap.set(l.id, l));
-        classLessons.forEach((l) => allLessonsMap.set(l.id, l));
-        const combinedLessons = Array.from(allLessonsMap.values()).sort(
+        const sortedLessons = [...classLessons].sort(
           (a, b) =>
             new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
         );
+        setLessons(sortedLessons);
+        setClassStudents(apiStudents);
 
-        setLessons(combinedLessons);
-        const storedStudents = loadStoredClassStudents(classId);
-        if (storedStudents.length > 0) {
-          setClassStudents(storedStudents);
-        } else if (students.length > 0) {
-          setClassStudents(students);
-        }
-        const storedTeacher = loadStoredClassTeacher(classId);
-        setClassTeacher(storedTeacher);
-
-        let apiMaterials: LessonMaterial[] = [];
-        if (classData.id && classData.id > 0 && classLessons.length > 0) {
-          try {
-            const perLesson = await Promise.all(
-              classLessons.map((lesson) => listLessonMaterials(lesson.id)),
-            );
-            apiMaterials = perLesson.flat();
-          } catch (e) {
-            console.warn("API materials load fallback:", e);
-          }
-        }
-
-        const storedMaterials = loadStoredMaterials(classId);
-        const allMaterialsMap = new Map<number, LessonMaterial>();
-        storedMaterials.forEach((m) => allMaterialsMap.set(m.id, m));
-        apiMaterials.forEach((m) => allMaterialsMap.set(m.id, m));
-
-        setMaterials(Array.from(allMaterialsMap.values()));
+        const perLesson = await Promise.all(
+          sortedLessons.map((lesson) => listLessonMaterials(lesson.id)),
+        );
+        setMaterials(perLesson.flat());
       } catch {
+        setLessons([]);
+        setClassStudents([]);
+        setMaterials([]);
         addToast("Não foi possível carregar os dados da turma.", "error");
       } finally {
         setMaterialsLoading(false);
       }
     },
-    [addToast, classData.id],
+    [addToast],
   );
 
   // Busca o nome real do nível da turma para exibir no banner.
@@ -1086,55 +712,24 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
   }, [effectiveClassId, loadLessonsAndMaterials]);
 
   const handleCreateLesson = async (data: ClassEventData) => {
+    if (!canManageLessons) {
+      addToast("Não foi possível identificar a turma para agendar a aula.", "error");
+      return;
+    }
     setCreatingLesson(true);
     try {
-      let lesson: Lesson;
-      if (classData.id && classData.id > 0) {
-        try {
-          lesson = await createClassLesson(classData.id, {
-            title: data.title,
-            date: data.date,
-            startTime: data.startTime,
-            endTime: data.endTime,
-          });
-        } catch (err) {
-          console.warn("API lesson create fallback:", err);
-          lesson = {
-            id: Date.now(),
-            classId: effectiveClassId,
-            teacherId: 1,
-            classTeacherId: 1,
-            title: data.title,
-            description: null,
-            startTime: `${data.date}T${data.startTime}:00`,
-            duration: "01:00:00",
-            status: "scheduled",
-            type: "online",
-          };
-        }
-      } else {
-        lesson = {
-          id: Date.now(),
-          classId: effectiveClassId,
-          teacherId: 1,
-          classTeacherId: 1,
-          title: data.title,
-          description: null,
-          startTime: `${data.date}T${data.startTime}:00`,
-          duration: "01:00:00",
-          status: "scheduled",
-          type: "online",
-        };
-      }
-
-      setLessons((prev) => {
-        const updated = [...prev, lesson].sort(
+      const lesson = await createClassLesson(effectiveClassId, {
+        title: data.title,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+      });
+      setLessons((prev) =>
+        [...prev, lesson].sort(
           (a, b) =>
             new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-        );
-        saveStoredLessons(effectiveClassId, updated);
-        return updated;
-      });
+        ),
+      );
       addToast("Aula agendada com sucesso!", "success");
       setShowLessonModal(false);
     } catch {
@@ -1186,23 +781,14 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
 
   const handleConfirmDelete = async () => {
     if (!materialToDelete) return;
+    if (!materialToDelete.lessonId) {
+      addToast("Não foi possível excluir o material.", "error");
+      return;
+    }
     setDeletingId(materialToDelete.id);
     try {
-      if (classData.id && classData.id > 0 && materialToDelete.lessonId > 0) {
-        try {
-          await deleteLessonMaterial(
-            materialToDelete.lessonId,
-            materialToDelete.id,
-          );
-        } catch (err) {
-          console.warn("API delete fallback:", err);
-        }
-      }
-      setMaterials((prev) => {
-        const updated = prev.filter((m) => m.id !== materialToDelete.id);
-        saveStoredMaterials(effectiveClassId, updated);
-        return updated;
-      });
+      await deleteLessonMaterial(materialToDelete.lessonId, materialToDelete.id);
+      setMaterials((prev) => prev.filter((m) => m.id !== materialToDelete.id));
       addToast("Material excluído com sucesso.", "success");
     } catch {
       addToast("Não foi possível excluir o material.", "error");
@@ -1213,124 +799,29 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
   };
 
   const handleSaveMaterial = async (data: MaterialSubmitData) => {
+    if (!canManageLessons || data.lessonId <= 0) {
+      addToast("Selecione uma aula para publicar o material.", "warning");
+      return;
+    }
+
+    const files = data.items.map((item) => item.file).filter(Boolean) as File[];
+    if (files.length === 0) {
+      addToast("Envie um arquivo para publicar o material no backend.", "warning");
+      return;
+    }
+
     setUploading(true);
     try {
-      if (data.existingId && data.items.length > 0) {
-        // Modo de edição de material existente
-        const firstItem = data.items[0];
-        let fileUrl = firstItem.externalLink || "";
-        let fileName = firstItem.file?.name || firstItem.title;
-        let fileSize = firstItem.file?.size || firstItem.fileSize || 0;
-        let sizeFormatted =
-          firstItem.sizeFormatted ||
-          (fileSize > 0 ? formatBytes(fileSize) : "Link externo");
-
-        if (firstItem.file) {
-          fileUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => resolve(URL.createObjectURL(firstItem.file!));
-            reader.readAsDataURL(firstItem.file!);
-          });
-        }
-
-        setMaterials((prev) => {
-          const updated = prev.map((m) => {
-            if (m.id === data.existingId) {
-              return {
-                ...m,
-                title: data.title,
-                description: data.description,
-                category: data.category,
-                lessonId: data.lessonId,
-                type: firstItem.type,
-                link: fileUrl || m.link,
-                file: fileName || m.file,
-                fileSize: fileSize || m.fileSize,
-                sizeFormatted: sizeFormatted || m.sizeFormatted,
-                isExternalLink: !firstItem.file && !!firstItem.externalLink,
-              };
-            }
-            return m;
-          });
-          saveStoredMaterials(effectiveClassId, updated);
-          return updated;
-        });
-        addToast("Material atualizado com sucesso!", "success");
-      } else {
-        // Criando 1 ou múltiplos materiais adicionados pela professora
-        const createdMaterials: LessonMaterial[] = [];
-
-        for (let i = 0; i < data.items.length; i++) {
-          const item = data.items[i];
-          let fileUrl = item.externalLink || "";
-          let fileName = item.file?.name || item.title;
-          let fileSize = item.file?.size || item.fileSize || 0;
-          let sizeFormatted =
-            item.sizeFormatted ||
-            (fileSize > 0 ? formatBytes(fileSize) : "Recurso online");
-
-          if (item.file) {
-            fileUrl = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = () => resolve(URL.createObjectURL(item.file!));
-              reader.readAsDataURL(item.file!);
-            });
-          }
-
-          const itemTitle =
-            data.items.length === 1
-              ? data.title
-              : item.title && item.title !== data.title
-              ? `${data.title} — ${item.title}`
-              : `${data.title} (${i + 1})`;
-
-          const newMat: LessonMaterial = {
-            id: Date.now() + i,
-            lessonId: data.lessonId,
-            title: itemTitle,
-            description: data.description,
-            category: data.category,
-            file: fileName || itemTitle,
-            link: fileUrl,
-            type: item.type,
-            fileSize: fileSize,
-            sizeFormatted: sizeFormatted,
-            createdAt: new Date().toISOString(),
-            isExternalLink: !item.file && !!item.externalLink,
-          };
-
-          if (
-            classData.id &&
-            classData.id > 0 &&
-            data.lessonId > 0 &&
-            item.file
-          ) {
-            try {
-              await uploadLessonMaterial(data.lessonId, item.file);
-            } catch (e) {
-              console.warn("API upload fallback to local storage:", e);
-            }
-          }
-
-          createdMaterials.push(newMat);
-        }
-
-        setMaterials((prev) => {
-          const updated = [...createdMaterials, ...prev];
-          saveStoredMaterials(effectiveClassId, updated);
-          return updated;
-        });
-
-        addToast(
-          createdMaterials.length > 1
-            ? `${createdMaterials.length} conteúdos publicados com sucesso!`
-            : "Material publicado com sucesso!",
-          "success",
-        );
+      for (const file of files) {
+        await uploadLessonMaterial(data.lessonId, file);
       }
-
+      await loadLessonsAndMaterials(effectiveClassId);
+      addToast(
+        files.length > 1
+          ? `${files.length} conteúdos publicados com sucesso!`
+          : "Material publicado com sucesso!",
+        "success",
+      );
       setShowMaterialModal(false);
       setEditingMaterial(null);
     } catch (error) {
