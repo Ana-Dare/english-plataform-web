@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, format, isSameDay, isAfter, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Clock, CalendarDays, Search } from 'lucide-react';
@@ -12,6 +12,7 @@ import {
 import CalendarGrid from './CalendarGrid';
 import EventModal from './EventModal';
 import type { CalendarEvent } from './EventModal';
+import useToast from '../../../contexts/Toast/useToast';
 
 type ViewMode = 'mensal' | 'semanal';
 
@@ -35,6 +36,7 @@ const typeLabels: Record<string, string> = {
 };
 
 const AgendaTab: React.FC = () => {
+  const { addToast } = useToast();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('mensal');
@@ -84,6 +86,12 @@ const AgendaTab: React.FC = () => {
   }, [filteredEvents]);
 
   const handleDateClick = (date: Date) => {
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    const clickedStr = format(date, "yyyy-MM-dd");
+    if (clickedStr < todayStr) {
+      addToast("Não é permitido agendar eventos em datas passadas.", "warning");
+      return;
+    }
     setSelectedDate(date);
     setEventToEdit(null);
     setIsModalOpen(true);

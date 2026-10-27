@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ArrowLeft,
   Award,
@@ -7,19 +7,29 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Edit2,
+  FileText,
   Mail,
   Phone,
   Plus,
   Search,
   User,
+  UserCheck,
   UserX,
   Power,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import CustomDropdown from "../../../components/CustomDropdown";
+import MobileCarousel from "../../../components/MobileCarousel";
 import {
   ActionsWrapper,
+  ActionButtonsGroup,
+  ActionIconButton,
+  MobileExpandBtn,
+  MobileDossierRow,
+  MobileDossierBtn,
   AddButton,
   Avatar,
   Container,
@@ -36,13 +46,24 @@ import {
   DetailHeader,
   DetailHeaderInfo,
   DetailNameBlock,
+  DetailObservationsWrapper,
   DetailSection,
   DetailSectionTitle,
   DetailStatusBadge,
   HeaderActions,
-  IconButton,
-  PaginationContainer,
+  FiltersRow,
+  PaginationFooter,
+  PaginationLeft,
+  PageSizeSelector,
+  ShowingInfo,
+  PaginationNav,
+  PageNavButton,
+  PageNumberButton,
+  PageEllipsis,
   PlanBadge,
+  ProgressWrapper,
+  ProgressBarTrack,
+  ProgressBarFill,
   SearchWrapper,
   StatusBadge,
   StudentCell,
@@ -53,7 +74,6 @@ import {
   Th,
   Tr,
   LevelBadge,
-  PageNumber,
 } from "./style";
 import RegisterStudent from "./RegisterStudent";
 import type {
@@ -64,8 +84,6 @@ import { useStudents } from "../../../contexts/Students/hooks/useStudents";
 import type { Student } from "../../../contexts/Students/StudentsContext";
 import useToast from "../../../contexts/Toast/useToast";
 import { listLevels } from "../services/level";
-
-const ITEMS_PER_PAGE = 10;
 
 const getInitials = (name: string) => {
   const parts = name.split(" ");
@@ -127,9 +145,21 @@ const buildUpdatePayload = (
 
 interface StudentsTabProps {
   initialStudentId?: number | null;
+  initialStudentData?: any;
+  initialShowRegister?: boolean;
+  initialTurmaId?: number | string | null;
+  initialTurmaName?: string | null;
+  onClearInitialState?: () => void;
 }
 
-const StudentsTab: React.FC<StudentsTabProps> = () => {
+const StudentsTab: React.FC<StudentsTabProps> = ({
+  initialStudentId,
+  initialStudentData,
+  initialShowRegister,
+  initialTurmaId,
+  initialTurmaName,
+  onClearInitialState,
+}) => {
   const { addToast } = useToast();
   const {
     students,
@@ -141,6 +171,8 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     isUpdating,
     deactivateStudent,
     isDeactivating,
+    activateStudent,
+    isActivating,
   } = useStudents();
 
   const { data: levelsData } = useQuery({
@@ -152,14 +184,45 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
   const [filterLevel, setFilterLevel] = useState("todos");
   const [filterTurma] = useState("todas");
   const [filterFreq] = useState("qualquer");
-  const [filterStatus, setFilterStatus] = useState("ativos");
+  const [filterStatus, setFilterStatus] = useState("todos");
   const [sortOrder, setSortOrder] = useState("recent");
 
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Student | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [expandedStudentIds, setExpandedStudentIds] = useState<Record<number, boolean>>({});
+
+  const toggleStudentExpand = (studentId: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setExpandedStudentIds((prev) => ({
+      ...prev,
+      [studentId]: !prev[studentId],
+    }));
+  };
+
+  // Se veio navegação direta para um aluno específico a partir de outra aba (ex: Turmas)
+  useEffect(() => {
+    if (initialStudentId) {
+      const found = students.find((s) => s.id === initialStudentId);
+      if (found) {
+        setSelectedStudent(found);
+      } else if (initialStudentData) {
+        setSelectedStudent(initialStudentData);
+      }
+    } else if (initialStudentData) {
+      setSelectedStudent(initialStudentData);
+    }
+  }, [initialStudentId, initialStudentData, students]);
+
+  useEffect(() => {
+    if (initialShowRegister) {
+      setShowRegister(true);
+      setSelectedStudent(null);
+    }
+  }, [initialShowRegister]);
 
   const levelMap = useMemo(() => {
     const map: Record<number, string> = {};
@@ -215,15 +278,38 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     filterStatus,
     sortOrder,
   ]);
-  const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE);
-  const validCurrentPage = Math.min(currentPage, Math.max(totalPages, 1));
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
+  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (validCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredStudents.length);
+
   const currentStudents = useMemo(() => {
-    const startIndex = (validCurrentPage - 1) * ITEMS_PER_PAGE;
-    return filteredStudents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredStudents, validCurrentPage]);
+    return filteredStudents.slice(startIndex, endIndex);
+  }, [filteredStudents, startIndex, endIndex]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleSortOrderChange = (val: string) => {
+    setSortOrder(val);
+    setCurrentPage(1);
+  };
+
+  const handleFilterLevelChange = (val: string) => {
+    setFilterLevel(val);
+    setCurrentPage(1);
+  };
+
+  const handleFilterStatusChange = (val: string) => {
+    setFilterStatus(val);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (val: number) => {
+    setItemsPerPage(val);
     setCurrentPage(1);
   };
 
@@ -248,6 +334,10 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     setSelectedStudent(null);
     setIsEditing(false);
     setEditForm(null);
+    setShowRegister(false);
+    if (onClearInitialState) {
+      onClearInitialState();
+    }
   };
 
   const handleRegisterSave = (
@@ -274,23 +364,39 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
   };
 
   const handleToggleActive = (student: any) => {
-    updateStudent(
-      {
-        userId: student.id,
-        params: { active: student.isActive ? 0 : 1 },
+    const nextActive = !student.isActive;
+
+    // Se o usuário estiver no filtro "ativos" e desativar um aluno,
+    // alternamos o filtro para "todos" para que o aluno continue na tela e
+    // o usuário veja claramente o status mudar para Inativo e o botão para Ativar
+    if (!nextActive && filterStatus === "ativos") {
+      setFilterStatus("todos");
+    }
+
+    const mutateFn = nextActive ? activateStudent : deactivateStudent;
+    mutateFn(student.id, {
+      onSuccess: () => {
+        setSelectedStudent((prev) =>
+          prev && prev.id === student.id
+            ? { ...prev, isActive: nextActive }
+            : prev,
+        );
+        if (editForm && editForm.id === student.id) {
+          setEditForm((prev) =>
+            prev ? { ...prev, isActive: nextActive } : null,
+          );
+        }
+        const msg = nextActive
+          ? `Aluno(a) "${student.name}" ativado com sucesso!`
+          : `Aluno(a) "${student.name}" desativado com sucesso!`;
+        addToast(msg, "success");
       },
-      {
-        onSuccess: () => {
-          setSelectedStudent(null);
-          addToast("Status do aluno atualizado com sucesso!", "success");
-        },
-        onError: () =>
-          addToast(
-            "Não foi possível atualizar o status do aluno. Tente novamente.",
-            "error",
-          ),
-      },
-    );
+      onError: () =>
+        addToast(
+          `Não foi possível ${nextActive ? "ativar" : "desativar"} o aluno. Tente novamente.`,
+          "error",
+        ),
+    });
   };
 
   const handleSaveEdit = () => {
@@ -322,12 +428,59 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
     });
   };
 
+  const renderPageNumbers = () => {
+    if (totalPages <= 1) return null;
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (validCurrentPage > 3) {
+        pages.push("ellipsis-1");
+      }
+      const start = Math.max(2, validCurrentPage - 1);
+      const end = Math.min(totalPages - 1, validCurrentPage + 1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (validCurrentPage < totalPages - 2) {
+        pages.push("ellipsis-2");
+      }
+      pages.push(totalPages);
+    }
+
+    return pages.map((page) => {
+      if (typeof page === "string") {
+        return <PageEllipsis key={page}>...</PageEllipsis>;
+      }
+      return (
+        <PageNumberButton
+          key={page}
+          $active={validCurrentPage === page}
+          onClick={() => setCurrentPage(page)}
+          aria-label={`Ir para a página ${page}`}
+          aria-current={validCurrentPage === page ? "page" : undefined}
+        >
+          {page}
+        </PageNumberButton>
+      );
+    });
+  };
+
   if (showRegister) {
     return (
       <RegisterStudent
         onBack={handleBackToList}
-        onSave={handleRegisterSave}
+        onSave={(student, photoBlob) => {
+          handleRegisterSave(student, photoBlob);
+          if (onClearInitialState) {
+            onClearInitialState();
+          }
+        }}
         isSaving={isAdding}
+        initialTurmaId={initialTurmaId}
+        initialTurmaName={initialTurmaName}
       />
     );
   }
@@ -540,19 +693,19 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                   <div className="field-content">
                     <DetailFieldLabel>Plano</DetailFieldLabel>
                     {isEditing ? (
-                      <select
-                        value={editForm!.plan}
-                        onChange={(e) =>
+                      <CustomDropdown
+                        value={String(editForm!.plan)}
+                        onChange={(val) =>
                           setEditForm((f) =>
-                            f
-                              ? { ...f, plan: Number(e.target.value) as 0 | 1 }
-                              : null,
+                            f ? { ...f, plan: Number(val) as 0 | 1 } : null,
                           )
                         }
-                      >
-                        <option value={0}>Regular</option>
-                        <option value={1}>VIP</option>
-                      </select>
+                        fullWidth
+                        options={[
+                          { value: "0", label: "Regular" },
+                          { value: "1", label: "VIP" },
+                        ]}
+                      />
                     ) : (
                       <DetailFieldValue>
                         <PlanBadge $plan={displayData.plan}>
@@ -587,7 +740,7 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                 </div>
                 Observações
               </DetailSectionTitle>
-              <div style={{ padding: "24px" }}>
+              <DetailObservationsWrapper>
                 <DetailField className="align-top">
                   <div className="field-icon">
                     <BookOpen size={20} />
@@ -617,7 +770,7 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                     )}
                   </div>
                 </DetailField>
-              </div>
+              </DetailObservationsWrapper>
             </DetailSection>
           </DetailBody>
 
@@ -641,14 +794,23 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
               </>
             ) : (
               <>
-                {selectedStudent.isActive && (
+                {displayData.isActive ? (
                   <DetailActionBtn
                     $variant="danger"
-                    disabled={isDeactivating}
-                    onClick={() => handleDeactivate(selectedStudent.id)}
+                    disabled={isUpdating || isDeactivating || isActivating}
+                    onClick={() => handleToggleActive(displayData)}
                   >
                     <UserX size={16} />
                     {isDeactivating ? "Desativando..." : "Desativar Aluno"}
+                  </DetailActionBtn>
+                ) : (
+                  <DetailActionBtn
+                    $variant="success"
+                    disabled={isUpdating || isDeactivating || isActivating}
+                    onClick={() => handleToggleActive(displayData)}
+                  >
+                    <UserCheck size={16} />
+                    {isActivating ? "Ativando..." : "Ativar Aluno"}
                   </DetailActionBtn>
                 )}
                 <DetailActionBtn $variant="primary" onClick={handleStartEdit}>
@@ -675,50 +837,76 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
           />
         </SearchWrapper>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "0.8rem",
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          <CustomDropdown
-            value={sortOrder}
-            onChange={setSortOrder}
-            options={[
-              { value: "recent", label: "Mais recentes" },
-              { value: "oldest", label: "Mais antigos" },
-              { value: "az", label: "Ordem alfabética (A-Z)" },
-            ]}
-          />
+        <FiltersRow>
+          <MobileCarousel>
+            <CustomDropdown
+              value={sortOrder}
+              onChange={handleSortOrderChange}
+              options={[
+                { value: "recent", label: "Mais recentes" },
+                { value: "oldest", label: "Mais antigos" },
+                { value: "az", label: "Ordem alfabética (A-Z)" },
+              ]}
+            />
 
-          <CustomDropdown
-            value={filterLevel}
-            onChange={setFilterLevel}
-            options={[
-              { value: "todos", label: "Nível: Todos" },
-              ...(levelsData?.levels?.map((level) => ({
-                value: String(level.id),
-                label: `Nível: ${level.name}`,
-              })) || []),
-            ]}
-          />
+            <CustomDropdown
+              value={filterLevel}
+              onChange={handleFilterLevelChange}
+              options={[
+                { value: "todos", label: "Nível: Todos" },
+                ...(levelsData?.levels?.map((level) => ({
+                  value: String(level.id),
+                  label: `Nível: ${level.name}`,
+                })) || []),
+              ]}
+            />
 
-          <CustomDropdown
-            value={filterStatus}
-            onChange={setFilterStatus}
-            options={[
-              { value: "ativos", label: "Status: Ativos" },
-              { value: "inativos", label: "Status: Inativos" },
-              { value: "todos", label: "Status: Todos" },
-            ]}
-          />
+            <CustomDropdown
+              value={filterStatus}
+              onChange={handleFilterStatusChange}
+              menuAlign="right"
+              options={[
+                { value: "todos", label: "Status: Todos" },
+                { value: "ativos", label: "Status: Ativos" },
+                { value: "inativos", label: "Status: Inativos" },
+              ]}
+            />
+          </MobileCarousel>
 
-          <AddButton onClick={() => setShowRegister(true)}>
-            Adicionar aluno <Plus size={16} />
+          {(searchQuery.trim() !== "" ||
+            filterLevel !== "todos" ||
+            filterStatus !== "todos" ||
+            sortOrder !== "recent") && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
+                setFilterLevel("todos");
+                setFilterStatus("todos");
+                setSortOrder("recent");
+                setCurrentPage(1);
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#2563eb",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                padding: "4px 8px",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Limpar filtro
+            </button>
+          )}
+
+          <AddButton onClick={() => setShowRegister(true)} type="button">
+            <Plus size={18} strokeWidth={2.2} />
+            <span>Adicionar aluno</span>
           </AddButton>
-        </div>
+        </FiltersRow>
       </HeaderActions>
 
       <TableContainer>
@@ -747,15 +935,31 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                     statusText = "Trancado";
                 }
 
+                const isExpanded = !!expandedStudentIds[student.id];
+
                 return (
                   <Tr
                     key={student.id}
-                    onClick={() => handleOpenDetail(student)}
+                    $inactive={!student.isActive}
+                    $isExpanded={isExpanded}
+                    onClick={() => {
+                      if (
+                        typeof window !== "undefined" &&
+                        window.innerWidth <= 768
+                      ) {
+                        toggleStudentExpand(student.id);
+                      } else {
+                        handleOpenDetail(student);
+                      }
+                    }}
                     style={{ cursor: "pointer" }}
                   >
                     <Td data-label="Nome">
                       <StudentCell>
-                        <Avatar $color={student.avatarColor}>
+                        <Avatar
+                          $color={student.avatarColor}
+                          $inactive={!student.isActive}
+                        >
                           {student.avatar_url ? (
                             <img
                               src={student.avatar_url}
@@ -775,17 +979,32 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                             getInitials(student.name)
                           )}
                         </Avatar>
-                        <StudentInfo>
-                          <strong>{student.name}</strong>
+                        <StudentInfo $inactive={!student.isActive}>
+                          <strong>
+                            {student.name}
+                            {!student.isActive && (
+                              <span className="inactive-tag">Desativado</span>
+                            )}
+                          </strong>
                         </StudentInfo>
                       </StudentCell>
                     </Td>
-                    <Td data-label="Nível">
+
+                    <Td
+                      data-label="Nível"
+                      $secondaryOnMobile
+                      $isExpanded={isExpanded}
+                    >
                       <LevelBadge $color={getLevelColor(student.level)}>
                         {getLevelShort(student.level)}
                       </LevelBadge>
                     </Td>
-                    <Td data-label="Turma">
+
+                    <Td
+                      data-label="Turma"
+                      $secondaryOnMobile
+                      $isExpanded={isExpanded}
+                    >
                       <span
                         title={
                           student.turma !== "Não atribuída"
@@ -796,78 +1015,101 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
                         {student.turma}
                       </span>
                     </Td>
-                    <Td data-label="Andamento">
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "6px",
-                          width: "80px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            fontWeight: 800,
-                            color: "#1F2B45",
-                          }}
-                        >
-                          {student.progress}%
+
+                    <Td
+                      data-label="Andamento"
+                      $secondaryOnMobile
+                      $isExpanded={isExpanded}
+                    >
+                      <ProgressWrapper>
+                        <span className="progress-percent">
+                          {student.progress || 0}%
                         </span>
-                        <div
-                          style={{
-                            width: "100%",
-                            height: "3px",
-                            background: "#F1F5F9",
-                            borderRadius: "3px",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: `${student.progress}%`,
-                              height: "100%",
-                              background: "#C57A67",
-                              borderRadius: "3px",
-                            }}
-                          />
-                        </div>
-                      </div>
+                        <ProgressBarTrack>
+                          <ProgressBarFill $width={student.progress || 0} />
+                        </ProgressBarTrack>
+                      </ProgressWrapper>
                     </Td>
+
                     <Td data-label="Status">
                       <StatusBadge $status={statusText}>
                         {statusText}
                       </StatusBadge>
                     </Td>
+
                     <Td data-label="Ações" onClick={(e) => e.stopPropagation()}>
                       <ActionsWrapper>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <IconButton
-                            title="Editar Aluno"
+                        <MobileExpandBtn
+                          type="button"
+                          onClick={(e) => toggleStudentExpand(student.id, e)}
+                          aria-label={
+                            isExpanded ? "Ocultar detalhes" : "Ver mais detalhes"
+                          }
+                        >
+                          {isExpanded ? (
+                            <>
+                              <span>Menos detalhes</span>
+                              <ChevronUp size={14} />
+                            </>
+                          ) : (
+                            <>
+                              <span>Ver detalhes</span>
+                              <ChevronDown size={14} />
+                            </>
+                          )}
+                        </MobileExpandBtn>
+
+                        <ActionButtonsGroup>
+                          <ActionIconButton
+                            $variant="edit"
+                            title={`Editar aluno ${student.name}`}
+                            aria-label={`Editar aluno ${student.name}`}
                             onClick={() => {
                               handleOpenDetail(student);
                               setEditForm({ ...student });
                               setIsEditing(true);
                             }}
                           >
-                            <Edit2 size={16} />
-                          </IconButton>
-                          <IconButton
+                            <Edit2 size={15} />
+                          </ActionIconButton>
+                          <ActionIconButton
+                            $variant="power"
+                            $isActive={student.isActive}
                             title={
                               student.isActive
-                                ? "Desativar Aluno"
-                                : "Ativar Aluno"
+                                ? `Desativar aluno ${student.name}`
+                                : `Ativar aluno ${student.name}`
                             }
-                            disabled={isUpdating}
+                            aria-label={
+                              student.isActive
+                                ? `Desativar aluno ${student.name}`
+                                : `Ativar aluno ${student.name}`
+                            }
+                            disabled={
+                              isUpdating || isDeactivating || isActivating
+                            }
                             onClick={() => handleToggleActive(student)}
-                            style={{
-                              color: student.isActive ? "#ef4444" : "#22c55e",
-                            }}
                           >
-                            <Power size={16} />
-                          </IconButton>
-                        </div>
+                            {student.isActive ? (
+                              <Power size={15} />
+                            ) : (
+                              <UserCheck size={16} strokeWidth={2.3} />
+                            )}
+                          </ActionIconButton>
+                        </ActionButtonsGroup>
                       </ActionsWrapper>
+
+                      <MobileDossierRow $isExpanded={isExpanded}>
+                        <MobileDossierBtn
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDetail(student);
+                          }}
+                        >
+                          <FileText size={15} /> Ver Dossiê Completo
+                        </MobileDossierBtn>
+                      </MobileDossierRow>
                     </Td>
                   </Tr>
                 );
@@ -894,47 +1136,54 @@ const StudentsTab: React.FC<StudentsTabProps> = () => {
         </Table>
       </TableContainer>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: "8px",
-        }}
-      >
-        <span style={{ color: "#64748B", fontSize: "0.9rem" }}>
-          Mostrando {(validCurrentPage - 1) * ITEMS_PER_PAGE + 1}-
-          {Math.min(validCurrentPage * ITEMS_PER_PAGE, filteredStudents.length)}{" "}
-          de {filteredStudents.length} resultados
-        </span>
+      <PaginationFooter>
+        <PaginationLeft>
+          <PageSizeSelector>
+            <span className="label">Mostrar</span>
+            <CustomDropdown
+              size="compact"
+              menuDirection="up"
+              minWidth="60px"
+              value={String(itemsPerPage)}
+              onChange={(val) => handleItemsPerPageChange(Number(val))}
+              options={[
+                { value: "10", label: "10" },
+                { value: "25", label: "25" },
+                { value: "50", label: "50" },
+                { value: "100", label: "100" },
+              ]}
+              ariaLabel="Alunos por página"
+            />
+            <span>por página</span>
+          </PageSizeSelector>
 
-        <PaginationContainer style={{ marginTop: 0 }}>
-          <IconButton
+          <ShowingInfo>
+            {filteredStudents.length === 0
+              ? "Nenhum aluno encontrado"
+              : `Mostrando ${startIndex + 1}–${endIndex} de ${filteredStudents.length} alunos`}
+          </ShowingInfo>
+        </PaginationLeft>
+
+        <PaginationNav>
+          <PageNavButton
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={validCurrentPage === 1}
+            aria-label="Página anterior"
           >
             <ChevronLeft size={18} />
-          </IconButton>
+          </PageNavButton>
 
-          {[...Array(Math.min(5, totalPages))].map((_, i) => (
-            <PageNumber
-              key={i}
-              $active={validCurrentPage === i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </PageNumber>
-          ))}
-          {totalPages > 5 && <span style={{ padding: "0 4px" }}>..</span>}
+          {renderPageNumbers()}
 
-          <IconButton
+          <PageNavButton
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={validCurrentPage === totalPages || totalPages === 0}
+            aria-label="Próxima página"
           >
             <ChevronRight size={18} />
-          </IconButton>
-        </PaginationContainer>
-      </div>
+          </PageNavButton>
+        </PaginationNav>
+      </PaginationFooter>
     </Container>
   );
 };

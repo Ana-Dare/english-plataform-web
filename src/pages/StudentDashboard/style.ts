@@ -1,34 +1,38 @@
-﻿import styled from 'styled-components';
+import styled from 'styled-components';
 
 export const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  max-width: 100%;
-  margin: 0 auto;
+  gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const HeaderSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 1rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     flex-direction: column;
-    gap: 16px;
+    gap: 1rem;
   }
 
   h1 {
-    font-size: 1.8rem;
+    font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+    line-height: 1.25;
     font-weight: 800;
     color: #1F2B45;
-    margin-bottom: 8px;
+    margin-bottom: 0.375rem;
   }
 
   p {
-    color: #666;
-    font-size: 0.9rem;
+    color: #4D4D4D;
+    font-size: clamp(0.875rem, 0.25vw + 0.825rem, 0.9375rem);
+    line-height: 1.5;
     font-weight: 500;
   }
 `;
@@ -36,17 +40,19 @@ export const HeaderSection = styled.div`
 export const BadgesContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 0.75rem;
 `;
 
 export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' | 'blue' | 'red' }>`
-  padding: 4px 10px;
+  padding: 0.3rem 0.75rem;
   border-radius: 16px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.3;
   font-weight: 700;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
+  white-space: nowrap;
 
   ${({ $variant }) => {
     switch ($variant) {
@@ -82,14 +88,15 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' | 'blue' |
 
 export const StatsRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.875rem, 1.5vw, 1.25rem);
+  width: 100%;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 479px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -98,29 +105,32 @@ export const StatCard = styled.div`
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.08);
   }
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 14px;
+  padding: clamp(1rem, 2vw, 1.25rem);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  min-width: 0; /* Prevents overflow in grid */
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 export const IconBox = styled.div<{ $color?: string, $bg?: string }>`
   width: 48px;
   height: 48px;
   min-width: 48px;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: ${({ $bg }) => $bg || '#E8F0FE'};
   color: ${({ $color }) => $color || '#4A72FF'};
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
   svg {
     width: 24px;
@@ -133,18 +143,20 @@ export const StatInfo = styled.div`
   min-width: 0;
 
   h4 {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 1.5vw + 0.9rem, 1.5rem);
+    line-height: 1.25;
     font-weight: 800;
     color: #1F2B45;
-    margin-bottom: 4px;
+    margin-bottom: 0.2rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   p {
-    font-size: 0.8rem;
-    color: #888;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #64748b;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -160,39 +172,46 @@ export const ProgressSection = styled.div`
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
   }
   background: white;
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 14px;
+  padding: clamp(1.25rem, 2.5vw, 1.5rem);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const ProgressHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 16px;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 
   @media (max-width: 600px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 0.5rem;
   }
 
   h4 {
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 0.5vw + 0.9rem, 1.1875rem);
+    line-height: 1.3;
     font-weight: 800;
     color: #1F2B45;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
   }
 
   p {
-    font-size: 0.85rem;
-    color: #888;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: #64748b;
     font-weight: 500;
   }
 `;
 
 export const Percentage = styled.span`
-  font-size: 1.35rem;
+  font-size: clamp(1.25rem, 1vw + 1rem, 1.5rem);
+  line-height: 1.2;
   font-weight: 800;
   color: #C57A67;
 `;
@@ -200,71 +219,82 @@ export const Percentage = styled.span`
 export const ProgressBar = styled.div`
   height: 8px;
   background-color: #F0F0F0;
-  border-radius: 4px;
+  border-radius: 999px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 `;
 
 export const ProgressFill = styled.div<{ $width: string }>`
   height: 100%;
   width: ${({ $width }) => $width};
   background-color: #C57A67;
-  border-radius: 4px;
+  border-radius: 999px;
 `;
 
 export const ProgressFooter = styled.div`
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  color: #888;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #64748b;
   font-weight: 600;
 
   @media (max-width: 600px) {
     flex-direction: column;
-    gap: 6px;
+    gap: 0.375rem;
   }
 `;
 
 export const AgendaSection = styled.div`
+  min-width: 0;
+  width: 100%;
+
   h3 {
-    font-size: 1.3rem;
+    font-size: clamp(1.125rem, 1vw + 0.875rem, 1.5rem);
+    line-height: 1.3;
     font-weight: 800;
     color: #1F2B45;
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
   }
 `;
 
 export const AgendaGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 24px;
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+  width: 100%;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1023px) {
     grid-template-columns: 1fr;
   }
 `;
 
 export const ColumnHeader = styled.h4`
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: clamp(1rem, 0.5vw + 0.9rem, 1.125rem);
+  line-height: 1.35;
+  font-weight: 700;
   color: #1F2B45;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 `;
 
 export const ClassesList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
+  min-width: 0;
 `;
 
 export const EventsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
   background: white;
-  padding: 24px;
-  border-radius: 12px;
+  padding: clamp(1.25rem, 2vw, 1.5rem);
+  border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  min-width: 0;
 `;
 
 export const ClassCard = styled.div`
@@ -276,17 +306,18 @@ export const ClassCard = styled.div`
   }
   background: white;
   border-radius: 12px;
-  padding: 16px;
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1.25rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  border: 1px solid #f9f9f9;
+  border: 1px solid #f1f5f9;
+  min-width: 0;
 
-  @media (max-width: 480px) {
+  @media (max-width: 479px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 0.875rem;
   }
 `;
 
@@ -301,6 +332,7 @@ export const DateBox = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
   strong {
     font-size: 1.25rem;
@@ -309,18 +341,18 @@ export const DateBox = styled.div`
   }
 
   span {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     margin-top: 4px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 479px) {
     width: 100%;
     height: auto;
-    padding: 8px;
+    padding: 0.5rem 0.75rem;
     flex-direction: row;
-    gap: 8px;
+    gap: 0.5rem;
 
     span {
       margin-top: 0;
@@ -335,26 +367,29 @@ export const ClassDetails = styled.div`
   .title-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
     flex-wrap: wrap;
 
     h5 {
       font-size: 1rem;
-      font-weight: 800;
+      line-height: 1.35;
+      font-weight: 700;
       color: #1F2B45;
     }
 
     svg {
-      color: #888;
+      color: #64748b;
       width: 16px;
       height: 16px;
+      flex-shrink: 0;
     }
   }
 
   p {
-    font-size: 0.85rem;
-    color: #888;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #64748b;
     font-weight: 500;
   }
 `;
@@ -377,8 +412,10 @@ export const EventCard = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding-bottom: 20px;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid #f0f0f0;
+  min-width: 0;
 
   &:last-child {
     border-bottom: none;
@@ -386,24 +423,27 @@ export const EventCard = styled.div`
   }
 
   h5 {
-    font-size: 0.95rem;
-    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.35;
+    font-weight: 700;
     color: #1F2B45;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
   }
 
   p {
-    font-size: 0.8rem;
-    color: #888;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #64748b;
     font-weight: 500;
   }
 `;
 
 export const EventTime = styled.span<{ $color?: string }>`
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: ${({ $color }) => $color || '#C57A67'};
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 

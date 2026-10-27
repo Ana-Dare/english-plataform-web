@@ -27,21 +27,10 @@ export const Header = styled.div`
 
 export const FilterContainer = styled.div`
   display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  
-  /* Esconder a barra de rolagem mas manter a funcionalidade */
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #e0e0e0;
-    border-radius: 4px;
-  }
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 4px;
 `;
 
 export const FilterButton = styled.button<{ $active?: boolean }>`

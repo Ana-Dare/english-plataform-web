@@ -1,4 +1,4 @@
-import { MonitorPlay, Globe, Zap, Sparkles } from 'lucide-react';
+import { MonitorPlay, Globe, Zap, Compass } from 'lucide-react';
 import {
   SectionContainer,
   Header,
@@ -62,7 +62,7 @@ const WhyChooseUsSection = () => {
         <Reveal direction="up" delay={400}>
           <Card>
             <IconWrapper>
-              <Sparkles size={28} />
+              <Compass size={28} />
             </IconWrapper>
             <CardTitle>Imersão</CardTitle>
             <CardText>

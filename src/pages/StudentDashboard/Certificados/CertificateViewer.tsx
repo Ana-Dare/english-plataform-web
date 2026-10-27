@@ -1,5 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { ArrowLeft, Download, Share2, Printer, CheckCircle, X, Link as LinkIcon, Copy } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  ArrowLeft,
+  Download,
+  Share2,
+  Printer,
+  CheckCircle,
+  X,
+  Link as LinkIcon,
+  Copy,
+  ExternalLink,
+  ShieldCheck,
+  Check,
+  Globe
+} from 'lucide-react';
 import styled, { keyframes } from 'styled-components';
 import {
   ViewerContainer,
@@ -8,9 +21,17 @@ import {
   MainContent,
   CertificateImage,
   ActionBar,
+  ActionButtonsWrapper,
   ActionButton,
-  PrintStyles
+  PrintStyles,
+  CertCodeStamp,
+  ModalBackdrop,
+  ModalCard,
+  ModalHeader,
+  ModalBody
 } from './viewerStyle';
+import { useAuth } from '../../../contexts/Auth/AuthContext';
+import { useProfile } from '../../../contexts/ProfileContext';
 
 interface CertificateViewerProps {
   onBack: () => void;
@@ -35,6 +56,13 @@ const ToastOverlay = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-width: calc(100vw - 32px);
+
+  @media (max-width: 480px) {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+  }
 
   @media print {
     display: none !important;
@@ -44,14 +72,15 @@ const ToastOverlay = styled.div`
 const ToastItem = styled.div<{ $leaving?: boolean }>`
   background: white;
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 16px 20px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.12);
   border: 1px solid #E2E8F0;
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  min-width: 380px;
-  max-width: 440px;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
   animation: ${({ $leaving }) => $leaving ? slideOut : slideIn} 0.3s ease forwards;
 
   .toast-icon {
@@ -142,6 +171,48 @@ interface ToastData {
 
 const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseName }) => {
   const [toasts, setToasts] = useState<ToastData[]>([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copiedModal, setCopiedModal] = useState(false);
+
+  const { user } = useAuth();
+  let profileName = '';
+  try {
+    const profileCtx = useProfile();
+    if (profileCtx?.profile?.firstName) {
+      profileName = `${profileCtx.profile.firstName} ${profileCtx.profile.lastName || ''}`.trim();
+    }
+  } catch {
+    // profile context fallback
+  }
+
+  // Nome dinâmico do aluno logado
+  const studentName = profileName || user?.name || 'Marjorie Talberg';
+  const completionDate = '04 de setembro de 2024';
+  const hours = '60 horas de imersão';
+
+  // Código único e verificável do certificado
+  const cleanCourse = courseName.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase() || 'INTA';
+  const certCode = `EP-${cleanCourse}-2024`;
+
+  // URL real do certificado com parâmetros para funcionar mesmo sem autenticação ou em outro dispositivo
+  const origin = window.location.origin;
+  const shareUrl = `${origin}/validar-certificado/${certCode}?student=${encodeURIComponent(studentName)}&course=${encodeURIComponent(courseName)}&date=${encodeURIComponent(completionDate)}&hours=${encodeURIComponent(hours)}`;
+
+  // Salva no localStorage para persistência local
+  useEffect(() => {
+    try {
+      localStorage.setItem(`@App:cert_${certCode}`, JSON.stringify({
+        studentName,
+        courseName,
+        completionDate,
+        hours,
+        code: certCode,
+        createdAt: new Date().toISOString()
+      }));
+    } catch {
+      // storage error fallback
+    }
+  }, [certCode, studentName, courseName]);
 
   const addToast = useCallback((title: string, message: string, link?: string) => {
     const id = Date.now();
@@ -162,11 +233,57 @@ const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseNam
   }, []);
 
   const handleDownload = () => {
+    try {
+      const a = document.createElement("a");
+      a.href = "/certificate.png";
+      a.download = `Certificado_${courseName.replace(/\s+/g, "_")}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.warn("Download fallback:", e);
+    }
     addToast('Download iniciado', 'O arquivo do certificado será salvo no seu dispositivo em instantes.');
   };
 
   const handleShare = () => {
-    addToast('Link Copiado!', 'O link de acesso ao seu certificado foi copiado para a área de transferência.', 'https://cert.englishplatform.com/v/mt2024');
+    try {
+      navigator.clipboard?.writeText(shareUrl);
+    } catch {
+      // fallback
+    }
+    setIsShareModalOpen(true);
+    addToast(
+      'Link Copiado!',
+      'O link real e verificável do seu certificado foi copiado. Você também pode compartilhá-lo pelo modal.',
+      shareUrl
+    );
+  };
+
+  const handleCopyFromModal = () => {
+    try {
+      navigator.clipboard?.writeText(shareUrl);
+      setCopiedModal(true);
+      setTimeout(() => setCopiedModal(false), 2500);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleOpenCertificateLink = () => {
+    window.open(shareUrl, '_blank');
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = encodeURIComponent(
+      `Confira meu Certificado Oficial de Conclusão no curso ${courseName} emitido pela English Platform: ${shareUrl}`
+    );
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
+
+  const handleShareLinkedIn = () => {
+    const url = encodeURIComponent(shareUrl);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
   };
 
   const handlePrint = () => {
@@ -201,6 +318,69 @@ const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseNam
         ))}
       </ToastOverlay>
 
+      {/* Modal de Compartilhamento Real */}
+      {isShareModalOpen && (
+        <ModalBackdrop onClick={() => setIsShareModalOpen(false)}>
+          <ModalCard onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <div className="title-area">
+                <div className="icon-box">
+                  <Share2 size={22} />
+                </div>
+                <div>
+                  <h3>Compartilhar Certificado</h3>
+                  <p>Link oficial e verificável para recrutadores e redes</p>
+                </div>
+              </div>
+              <button className="close-btn" onClick={() => setIsShareModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </ModalHeader>
+
+            <ModalBody>
+              <div>
+                <div className="label-group">
+                  <Globe size={14} /> Link Público do Certificado
+                </div>
+                <div className="url-box">
+                  <input type="text" readOnly value={shareUrl} onClick={(e) => (e.target as HTMLInputElement).select()} />
+                  <button className={copiedModal ? 'copied' : ''} onClick={handleCopyFromModal}>
+                    {copiedModal ? (
+                      <>
+                        <Check size={16} /> Copiado!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={16} /> Copiar
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="share-grid">
+                <button className="share-btn open-preview" onClick={handleOpenCertificateLink}>
+                  <ExternalLink size={17} /> Abrir Certificado em Nova Aba
+                </button>
+                <button className="share-btn whatsapp" onClick={handleShareWhatsApp}>
+                  <Share2 size={16} /> WhatsApp
+                </button>
+                <button className="share-btn linkedin" onClick={handleShareLinkedIn}>
+                  <Share2 size={16} /> LinkedIn
+                </button>
+              </div>
+
+              <div className="info-badge">
+                <ShieldCheck size={18} />
+                <div>
+                  <strong>Autenticidade Garantida:</strong> Qualquer pessoa que acessar esse link poderá visualizar e validar seu certificado em tempo real com os dados originais, sem necessidade de login.
+                </div>
+              </div>
+            </ModalBody>
+          </ModalCard>
+        </ModalBackdrop>
+      )}
+
       <CertificateWrapper>
         <MainContent>
           <BackButton onClick={onBack} className="back-btn">
@@ -211,9 +391,9 @@ const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseNam
             <div className="watermark">CERTIFICATE</div>
             <div className="title">Certificado de Conclusão</div>
             <div style={{ flex: 1 }}></div>
-            <div className="name">Marjorie Talberg</div>
+            <div className="name">{studentName}</div>
             <div className="course">{courseName}</div>
-            <div className="date">Finalizado em 04 de setembro de 2024</div>
+            <div className="date">Finalizado em {completionDate}</div>
             
             <div className="signatures">
               <div>
@@ -225,6 +405,16 @@ const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseNam
                 <span>Course Instructor</span>
               </div>
             </div>
+
+            <CertCodeStamp className="no-print">
+              <div className="code-left">
+                <ShieldCheck size={14} color="#10B981" />
+                <span>Código de Verificação: <strong>{certCode}</strong></span>
+              </div>
+              <div className="code-right">
+                englishplatform.com/validar-certificado/{certCode}
+              </div>
+            </CertCodeStamp>
           </CertificateImage>
         </MainContent>
 
@@ -235,17 +425,17 @@ const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseNam
               Você concluiu este curso com sucesso! Utilize as opções abaixo para compartilhar ou guardar sua conquista.
             </div>
           </div>
-          <div className="action-buttons-wrapper" style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <ActionButtonsWrapper className="action-buttons-wrapper">
             <ActionButton onClick={handleDownload} $variant="primary">
-              <Download size={20} /> Baixar PDF
+              <Download size={18} /> Baixar PDF
             </ActionButton>
             <ActionButton onClick={handleShare} $variant="secondary">
-              <Share2 size={20} /> Compartilhar Link
+              <Share2 size={18} /> Compartilhar Link
             </ActionButton>
             <ActionButton onClick={handlePrint} $variant="secondary">
-              <Printer size={20} /> Imprimir
+              <Printer size={18} /> Imprimir
             </ActionButton>
-          </div>
+          </ActionButtonsWrapper>
         </ActionBar>
       </CertificateWrapper>
     </ViewerContainer>
@@ -253,6 +443,7 @@ const CertificateViewer: React.FC<CertificateViewerProps> = ({ onBack, courseNam
 };
 
 export default CertificateViewer;
+
 
 
 

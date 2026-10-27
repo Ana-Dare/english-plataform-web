@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import DashboardSidebar from '../../components/DashboardSidebar';
 import type { SidebarMenuItem } from '../../components/DashboardSidebar';
@@ -76,7 +76,7 @@ const StudentDashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            style={{ height: '100%', overflowY: 'auto', paddingBottom: '32px' }}
+            style={{ width: '100%', paddingBottom: '24px' }}
           >
             <DashboardContainer>
               <HeaderSection>
@@ -252,7 +252,12 @@ const StudentDashboard: React.FC = () => {
         isMobileMenuOpen={isMobileMenuOpen}
         onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
         sidebar={<DashboardSidebar activeTab={activeTab} onTabChange={handleTabChange} menuItems={referenceMenuItems} />} 
-        header={<DashboardHeader onOpenMenu={() => setIsMobileMenuOpen(true)} />}
+        header={
+          <DashboardHeader
+            onOpenMenu={() => setIsMobileMenuOpen(true)}
+            onNavigate={(tab) => handleTabChange(tab === 'perfil' ? 'profile' : tab)}
+          />
+        }
       >
         <AnimatePresence mode="wait">
           {renderContent()}

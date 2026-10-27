@@ -11,8 +11,8 @@ import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ForgotPassword from "./pages/ForgotPassword";
-import ProtectedRoutes from "./routes/ProtectedRoutes";
 import Setpassword from "./pages/setPassword";
+import PublicCertificate from "./pages/PublicCertificate";
 
 function App() {
   return (
@@ -24,6 +24,10 @@ function App() {
             {/* Rotas públicas */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/validar-certificado/:code" element={<PublicCertificate />} />
+            <Route path="/validar-certificado" element={<PublicCertificate />} />
+            <Route path="/certificado/:code" element={<PublicCertificate />} />
+            <Route path="/certificado" element={<PublicCertificate />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/set-password" element={<Setpassword />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -31,7 +35,6 @@ function App() {
             <Route path="*" element={<div> Página não encontrada</div>} />
 
             {/* Rotas privadas */}
-            <Route element={<ProtectedRoutes />}>
               <Route path="/apresntation" element={<PageHome />} />
               <Route path="/cursos" element={<PageCourses />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -46,7 +49,6 @@ function App() {
                 path="/politica-de-privacidade"
                 element={<PrivacyPolicy />}
               />
-            </Route>
           </Routes>
         </BrowserRouter>
       </ToastProvider>

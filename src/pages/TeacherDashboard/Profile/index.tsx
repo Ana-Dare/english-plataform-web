@@ -243,11 +243,6 @@ const ProfileTab: React.FC = () => {
               <h3>
                 {firstName || "Meu"} {lastName || "Perfil"}
               </h3>
-              <p>
-                Formatos aceitos: JPG, PNG.
-                <br />
-                Tamanho máximo: 5MB.
-              </p>
               <PhotoActions>
                 <PhotoBtn
                   $variant="primary"

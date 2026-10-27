@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   HeaderContainer,
@@ -94,7 +94,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const displayName = user?.name || profile.name || userName;
+  const profileFullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
+  const displayName = user?.name || profileFullName || userName;
   const displayEmail = user?.email || profile.email || userEmail;
   const avatarColor = user ? getAvatarColorByName(user.name) : "#1F2B45";
   const avatarInitials = user ? getInitials(user.name) : "US";

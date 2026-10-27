@@ -1,31 +1,121 @@
 import styled from "styled-components";
+import { motion } from "framer-motion";
 
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.75rem;
   animation: fadeIn 0.3s ease-in-out;
   height: 100%;
 `;
 
-export const HeaderActions = styled.div`
+/* ================= Header da Página de Turmas ================= */
+
+export const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   width: 100%;
+
   @media (max-width: 768px) {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
   }
 `;
 
+export const HeaderActions = PageHeader;
+
+export const PageHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+export const HeaderIconCircle = styled.div`
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  background: #e0edff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d4ed8;
+`;
+
+export const HeaderTitleArea = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+    line-height: 1.25;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0.25rem 0 0 0;
+    font-size: clamp(0.875rem, 0.25vw + 0.825rem, 0.9375rem);
+    line-height: 1.5;
+    color: #64748b;
+  }
+`;
+
 export const Title = styled.h2`
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  line-height: 1.25;
   font-weight: 700;
-  color: #08142c;
+  color: #0f172a;
   margin: 0;
 `;
+
+export const NewClassBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #0b2347;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 0 20px;
+  height: 44px;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(11, 35, 71, 0.2);
+
+  &:hover:not(:disabled) {
+    background-color: #071730;
+    box-shadow: 0 6px 16px rgba(11, 35, 71, 0.3);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+`;
+
+export const AddButton = NewClassBtn;
 
 export const RightActions = styled.div`
   display: flex;
@@ -33,7 +123,7 @@ export const RightActions = styled.div`
   align-items: center;
   width: fit-content;
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     width: 100%;
     flex-direction: column;
     gap: 1rem;
@@ -41,235 +131,663 @@ export const RightActions = styled.div`
   }
 `;
 
-export const SearchWrapper = styled.div`
+/* ================= Barra de Filtros e Busca ================= */
+
+export const FilterBar = styled.div`
   display: flex;
   align-items: center;
-  background-color: #fff;
-  border-radius: 50px;
-  padding: 0.6rem 1.2rem;
-  min-width: 260px;
-  max-width: 320px;
-  flex-shrink: 0;
-  border: 1px solid #1f2b45;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+`;
+
+export const FilterSearchInput = styled.div`
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 42px;
+  flex: 1 1 260px;
+  max-width: 340px;
+  min-width: 200px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
 
   &:focus-within {
-    border-color: #c57a67;
-    box-shadow: 0 0 0 3px rgba(197, 122, 103, 0.15);
+    border-color: #1f2b45;
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.1);
   }
 
   svg {
-    color: #c57a67;
-    margin-right: 0.8rem;
+    color: #94a3b8;
     flex-shrink: 0;
+    margin-right: 8px;
   }
 
   input {
     border: none;
-    outline: none;
-    font-size: 0.95rem;
-    font-family: inherit;
-    width: 100%;
-    color: #1e293b;
     background: transparent;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    font-size: 0.9375rem;
+    color: #1e293b;
+    outline: none;
+    font-family: inherit;
 
     &::placeholder {
       color: #94a3b8;
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 100%;
   }
 `;
 
-export const AddButton = styled.button`
+export const SearchWrapper = FilterSearchInput;
+
+export const FilterCarouselWrapper = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 0.85rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
-  font-family: inherit;
-  white-space: nowrap;
+  gap: 6px;
+  min-width: 0;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
-    background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+  @media (max-width: 767px) {
+    width: 100%;
   }
 `;
 
-/* ================= Grid de Turmas ================= */
+export const FilterCarouselViewport = styled.div<{
+  $canScrollLeft?: boolean;
+  $canScrollRight?: boolean;
+}>`
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
 
-import { motion } from "framer-motion";
+  @media (max-width: 767px) {
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 22px;
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.2s ease;
+    }
 
-export const ClassesGrid = styled(motion.div)`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+    &::before {
+      left: 0;
+      background: linear-gradient(to right, #f8fafc 15%, rgba(248, 250, 252, 0));
+      opacity: ${(p) => (p.$canScrollLeft ? 1 : 0)};
+    }
+
+    &::after {
+      right: 0;
+      background: linear-gradient(to left, #f8fafc 15%, rgba(248, 250, 252, 0));
+      opacity: ${(p) => (p.$canScrollRight ? 1 : 0)};
+    }
+  }
 `;
 
-export const FormSelect = styled.select`
-  width: 100%;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1.5px solid #1f2b45;
+export const CarouselArrowBtn = styled.button<{ $active?: boolean }>`
+  display: none;
+
+  @media (max-width: 767px) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    border: 1.5px solid ${(p) => (p.$active ? "#cbd5e1" : "#e2e8f0")};
+    background: #ffffff;
+    color: ${(p) => (p.$active ? "#1f2b45" : "#94a3b8")};
+    cursor: ${(p) => (p.$active ? "pointer" : "default")};
+    opacity: ${(p) => (p.$active ? 1 : 0.45)};
+    box-shadow: ${(p) =>
+      p.$active ? "0 2px 6px rgba(15, 23, 42, 0.08)" : "none"};
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+
+    &:active {
+      transform: ${(p) => (p.$active ? "scale(0.94)" : "none")};
+    }
+  }
+`;
+
+export const FilterControlsGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  min-width: 0;
+
+  @media (max-width: 767px) {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    padding: 2px 2px 4px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > div,
+    > button {
+      flex: 0 0 auto;
+      width: auto;
+    }
+  }
+`;
+
+export const StatusFilterDot = styled.span<{ $color?: string; $ring?: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${(p) => p.$color || "#10b981"};
+  box-shadow: 0 0 0 3px ${(p) => p.$ring || "#dcfce7"};
+  display: inline-block;
+  flex-shrink: 0;
+  margin: 0 2px;
+`;
+
+export const FilterSelect = styled.select`
+  height: 42px;
   border-radius: 999px;
-  padding: 0.75rem 2.4rem 0.75rem 1.25rem;
-  font-size: 0.95rem;
-  font-family: "Rubik", inherit;
+  border: 1.5px solid #cbd5e1;
+  background-color: #ffffff;
+  padding: 0 34px 0 14px;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: #1f2b45;
-  outline: none;
+  color: #334155;
   cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
   appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C57A67%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 1rem top 52%;
-  background-size: 0.7rem auto;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow:
-    0 2px 8px rgba(31, 43, 69, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  box-sizing: border-box;
+  background-position: right 12px center;
+  background-size: 14px;
 
   &:hover {
-    border-color: #c57a67;
-    background-color: #fff8f6;
-    box-shadow: 0 4px 12px rgba(197, 122, 103, 0.18);
-    color: #c57a67;
+    border-color: #94a3b8;
+    background-color: #f8fafc;
   }
 
   &:focus {
-    border-color: #c57a67;
-    box-shadow:
-      0 0 0 3px rgba(197, 122, 103, 0.18),
-      0 2px 8px rgba(31, 43, 69, 0.06);
-    color: #c57a67;
-    background-color: #fff8f6;
+    border-color: #1f2b45;
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.08);
   }
 `;
 
-export const ClassCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
-  overflow: hidden;
-  transition: box-shadow 0.3s ease;
-  cursor: pointer;
+export const FilterIconButton = styled.button`
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 999px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #1f2b45;
+  }
+
+  @media (max-width: 767px) {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
   }
 `;
 
-export const ClassCardHeader = styled.div<{ $level: string }>`
-  padding: 1.5rem;
-  background: ${({ $level }) => {
-    switch ($level) {
-      case "Advanced":
-        return "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)";
-      case "Intermediate":
-        return "linear-gradient(135deg, #1e293b 0%, #334155 100%)";
-      default:
-        return "linear-gradient(135deg, #334155 0%, #475569 100%)";
-    }
-  }};
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-
-  h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.3rem;
-    font-weight: 700;
-  }
-`;
-
-export const LevelBadge = styled.span`
-  background: rgba(255, 255, 255, 0.15);
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
+export const ClearFiltersLink = styled.button`
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 0.875rem;
   font-weight: 600;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+
+  &:hover {
+    text-decoration: underline;
+    color: #1d4ed8;
+  }
+
+  @media (max-width: 767px) {
+    margin-left: auto;
+    padding: 2px 4px;
+  }
 `;
 
-export const ClassCardBody = styled.div`
-  padding: 1.5rem;
-  flex: 1;
+/* ================= Cards de Turma (Sem Capa, com Usuários) ================= */
+
+export const ClassesGrid = styled(motion.div)`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const TurmaCard = styled(motion.div)`
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  padding: 1.4rem;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-`;
+  gap: 1.15rem;
+  transition: all 0.22s ease;
+  cursor: pointer;
+  position: relative;
 
-export const ClassCardInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: #555;
-  font-size: 0.9rem;
-
-  svg {
-    color: #888;
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
   }
 `;
 
-export const StudentsPreview = styled.div`
+export const ClassCard = TurmaCard;
+
+export const TurmaCardHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  .title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.2px;
+      line-height: 1.3;
+    }
+  }
+
+  p.description {
+    margin: 0;
+    font-size: 0.84rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+`;
+
+export const ClassCardHeader = styled.div<{ $level?: string }>``;
+
+export const LevelBadgeSolid = styled.span<{ $levelColor: string }>`
+  background-color: ${({ $levelColor }) => $levelColor};
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
+
+export const LevelBadge = LevelBadgeSolid;
+
+export const TurmaStudentsRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  .left-area {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+`;
+
+export const AvatarStack = styled.div`
   display: flex;
   align-items: center;
 `;
 
-export const StudentAvatarSmall = styled.div<{
+export const StackedAvatar = styled.div<{
+  $bg: string;
   $color: string;
   $index: number;
 }>`
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background-color: ${({ $color }) => $color};
-  color: #fff;
+  background-color: ${({ $bg }) => $bg};
+  color: ${({ $color }) => $color};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  border: 2px solid #fff;
-  margin-left: ${({ $index }) => ($index > 0 ? "-10px" : "0")};
-  position: relative;
-  z-index: ${({ $index }) => 10 - $index};
+  border: 2px solid #ffffff;
+  margin-left: ${({ $index }) => ($index > 0 ? "-7px" : "0")};
+  user-select: none;
+  flex-shrink: 0;
 `;
 
-export const MoreStudents = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-  color: #666;
+export const StudentsCountText = styled.span`
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #475569;
+
+  svg {
+    color: #64748b;
+  }
+`;
+
+export const TurmaStatusBadge = styled.span<{ $active: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.75rem;
   font-weight: 600;
-  border: 2px solid #fff;
-  margin-left: -10px;
-  position: relative;
-  z-index: 1;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+
+  ${({ $active }) =>
+    $active
+      ? `
+    background-color: #ecfdf5;
+    color: #16a34a;
+    &::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #16a34a;
+    }
+  `
+      : `
+    background-color: #fffbeb;
+    color: #d97706;
+    &::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #d97706;
+    }
+  `}
+`;
+
+export const TurmaProgressSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+
+    .progress-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .progress-value {
+      color: #0f172a;
+      font-weight: 700;
+    }
+  }
+`;
+
+export const TurmaProgressBarTrack = styled.div`
+  width: 100%;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+`;
+
+export const TurmaProgressBarFill = styled.div<{ $width: number }>`
+  width: ${({ $width }) => Math.min(Math.max($width, 0), 100)}%;
+  height: 100%;
+  background-color: #2563eb;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+`;
+
+export const TurmaNextLessonRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #64748b;
+
+  svg {
+    color: #64748b;
+    flex-shrink: 0;
+  }
+`;
+
+export const TurmaCardFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f1f5f9;
+
+  .view-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #0f172a;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: #2563eb;
+    }
+  }
+
+  button.more-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  }
+`;
+
+export const ClassCardBody = styled.div``;
+export const ClassCardInfo = styled.div``;
+export const StudentsPreview = AvatarStack;
+export const StudentAvatarSmall = StackedAvatar;
+export const MoreStudents = styled.div``;
+
+/* ================= Paginação de Turmas ================= */
+
+export const ClassesPagination = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  width: 100%;
+  flex-wrap: nowrap;
+
+  @media (max-width: 680px) {
+    gap: 0.5rem;
+  }
+`;
+
+export const PaginationSelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  @media (max-width: 680px) {
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+`;
+
+export const PaginationButtonsGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+
+  @media (max-width: 680px) {
+    gap: 4px;
+  }
+`;
+
+export const PageBtn = styled.button<{ $active?: boolean }>`
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1.5px solid ${({ $active }) => ($active ? "#0b2347" : "#e2e8f0")};
+  background-color: ${({ $active }) => ($active ? "#0b2347" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "#ffffff" : "#475569")};
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+
+  &:hover:not(:disabled) {
+    background-color: ${({ $active }) => ($active ? "#0b2347" : "#f8fafc")};
+    border-color: ${({ $active }) => ($active ? "#0b2347" : "#cbd5e1")};
+    color: ${({ $active }) => ($active ? "#ffffff" : "#0f172a")};
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 680px) {
+    min-width: 30px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 0.75rem;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+`;
+
+export const EmptyClassesState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px dashed #cbd5e1;
+  text-align: center;
+  gap: 1rem;
+  grid-column: 1 / -1;
+
+  .icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+  }
+
+  h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    max-width: 400px;
+  }
 `;
 
 /* ================= Detail Workspace ================= */

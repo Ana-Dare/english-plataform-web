@@ -3,97 +3,110 @@ import styled from "styled-components";
 export const ClassWorkspace = styled.div`
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 28px rgba(31, 43, 69, 0.08);
-  min-height: calc(100vh - 140px);
+  gap: 24px;
+  max-width: 100%;
+  margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 `;
 
 export const ClassBanner = styled.div`
-  background: #1f2b45;
-  color: #fff;
-  padding: 1.5rem 1.75rem 0.5rem;
+  background-color: #1f2b45;
+  border-radius: 14px;
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2.5rem);
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
   width: 100%;
   box-sizing: border-box;
 
-  @media (max-width: 640px) {
-    padding: 1.15rem 1rem 0.35rem;
+  h2 {
+    color: white;
+    font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+    line-height: 1.25;
+    font-weight: 800;
+    margin: 0;
+    overflow-wrap: break-word;
   }
 `;
 
 export const ClassBannerTop = styled.div`
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
 `;
 
-export const ClassBannerTitle = styled.h1`
+export const ClassBannerTitle = styled.h2`
+  color: white;
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  line-height: 1.25;
+  font-weight: 800;
   margin: 0;
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 `;
 
 export const ClassBannerMeta = styled.div`
   display: flex;
   align-items: center;
+  gap: 16px;
   flex-wrap: wrap;
-  gap: 0.45rem;
 `;
 
-export const SoftBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  background: rgba(197, 122, 103, 0.28);
-  color: #f8d7cf;
+export const SoftBadge = styled.span<{ $bgColor?: string }>`
+  background-color: ${({ $bgColor }) => $bgColor || "#C57A67"};
+  color: #ffffff;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: none;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 `;
 
 export const CefrBadge = styled.span`
-  padding: 0.15rem 0.6rem;
-  border-radius: 6px;
-  background: #3b82f6;
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 `;
 
-export const ExtraBadge = styled.span`
-  width: 26px;
-  height: 26px;
+export const ExtraBadge = styled.button`
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #f59e0b;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  display: inline-flex;
+  background-color: #f59e0b;
+  color: white;
+  display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  border: 2px solid #1f2b45;
+  margin-left: -8px;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+  }
 `;
 
 export const StudentsCount = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  margin-left: 0.25rem;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.9);
+  gap: 10px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
 `;
 
 export const AvatarStack = styled.div`
@@ -102,92 +115,103 @@ export const AvatarStack = styled.div`
 `;
 
 export const StackAvatar = styled.div<{ $color: string; $index: number }>`
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: ${({ $color }) => $color};
-  color: #fff;
-  font-size: 0.55rem;
-  font-weight: 700;
+  background-color: ${({ $color }) => $color};
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #1f2b45;
-  margin-left: ${({ $index }) => ($index > 0 ? "-6px" : "0")};
+  margin-left: ${({ $index }) => ($index > 0 ? "-8px" : "0")};
+  user-select: none;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 `;
 
 export const TabsBar = styled.div`
   display: flex;
-  gap: 0.2rem 1.35rem;
-  padding: 0.15rem 1.75rem 0;
-  overflow-x: auto;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
 
-  /* Custom subtle scrollbar */
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-  }
-
-  @media (max-width: 640px) {
-    /* Expand beyond parent padding to allow edge-to-edge scrolling */
-    width: calc(100% + 2rem);
-    margin-left: -1rem;
-    padding: 0.1rem 1rem 4px 1rem;
-    gap: 0.15rem 0.9rem;
+  @media (max-width: 767px) {
+    padding-bottom: 4px;
   }
 `;
 
 export const ClassTab = styled.button<{ $active: boolean }>`
-  flex-shrink: 0;
   background: none;
   border: none;
-  border-bottom: 2px solid
-    ${({ $active }) => ($active ? "#fff" : "transparent")};
-  color: ${({ $active }) => ($active ? "#fff" : "rgba(255,255,255,0.55)")};
-  padding: 0.65rem 0 0.7rem;
-  font-size: 0.78rem;
-  font-weight: 500;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  padding: 0 0 1rem 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: ${({ $active }) => ($active ? "#1f2b45" : "#64748b")};
   cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s;
+  font-family: inherit;
+
+  @media (max-width: 767px) {
+    font-size: 0.875rem;
+    padding: 0 0 0.75rem 0;
+    gap: 6px;
+  }
 
   svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
+
+    @media (max-width: 767px) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: ${({ $active }) => ($active ? "#1f2b45" : "transparent")};
+    border-radius: 3px 3px 0 0;
+    transition: background-color 0.2s;
   }
 
   &:hover {
-    color: #fff;
+    color: #1f2b45;
   }
 `;
 
 export const WorkspaceBody = styled.div`
-  padding: 1.35rem 1.5rem 1.75rem;
-  background: #fff;
-
-  @media (max-width: 640px) {
-    padding: 1rem 0.85rem 1.25rem;
-  }
+  background: white;
+  border-radius: 14px;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f2f2f2;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const PanelTitle = styled.h2`
-  margin: 0 0 1rem;
-  font-size: 1.05rem;
-  font-weight: 700;
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.125rem, 1vw + 0.875rem, 1.5rem);
+  line-height: 1.3;
+  font-weight: 800;
   color: #1f2b45;
 `;
 
@@ -195,27 +219,33 @@ export const PanelHeaderRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 `;
 
 export const ComposeRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: #fff;
-  border: 1px solid #e8edf3;
+  gap: 12px;
+  background: #fafafa;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 0.45rem 0.5rem 0.45rem 1rem;
-  margin-bottom: 1rem;
+  padding: 8px 12px 8px 18px;
+  margin-bottom: 24px;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: #1f2b45;
+    background: #fff;
+  }
 
   input {
     flex: 1;
     border: none;
     outline: none;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #1f2b45;
     min-width: 0;
     background: transparent;
@@ -226,8 +256,9 @@ export const ComposeRow = styled.div`
   }
 
   @media (max-width: 560px) {
-    flex-wrap: wrap;
-    padding: 0.65rem;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
   }
 `;
 
@@ -236,52 +267,56 @@ export const PublishBtn = styled.button`
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0.55rem 1.1rem;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
+  transition: background-color 0.2s;
 
   &:hover {
-    background: #162033;
+    background: #0f172a;
   }
 `;
 
 export const NoticeList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
 `;
 
 export const NoticeCard = styled.div`
-  border: 1px solid #eef1f6;
+  background-color: #fafafa;
+  border: 1px solid #f0f0f0;
   border-radius: 12px;
-  padding: 0.95rem 1.05rem;
+  padding: 24px;
+  margin-bottom: 16px;
+  position: relative;
 `;
 
 export const NoticeHead = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.55rem;
+  gap: 16px;
+  margin-bottom: 12px;
 `;
 
 export const NoticeAuthor = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 16px;
 
   .avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 14px;
     font-weight: 700;
     color: #fff;
     background: #c57a67;
@@ -289,13 +324,15 @@ export const NoticeAuthor = styled.div`
 
   strong {
     display: block;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
+    font-weight: 700;
     color: #1f2b45;
+    margin-bottom: 2px;
   }
 
   span {
-    font-size: 0.72rem;
-    color: #94a3b8;
+    font-size: 0.75rem;
+    color: #888;
   }
 `;
 
@@ -524,15 +561,19 @@ export const AddPill = styled.button`
   background: #1f2b45;
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 0.45rem 0.9rem;
-  font-size: 0.8rem;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.84rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 
-  &:hover {
-    background: #162033;
+  &:hover:not(:disabled) {
+    background: #151d2f;
+    box-shadow: 0 3px 10px rgba(31, 43, 69, 0.2);
+    transform: translateY(-1px);
   }
 
   &:disabled {
@@ -542,14 +583,294 @@ export const AddPill = styled.button`
   }
 `;
 
-export const LessonBlock = styled.div`
-  margin-bottom: 1.35rem;
+export const MaterialsFilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
-  h3 {
-    margin: 0 0 0.55rem;
-    font-size: 0.92rem;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+export const MaterialsFilterGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+  }
+`;
+
+export const MaterialSearchBox = styled.div`
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #1f2b45;
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 42px;
+  min-width: 200px;
+  flex: 1 1 220px;
+  max-width: 320px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: #2a4a7f;
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.1);
+  }
+
+  svg {
+    color: #94a3b8;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    font-size: 0.88rem;
+    color: #1e293b;
+    outline: none;
+    font-family: inherit;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex: none;
+    height: 42px;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+`;
+
+export const MaterialsEmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1.5px dashed #cbd5e1;
+  text-align: center;
+  gap: 1rem;
+  margin: 1rem 0;
+
+  .icon-wrapper {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #eef2f9;
+    color: #1f2b45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h4 {
+    margin: 0;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #1f2b45;
+    font-family: "Rubik", sans-serif;
+  }
+
+  p {
+    margin: 0;
+    max-width: 500px;
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.55;
+  }
+
+  .buttons-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+`;
+
+export const MaterialCard = styled.div`
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(31, 43, 69, 0.06);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+  }
+`;
+
+export const MaterialCardLeft = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.95rem;
+  flex: 1;
+  min-width: 0;
+`;
+
+export const MaterialCardGlyph = styled.div<{ $type?: string }>`
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: ${({ $type }) =>
+    $type === "pdf"
+      ? "#fee2e2"
+      : $type === "image"
+      ? "#ecfdf5"
+      : $type === "link"
+      ? "#eff6ff"
+      : $type === "audio"
+      ? "#fdf2f8"
+      : "#eef2f9"};
+  color: ${({ $type }) =>
+    $type === "pdf"
+      ? "#ef4444"
+      : $type === "image"
+      ? "#10b981"
+      : $type === "link"
+      ? "#3b82f6"
+      : $type === "audio"
+      ? "#ec4899"
+      : "#1f2b45"};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid
+    ${({ $type }) =>
+      $type === "pdf"
+        ? "#fecaca"
+        : $type === "image"
+        ? "#a7f3d0"
+        : $type === "link"
+        ? "#bfdbfe"
+        : $type === "audio"
+        ? "#fbcfe8"
+        : "#dbe2ee"};
+`;
+
+export const MaterialCardContent = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1f2b45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "Rubik", sans-serif;
+  }
+
+  p.desc {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .badges-line {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-top: 0.2rem;
+  }
+`;
+
+export const ViewDocPill = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 38px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  border: 1.5px solid #1f2b45;
+  background: #ffffff;
+  color: #1f2b45;
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: "Rubik", sans-serif;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(31, 43, 69, 0.06);
+
+  &:hover {
+    background: #1f2b45;
+    color: #ffffff;
+    box-shadow: 0 3px 8px rgba(31, 43, 69, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+export const LessonBlock = styled.div`
+  margin-bottom: 2rem;
+
+  h3 {
+    margin: 0 0 0.85rem;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #1f2b45;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: "Rubik", sans-serif;
   }
 `;
 
@@ -782,26 +1103,354 @@ export const StudentList = styled.div`
 export const StudentRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid #eef1f6;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1.5px solid #eef1f6;
   border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    transform: translateY(-1px);
+  }
+
+  .left-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+
+    & > div:first-child {
+      width: 42px;
+      height: 42px;
+      font-size: 0.92rem;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+      margin-left: 0;
+    }
+  }
+
+  .info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    strong {
+      color: #0f172a;
+      font-size: 0.96rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      svg {
+        flex-shrink: 0;
+        color: #94a3b8;
+      }
+    }
+  }
+
+  .right-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .view-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #2563eb;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+  }
+
+  .remove-student-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ef4444;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: #dc2626;
+      background: #fee2e2;
+      border-color: #fca5a5;
+      transform: translateY(-1px);
+    }
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    .right-content {
+      width: 100%;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 0.5rem;
+      border-top: 1px dashed #f1f5f9;
+    }
+  }
+`;
+
+export const StudentRowStatus = styled.span<{ $active?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: ${({ $active }) =>
+    $active !== false ? "#ecfdf5" : "#f1f5f9"};
+  color: ${({ $active }) => ($active !== false ? "#16a34a" : "#64748b")};
+  white-space: nowrap;
+
+  &::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: ${({ $active }) =>
+      $active !== false ? "#16a34a" : "#94a3b8"};
+  }
 `;
 
 export const BackLink = styled.button`
   align-self: flex-start;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.45rem;
   padding: 0;
+  margin-bottom: 4px;
+  transition: color 0.15s ease;
 
   &:hover {
     color: #fff;
+  }
+`;
+
+export const TeacherSectionWrap = styled.div`
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+export const TeacherCard = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+
+  .left-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+
+    .info-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        strong {
+          color: #0f172a;
+          font-size: 0.98rem;
+          font-weight: 700;
+        }
+      }
+
+      .email-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.82rem;
+        color: #64748b;
+
+        svg {
+          color: #94a3b8;
+          flex-shrink: 0;
+        }
+      }
+    }
+  }
+
+  .right-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .remove-teacher-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #b91c1c;
+    background: #ffffff;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #fef2f2;
+      border-color: #f87171;
+      color: #991b1b;
+    }
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    .right-content {
+      width: 100%;
+      justify-content: flex-end;
+      padding-top: 0.5rem;
+      border-top: 1px dashed #cbd5e1;
+    }
+  }
+`;
+
+export const TeacherAvatar = styled.div`
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #08142c;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(8, 20, 44, 0.18);
+  flex-shrink: 0;
+`;
+
+export const TeacherBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #1e40af;
+`;
+
+export const EmptyTeacherCard = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 0.85rem;
+
+  .info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+      color: #94a3b8;
+    }
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #08142c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #112347;
+    }
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 `;

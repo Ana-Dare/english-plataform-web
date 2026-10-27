@@ -1,53 +1,7 @@
 import React, { useState } from "react";
-import { Search, Upload } from "lucide-react";
 import {
-  Container,
-  HeaderActions,
-  FilterSelect,
-  SearchWrapper,
-  CardsList,
-  CertificateCard,
-  Avatar,
-  CardInfo,
-  StudentName,
-  LevelBadge,
-  CardMeta,
-  MetaItem,
-  ViewProfileBtn,
-  DetailContainer,
-  BackButton,
-  DetailSection,
-  SectionTitle,
-  ProgressWrapper,
-  ProgressBarContainer,
-  ProgressBarFill,
-  SendCertificateBtn,
-  InfoGrid,
-  InfoGroup,
-  InfoLabel,
-  InfoValue,
-  ProfileHeader,
-  ProfileAvatar,
-  ProfileInfo,
-  ProfileName,
-  BadgeRow,
-  PremiumCard,
-  Timeline,
-  TimelineItem,
-  TimelineIcon,
-  TimelineContent,
-  TimelineHeader,
-  TimelineTitle,
-  TimelineDate,
-  MaterialGrid,
-  MaterialCard,
-  MaterialIcon,
-  MaterialInfo,
-  MaterialTitle,
-  MaterialMeta,
-  ActionButtonsWrapper,
-} from "./style";
-import {
+  Search,
+  Upload,
   ChevronLeft,
   CheckCircle,
   FileText,
@@ -60,7 +14,73 @@ import {
   Activity,
   Download,
   Eye,
+  Mail,
+  Phone,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
+import CustomDropdown from "../../../components/CustomDropdown";
+import MobileCarousel from "../../../components/MobileCarousel";
+import DocumentViewerModal from "../Classes/DocumentViewerModal";
+import type { LessonMaterial } from "../services/material";
+import {
+  Container,
+  HeaderActions,
+  SearchWrapper,
+  CardsList,
+  CertificateCard,
+  CardIdentity,
+  Avatar,
+  CardInfo,
+  StudentName,
+  BadgesContainer,
+  LevelBadge,
+  PlanBadge,
+  StatusBadge,
+  CardMeta,
+  MetaItem,
+  ProgressIndicator,
+  MiniProgressBar,
+  CardAction,
+  ViewProfileBtn,
+  DetailContainer,
+  BackButton,
+  ProfileHeader,
+  ProfileAvatar,
+  ProfileInfo,
+  ProfileName,
+  BadgeRow,
+  SectionWrapper,
+  SectionTitle,
+  InfoGrid,
+  InfoGroup,
+  InfoLabel,
+  InfoValue,
+  PerformanceGrid,
+  ProgressContainer,
+  ProgressHeader,
+  ProgressPercentage,
+  ProgressBarContainer,
+  ProgressBarFill,
+  Timeline,
+  TimelineItem,
+  TimelineIcon,
+  TimelineContent,
+  TimelineInfo,
+  TimelineTitle,
+  TimelineDate,
+  TimelineStatus,
+  MaterialGrid,
+  MaterialCard,
+  MaterialIcon,
+  MaterialInfo,
+  MaterialTitle,
+  MaterialMeta,
+  MaterialActionBtn,
+  ActionButtonsWrapper,
+  SendCertificateBtn,
+  DownloadCertificateBtn,
+} from "./style";
 import useToast from "../../../contexts/Toast/useToast";
 
 const MOCK_CERTIFICATES = [
@@ -90,13 +110,45 @@ const MOCK_CERTIFICATES = [
       { name: "Listening Exercises B1", date: "30/06/2023", score: 90 },
     ],
     materials: [
-      { title: "Workbook 2", type: "PDF", date: "12/02/2023" },
       {
-        title: "Audio Exercises - Intermediate",
-        type: "Audio",
-        date: "18/03/2023",
+        id: 101,
+        lessonId: 0,
+        title: "Workbook 2",
+        type: "pdf" as const,
+        date: "12/02/2023",
+        category: "Gramática",
+        file: "workbook_2.pdf",
+        sizeFormatted: "2.4 MB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-02-12T10:00:00",
+        description: "Apostila com exercícios práticos e revisão gramatical nível intermediário.",
       },
-      { title: "Grammar Cheat Sheet", type: "Document", date: "22/04/2023" },
+      {
+        id: 102,
+        lessonId: 0,
+        title: "Audio Exercises - Intermediate",
+        type: "audio" as const,
+        date: "18/03/2023",
+        category: "Listening",
+        file: "audio_exercises_intermediate.mp3",
+        sizeFormatted: "4.8 MB",
+        link: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        createdAt: "2023-03-18T14:30:00",
+        description: "Exercícios de escuta e pronúncia com diálogos do dia a dia.",
+      },
+      {
+        id: 103,
+        lessonId: 0,
+        title: "Grammar Cheat Sheet",
+        type: "document" as const,
+        date: "22/04/2023",
+        category: "Gramática",
+        file: "grammar_cheat_sheet.docx",
+        sizeFormatted: "1.2 MB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-04-22T09:15:00",
+        description: "Guia rápido de consulta para tempos verbais e conectivos.",
+      },
     ],
   },
   {
@@ -124,8 +176,32 @@ const MOCK_CERTIFICATES = [
       { name: "Simple Present", date: "15/05/2023", score: 65 },
     ],
     materials: [
-      { title: "Starter Guide", type: "PDF", date: "22/02/2023" },
-      { title: "Flashcards", type: "Document", date: "28/03/2023" },
+      {
+        id: 201,
+        lessonId: 0,
+        title: "Starter Guide",
+        type: "pdf" as const,
+        date: "22/02/2023",
+        category: "Iniciante",
+        file: "starter_guide.pdf",
+        sizeFormatted: "3.1 MB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-02-22T08:00:00",
+        description: "Guia introdutório com vocabulário essencial e primeiras frases.",
+      },
+      {
+        id: 202,
+        lessonId: 0,
+        title: "Flashcards",
+        type: "document" as const,
+        date: "28/03/2023",
+        category: "Vocabulário",
+        file: "flashcards_beginner.docx",
+        sizeFormatted: "950 KB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-03-28T11:20:00",
+        description: "Cartões para fixação e memorização de vocabulário básico.",
+      },
     ],
   },
   {
@@ -153,9 +229,45 @@ const MOCK_CERTIFICATES = [
       { name: "Debate Prep", date: "20/07/2023", score: 96 },
     ],
     materials: [
-      { title: "Business Cases PDF", type: "PDF", date: "28/03/2023" },
-      { title: "Advanced Grammar Book", type: "PDF", date: "12/05/2023" },
-      { title: "TED Talks Transcripts", type: "Document", date: "18/06/2023" },
+      {
+        id: 301,
+        lessonId: 0,
+        title: "Business Cases PDF",
+        type: "pdf" as const,
+        date: "28/03/2023",
+        category: "Business",
+        file: "business_cases.pdf",
+        sizeFormatted: "2.5 MB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-03-28T14:00:00",
+        description: "Estudos de caso reais para negociações e apresentações em inglês corporativo.",
+      },
+      {
+        id: 302,
+        lessonId: 0,
+        title: "Advanced Grammar Book",
+        type: "pdf" as const,
+        date: "12/05/2023",
+        category: "Gramática",
+        file: "advanced_grammar_book.pdf",
+        sizeFormatted: "5.1 MB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-05-12T16:30:00",
+        description: "Livro de gramática avançada com foco em fluência e estruturas complexas.",
+      },
+      {
+        id: 303,
+        lessonId: 0,
+        title: "TED Talks Transcripts",
+        type: "document" as const,
+        date: "18/06/2023",
+        category: "Listening",
+        file: "ted_talks_transcripts.docx",
+        sizeFormatted: "1.8 MB",
+        link: "/sample-material.pdf",
+        createdAt: "2023-06-18T10:45:00",
+        description: "Transcrições anotadas de palestras do TED Talks para análise discursiva.",
+      },
     ],
   },
 ];
@@ -170,6 +282,37 @@ const CertificatesTab: React.FC = () => {
   const [selectedStudent, setSelectedStudent] = useState<StudentMock | null>(
     null,
   );
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerInitialId, setViewerInitialId] = useState<number | undefined>(
+    undefined,
+  );
+
+  const handleOpenMaterialViewer = (materialId: number) => {
+    setViewerInitialId(materialId);
+    setViewerOpen(true);
+  };
+
+  const handleDownloadMaterial = (material: LessonMaterial) => {
+    if (material.isExternalLink || material.type === "link") {
+      window.open(material.link, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    try {
+      const a = document.createElement("a");
+      a.href = material.link;
+      a.download = material.file || `${material.title || "documento"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      addToast(
+        `Download de "${material.title || material.file}" iniciado!`,
+        "success",
+      );
+    } catch {
+      window.open(material.link, "_blank");
+    }
+  };
 
   const filteredStudents = MOCK_CERTIFICATES.filter((student) => {
     const matchesSearch = student.name
@@ -198,10 +341,11 @@ const CertificatesTab: React.FC = () => {
     return (
       <Container>
         <BackButton onClick={() => setSelectedStudent(null)}>
-          <ChevronLeft size={18} /> Voltar para a lista
+          <ChevronLeft size={16} /> Voltar para a lista
         </BackButton>
 
         <DetailContainer>
+          {/* Header do Aluno em Azul Escuro Oficial */}
           <ProfileHeader>
             <ProfileAvatar
               $bg={selectedStudent.bg}
@@ -212,186 +356,171 @@ const CertificatesTab: React.FC = () => {
             <ProfileInfo>
               <ProfileName>{selectedStudent.name}</ProfileName>
               <BadgeRow>
-                <LevelBadge>
-                  <Award size={12} style={{ marginRight: "4px" }} />{" "}
+                <LevelBadge $onDark>
+                  <Award size={13} />
                   {selectedStudent.level}
                 </LevelBadge>
-                <LevelBadge
-                  style={{
-                    background: "rgba(59, 130, 246, 0.1)",
-                    color: "#3b82f6",
-                  }}
-                >
-                  {selectedStudent.plan}
-                </LevelBadge>
+                <PlanBadge $onDark>{selectedStudent.plan}</PlanBadge>
                 {selectedStudent.status === "Ativo" && (
-                  <LevelBadge
-                    style={{
-                      background: "rgba(34, 197, 94, 0.1)",
-                      color: "#22c55e",
-                    }}
-                  >
+                  <StatusBadge $onDark>
+                    <span className="dot" />
                     Ativo
-                  </LevelBadge>
+                  </StatusBadge>
                 )}
               </BadgeRow>
             </ProfileInfo>
           </ProfileHeader>
 
-          <PremiumCard>
-            <DetailSection>
-              <SectionTitle>
-                <User size={18} /> Perfil Acadêmico e Pessoal
-              </SectionTitle>
-              <InfoGrid>
-                <InfoGroup>
-                  <InfoLabel>Email</InfoLabel>
-                  <InfoValue>{selectedStudent.email}</InfoValue>
-                </InfoGroup>
-                <InfoGroup>
-                  <InfoLabel>Telefone</InfoLabel>
-                  <InfoValue>{selectedStudent.phone}</InfoValue>
-                </InfoGroup>
-                <InfoGroup>
-                  <InfoLabel>CPF</InfoLabel>
-                  <InfoValue>{selectedStudent.cpf}</InfoValue>
-                </InfoGroup>
-                <InfoGroup>
-                  <InfoLabel>Data de Nascimento</InfoLabel>
-                  <InfoValue>{selectedStudent.birthdate}</InfoValue>
-                </InfoGroup>
-                <InfoGroup>
-                  <InfoLabel>Data da Matrícula</InfoLabel>
-                  <InfoValue>{selectedStudent.enrollmentDate}</InfoValue>
-                </InfoGroup>
-              </InfoGrid>
-            </DetailSection>
-          </PremiumCard>
+          {/* 1. Perfil Acadêmico e Pessoal (5 cartões brancos diretos) */}
+          <SectionWrapper>
+            <SectionTitle>
+              <User size={18} /> Perfil Acadêmico e Pessoal
+            </SectionTitle>
+            <InfoGrid>
+              <InfoGroup>
+                <InfoLabel>
+                  <Mail size={13} /> Email
+                </InfoLabel>
+                <InfoValue title={selectedStudent.email}>
+                  {selectedStudent.email}
+                </InfoValue>
+              </InfoGroup>
+              <InfoGroup>
+                <InfoLabel>
+                  <Phone size={13} /> Telefone
+                </InfoLabel>
+                <InfoValue>{selectedStudent.phone}</InfoValue>
+              </InfoGroup>
+              <InfoGroup>
+                <InfoLabel>
+                  <FileText size={13} /> CPF
+                </InfoLabel>
+                <InfoValue>{selectedStudent.cpf}</InfoValue>
+              </InfoGroup>
+              <InfoGroup>
+                <InfoLabel>
+                  <Calendar size={13} /> Data de Nascimento
+                </InfoLabel>
+                <InfoValue>{selectedStudent.birthdate}</InfoValue>
+              </InfoGroup>
+              <InfoGroup>
+                <InfoLabel>
+                  <Award size={13} /> Data da Matrícula
+                </InfoLabel>
+                <InfoValue>{selectedStudent.enrollmentDate}</InfoValue>
+              </InfoGroup>
+            </InfoGrid>
+          </SectionWrapper>
 
-          <PremiumCard>
-            <DetailSection>
-              <SectionTitle>
-                <Activity size={18} /> Desempenho e Andamento
-              </SectionTitle>
-              <InfoGrid style={{ gap: "2rem", marginBottom: "1.5rem" }}>
-                <InfoGroup>
-                  <InfoLabel>Duração do Curso</InfoLabel>
-                  <InfoValue>{selectedStudent.durationMonths} meses</InfoValue>
-                </InfoGroup>
-                <InfoGroup>
-                  <InfoLabel>Aulas Concluídas</InfoLabel>
-                  <InfoValue>
-                    {selectedStudent.classesAttended} aulas realizadas
-                  </InfoValue>
-                </InfoGroup>
-              </InfoGrid>
-              <InfoGrid style={{ gap: "3rem" }}>
-                <ProgressWrapper style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "0.5rem",
+          {/* 2. Desempenho e Andamento */}
+          <SectionWrapper>
+            <SectionTitle>
+              <Activity size={18} /> Desempenho e Andamento
+            </SectionTitle>
+            <PerformanceGrid>
+              <InfoGroup>
+                <InfoLabel>
+                  <Clock size={13} /> Duração do Curso
+                </InfoLabel>
+                <InfoValue>{selectedStudent.durationMonths} meses</InfoValue>
+              </InfoGroup>
+              <InfoGroup>
+                <InfoLabel>
+                  <CheckCircle2 size={13} /> Aulas Concluídas
+                </InfoLabel>
+                <InfoValue>
+                  {selectedStudent.classesAttended} aulas realizadas
+                </InfoValue>
+              </InfoGroup>
+            </PerformanceGrid>
+
+            <ProgressContainer>
+              <ProgressHeader>
+                <InfoLabel>Progresso do Nível</InfoLabel>
+                <ProgressPercentage>
+                  {selectedStudent.progress}%
+                </ProgressPercentage>
+              </ProgressHeader>
+              <ProgressBarContainer>
+                <ProgressBarFill $progress={selectedStudent.progress} />
+              </ProgressBarContainer>
+            </ProgressContainer>
+          </SectionWrapper>
+
+          {/* 3. Linha do Tempo Acadêmica */}
+          <SectionWrapper>
+            <SectionTitle>
+              <BookOpen size={18} /> Linha do Tempo Acadêmica
+            </SectionTitle>
+            <Timeline>
+              {selectedStudent.pastClasses.map((aula, index) => (
+                <TimelineItem
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
+                >
+                  <TimelineIcon>
+                    <CheckCircle size={14} />
+                  </TimelineIcon>
+                  <TimelineContent>
+                    <TimelineInfo>
+                      <TimelineTitle>{aula.name}</TimelineTitle>
+                      <TimelineDate>
+                        <Calendar size={13} /> Concluída em {aula.date}
+                      </TimelineDate>
+                    </TimelineInfo>
+                    <TimelineStatus>
+                      <CheckCircle size={13} /> Concluída
+                    </TimelineStatus>
+                  </TimelineContent>
+                </TimelineItem>
+              ))}
+            </Timeline>
+          </SectionWrapper>
+
+          {/* 4. Dossiê de Materiais */}
+          <SectionWrapper>
+            <SectionTitle>
+              <FileBadge size={18} /> Dossiê de Materiais
+            </SectionTitle>
+            <MaterialGrid>
+              {selectedStudent.materials.map((mat, index) => (
+                <MaterialCard
+                  key={mat.id || index}
+                  onClick={() => handleOpenMaterialViewer(mat.id)}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
+                >
+                  <MaterialIcon $type={mat.type}>
+                    {mat.type.toLowerCase() === "pdf" ? (
+                      <FileText size={20} />
+                    ) : mat.type.toLowerCase() === "audio" ? (
+                      <FileAudio size={20} />
+                    ) : (
+                      <BookOpen size={20} />
+                    )}
+                  </MaterialIcon>
+                  <MaterialInfo>
+                    <MaterialTitle>{mat.title}</MaterialTitle>
+                    <MaterialMeta>Acessado em {mat.date}</MaterialMeta>
+                  </MaterialInfo>
+                  <MaterialActionBtn
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMaterialViewer(mat.id);
                     }}
                   >
-                    <InfoLabel>Progresso do Nível</InfoLabel>
-                    <InfoValue style={{ color: "#3b82f6", fontWeight: 700 }}>
-                      {selectedStudent.progress}%
-                    </InfoValue>
-                  </div>
-                  <ProgressBarContainer>
-                    <ProgressBarFill
-                      $progress={selectedStudent.progress}
-                      style={{
-                        background:
-                          "linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%)",
-                      }}
-                    />
-                  </ProgressBarContainer>
-                </ProgressWrapper>
-              </InfoGrid>
-            </DetailSection>
-          </PremiumCard>
+                    <Eye size={14} /> Visualizar
+                  </MaterialActionBtn>
+                </MaterialCard>
+              ))}
+            </MaterialGrid>
+          </SectionWrapper>
 
-          <PremiumCard>
-            <DetailSection>
-              <SectionTitle>
-                <BookOpen size={18} /> Linha do Tempo Acadêmica
-              </SectionTitle>
-              <Timeline>
-                {selectedStudent.pastClasses.map((aula, index) => (
-                  <TimelineItem
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.4 }}
-                  >
-                    <TimelineIcon>
-                      <CheckCircle size={14} />
-                    </TimelineIcon>
-                    <TimelineContent>
-                      <TimelineHeader>
-                        <TimelineTitle>{aula.name}</TimelineTitle>
-                      </TimelineHeader>
-                      <TimelineDate>
-                        <Calendar size={12} /> Concluída em {aula.date}
-                      </TimelineDate>
-                    </TimelineContent>
-                  </TimelineItem>
-                ))}
-              </Timeline>
-            </DetailSection>
-          </PremiumCard>
-
-          <PremiumCard>
-            <DetailSection>
-              <SectionTitle>
-                <FileBadge size={18} /> Dossiê de Materiais
-              </SectionTitle>
-              <MaterialGrid>
-                {selectedStudent.materials.map((mat, index) => (
-                  <MaterialCard
-                    key={index}
-                    onClick={() =>
-                      addToast(`Visualizando material: ${mat.title}`, "info")
-                    }
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.4 }}
-                  >
-                    <MaterialIcon $type={mat.type}>
-                      {mat.type === "PDF" ? (
-                        <FileText size={20} />
-                      ) : mat.type === "Audio" ? (
-                        <FileAudio size={20} />
-                      ) : (
-                        <BookOpen size={20} />
-                      )}
-                    </MaterialIcon>
-                    <MaterialInfo>
-                      <MaterialTitle>{mat.title}</MaterialTitle>
-                      <MaterialMeta>Acessado em {mat.date}</MaterialMeta>
-                    </MaterialInfo>
-                    <div
-                      style={{
-                        marginLeft: "auto",
-                        color: "#1F2B45",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.4rem",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      <Eye size={14} /> Visualizar
-                    </div>
-                  </MaterialCard>
-                ))}
-              </MaterialGrid>
-            </DetailSection>
-          </PremiumCard>
-
+          {/* 5. Ações de Certificado */}
           <ActionButtonsWrapper>
             <SendCertificateBtn
               onClick={() =>
@@ -400,30 +529,43 @@ const CertificatesTab: React.FC = () => {
                   "success",
                 )
               }
-              style={{ padding: "1rem 2.5rem", fontSize: "1.05rem" }}
             >
-              <Upload size={20} /> Emitir Certificado Oficial
+              <Upload size={18} /> Emitir Certificado Oficial
             </SendCertificateBtn>
-            <SendCertificateBtn
-              onClick={() =>
-                addToast(
-                  `Baixando certificado de ${selectedStudent.name}...`,
-                  "info",
-                )
-              }
-              style={{
-                padding: "1rem 2.5rem",
-                fontSize: "1.05rem",
-                background: "#f0f4f8",
-                color: "#1F2B45",
-                border: "1px solid #d0d5dd",
-                boxShadow: "none",
+            <DownloadCertificateBtn
+              onClick={() => {
+                try {
+                  const a = document.createElement("a");
+                  a.href = "/certificate.png";
+                  a.download = `Certificado_${selectedStudent.name.replace(/\s+/g, "_")}.png`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  addToast(
+                    `Download do certificado de ${selectedStudent.name} iniciado!`,
+                    "success",
+                  );
+                } catch {
+                  addToast(
+                    `Baixando certificado de ${selectedStudent.name}...`,
+                    "info",
+                  );
+                }
               }}
             >
-              <Download size={20} /> Baixar Certificado
-            </SendCertificateBtn>
+              <Download size={18} /> Baixar Certificado
+            </DownloadCertificateBtn>
           </ActionButtonsWrapper>
-          </DetailContainer>
+
+          {/* 6. Modal de Visualização de Documentos / Materiais */}
+          <DocumentViewerModal
+            isOpen={viewerOpen}
+            onClose={() => setViewerOpen(false)}
+            materials={selectedStudent.materials as unknown as LessonMaterial[]}
+            initialMaterialId={viewerInitialId}
+            onDownload={handleDownloadMaterial}
+          />
+        </DetailContainer>
       </Container>
     );
   }
@@ -441,26 +583,58 @@ const CertificatesTab: React.FC = () => {
           />
         </SearchWrapper>
 
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-          <FilterSelect
+        <MobileCarousel gap="0.85rem" mobileGap="0.5rem">
+          <CustomDropdown
             value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-          >
-            <option value="all">Todos os Níveis</option>
-            <option value="Beginner 2">Beginner</option>
-            <option value="Intermediate 2">Intermediate</option>
-            <option value="Advanced 1">Advanced</option>
-          </FilterSelect>
+            onChange={(val) => setLevelFilter(val)}
+            leadingIcon={<Award size={15} strokeWidth={2} />}
+            options={[
+              { value: "all", label: "Todos os Níveis" },
+              { value: "Beginner 2", label: "Beginner" },
+              { value: "Intermediate 2", label: "Intermediate" },
+              { value: "Advanced 1", label: "Advanced" },
+            ]}
+          />
 
-          <FilterSelect
+          <CustomDropdown
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(val) => setSortBy(val)}
+            leadingIcon={<Calendar size={15} strokeWidth={2} />}
+            menuAlign="right"
+            options={[
+              { value: "recentes", label: "Matrículas Recentes" },
+              { value: "antigos", label: "Matrículas Antigas" },
+              { value: "progresso", label: "Maior Progresso" },
+            ]}
+          />
+        </MobileCarousel>
+
+        {(searchQuery.trim() !== "" ||
+          levelFilter !== "all" ||
+          sortBy !== "recentes") && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery("");
+              setLevelFilter("all");
+              setSortBy("recentes");
+            }}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#2563eb",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              padding: "4px 8px",
+              fontFamily: "inherit",
+              whiteSpace: "nowrap",
+              alignSelf: "flex-end",
+            }}
           >
-            <option value="recentes">Matrículas Recentes</option>
-            <option value="antigos">Matrículas Antigas</option>
-            <option value="progresso">Maior Progresso</option>
-          </FilterSelect>
-        </div>
+            Limpar filtro
+          </button>
+        )}
       </HeaderActions>
 
       <CardsList>
@@ -469,39 +643,30 @@ const CertificatesTab: React.FC = () => {
             <CertificateCard
               key={student.id}
               onClick={() => setSelectedStudent(student)}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.04 }}
             >
-              <Avatar $bg={student.bg} $color={student.color}>
-                {student.initials}
-              </Avatar>
-              <CardInfo>
-                <StudentName>{student.name}</StudentName>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    alignItems: "center",
-                  }}
-                >
-                  <LevelBadge>{student.level}</LevelBadge>
-                  {student.status === "Ativo" && (
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        color: "#22c55e",
-                        background: "rgba(34, 197, 94, 0.1)",
-                        padding: "0.2rem 0.6rem",
-                        borderRadius: "20px",
-                      }}
-                    >
-                      Ativo
-                    </span>
-                  )}
-                </div>
-              </CardInfo>
+              <CardIdentity>
+                <Avatar $bg={student.bg} $color={student.color}>
+                  {student.initials}
+                </Avatar>
+                <CardInfo>
+                  <StudentName>{student.name}</StudentName>
+                  <BadgesContainer>
+                    <LevelBadge>
+                      <Award size={12} />
+                      {student.level}
+                    </LevelBadge>
+                    {student.status === "Ativo" && (
+                      <StatusBadge>
+                        <span className="dot" />
+                        Ativo
+                      </StatusBadge>
+                    )}
+                  </BadgesContainer>
+                </CardInfo>
+              </CardIdentity>
 
               <CardMeta>
                 <MetaItem>
@@ -510,22 +675,35 @@ const CertificatesTab: React.FC = () => {
                 </MetaItem>
                 <MetaItem>
                   <span>Progresso</span>
-                  <span style={{ color: "#3b82f6" }}>{student.progress}%</span>
+                  <ProgressIndicator>
+                    <span style={{ color: "#1f2b45", fontWeight: 700 }}>
+                      {student.progress}%
+                    </span>
+                    <MiniProgressBar>
+                      <div style={{ width: `${student.progress}%` }} />
+                    </MiniProgressBar>
+                  </ProgressIndicator>
                 </MetaItem>
               </CardMeta>
 
-              <ViewProfileBtn>
-                Ver Dossiê <Eye size={16} />
-              </ViewProfileBtn>
+              <CardAction>
+                <ViewProfileBtn>
+                  Ver Dossiê <Eye size={15} />
+                </ViewProfileBtn>
+              </CardAction>
             </CertificateCard>
           ))
         ) : (
           <div
             style={{
-              padding: "2rem",
+              padding: "3rem",
               textAlign: "center",
-              color: "#888",
+              color: "#94a3b8",
               fontFamily: "Rubik",
+              background: "#ffffff",
+              borderRadius: "16px",
+              border: "1.5px solid #e2e8f0",
+              fontWeight: 500,
             }}
           >
             Nenhum aluno encontrado.
