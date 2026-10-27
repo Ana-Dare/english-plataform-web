@@ -1,7 +1,9 @@
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+*, *::before, *::after {
+	box-sizing: border-box;
+}
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -23,26 +25,82 @@ time, mark, audio, video {
 	font: inherit;
 	vertical-align: baseline;
 }
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
-body {
-	line-height: 1;
-	font-family: "Rubik", sans-serif;
+
+html {
+	font-size: 16px;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	scroll-behavior: smooth;
 }
+
+body {
+	line-height: 1.5;
+	font-family: "Rubik", sans-serif;
+	font-size: 1rem;
+	color: #1F2B45;
+	background-color: #f7f7f8;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: "Rubik", sans-serif;
+	line-height: 1.3;
+	overflow-wrap: break-word;
+	text-wrap: balance;
+}
+
+h1 {
+	font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+	line-height: 1.25;
+}
+
+h2 {
+	font-size: clamp(1.25rem, 1.5vw + 0.95rem, 1.75rem);
+	line-height: 1.3;
+}
+
+h3 {
+	font-size: clamp(1.125rem, 1vw + 0.875rem, 1.5rem);
+	line-height: 1.35;
+}
+
+p {
+	line-height: 1.5;
+	overflow-wrap: break-word;
+}
+
+button, input, select, textarea {
+	font-family: "Rubik", sans-serif;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+img, picture, video, canvas, svg {
+	max-width: 100%;
+}
+
 ol, ul {
 	list-style: none;
 }
+
 blockquote, q {
 	quotes: none;
 }
+
 blockquote:before, blockquote:after,
 q:before, q:after {
 	content: '';
 	content: none;
 }
+
 table {
 	border-collapse: collapse;
 	border-spacing: 0;

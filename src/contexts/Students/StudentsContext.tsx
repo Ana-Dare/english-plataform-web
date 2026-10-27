@@ -68,6 +68,11 @@ export interface IStudentsContext {
   /** Indica desativação em andamento. */
   isDeactivating: boolean;
 
+  /** Ativa um aluno (persiste via API). */
+  activateStudent: (id: number, callbacks?: MutationCallbacks) => void;
+  /** Indica ativação em andamento. */
+  isActivating: boolean;
+
   /** Recupera um aluno pelo id (formato de UI). */
   getStudentById: (id: number) => Student | undefined;
 }

@@ -6,30 +6,32 @@ import {
   X,
   Phone,
   Mail,
-  Calendar,
   FileText,
+  Calendar,
+  Users,
 } from "lucide-react";
 import {
-  RegisterSection,
-  RegisterSectionTitle,
-  RegisterGrid,
-  RegisterField,
-  RegisterLabel,
-  RegisterInput,
+  DetailSection,
+  DetailSectionTitle,
+  DetailGrid,
+  DetailField,
+  DetailFieldLabel,
   FieldError,
 } from "../style";
 import {
-  ProfilePhotoArea,
-  PhotoCircle,
-  PhotoOverlay,
-  PhotoTextBlock,
-  UploadBtn,
+  ProfilePhotoCard,
+  AvatarContainer,
+  AvatarCircle,
+  CameraButton,
+  PhotoCardInfo,
+  PhotoCardTitle,
+  PhotoActionsGroup,
+  SelectPhotoBtn,
   RemovePhotoBtn,
-  ButtonRow,
-  InputIcon,
   GenderSelector,
   GenderOption,
 } from "./style";
+import ModernDatePicker from "../../../../components/ModernDatePicker";
 import { formatCPF } from "../helpers/validateCPF";
 import { formatPhone } from "../helpers/validatePhone";
 import type { StudentFormState, FieldErrors, PersonalFieldKey } from "./types";
@@ -66,131 +68,8 @@ const StepPersonalInfo: React.FC<StepPersonalInfoProps> = ({
 
   return (
     <>
-      {/* Dados pessoais */}
-      <RegisterSection>
-        <RegisterSectionTitle>
-          <User size={16} /> Dados Pessoais
-        </RegisterSectionTitle>
-        <RegisterGrid>
-          <RegisterField>
-            <RegisterLabel>
-              Nome Completo <span>*</span>
-            </RegisterLabel>
-            <InputIcon>
-              <User size={16} />
-              <RegisterInput
-                type="text"
-                placeholder="Ex: Maria da Silva"
-                value={form.name}
-                $error={!!errors.name}
-                onChange={(e) => {
-                  onClearError("name");
-                  onChange({ name: e.target.value });
-                }}
-              />
-            </InputIcon>
-            {errors.name && <FieldError>{errors.name}</FieldError>}
-          </RegisterField>
-
-          <RegisterField>
-            <RegisterLabel>
-              E-mail <span>*</span>
-            </RegisterLabel>
-            <InputIcon>
-              <Mail size={16} />
-              <RegisterInput
-                type="email"
-                placeholder="aluno@email.com"
-                value={form.email}
-                $error={!!errors.email}
-                onChange={(e) => {
-                  onClearError("email");
-                  onChange({ email: e.target.value });
-                }}
-              />
-            </InputIcon>
-            {errors.email && <FieldError>{errors.email}</FieldError>}
-          </RegisterField>
-
-          <RegisterField>
-            <RegisterLabel>
-              Telefone / WhatsApp <span>*</span>
-            </RegisterLabel>
-            <InputIcon>
-              <Phone size={16} />
-              <RegisterInput
-                type="text"
-                placeholder="(00) 00000-0000"
-                value={form.phone}
-                $error={!!errors.phone}
-                onChange={(e) => {
-                  onClearError("phone");
-                  onChange({ phone: formatPhone(e.target.value) });
-                }}
-              />
-            </InputIcon>
-            {errors.phone && <FieldError>{errors.phone}</FieldError>}
-          </RegisterField>
-
-          <RegisterField>
-            <RegisterLabel>
-              CPF <span>*</span>
-            </RegisterLabel>
-            <InputIcon>
-              <FileText size={16} />
-              <RegisterInput
-                type="text"
-                placeholder="000.000.000-00"
-                value={form.cpf_hash}
-                $error={!!errors.cpf_hash}
-                onChange={(e) => {
-                  onClearError("cpf_hash");
-                  onChange({ cpf_hash: formatCPF(e.target.value) });
-                }}
-              />
-            </InputIcon>
-            {errors.cpf_hash && <FieldError>{errors.cpf_hash}</FieldError>}
-          </RegisterField>
-
-          <RegisterField>
-            <RegisterLabel>
-              Data de Nascimento <span>*</span>
-            </RegisterLabel>
-            <InputIcon>
-              <Calendar size={16} />
-              <RegisterInput
-                type="date"
-                value={form.birthdate}
-                $error={!!errors.birthdate}
-                onChange={(e) => {
-                  onClearError("birthdate");
-                  onChange({ birthdate: e.target.value });
-                }}
-              />
-            </InputIcon>
-            {errors.birthdate && <FieldError>{errors.birthdate}</FieldError>}
-          </RegisterField>
-
-          <RegisterField>
-            <RegisterLabel>Gênero</RegisterLabel>
-            <GenderSelector>
-              {GENDER_OPTIONS.map((option) => (
-                <GenderOption
-                  key={option.value}
-                  type="button"
-                  $selected={form.gender === option.value}
-                  onClick={() => onChange({ gender: option.value })}
-                >
-                  {option.label}
-                </GenderOption>
-              ))}
-            </GenderSelector>
-          </RegisterField>
-        </RegisterGrid>
-      </RegisterSection>
-
-      {/* Foto do aluno (por último) - banda compacta */}
-      <ProfilePhotoArea>
+      {/* 1. Foto de perfil sempre no topo */}
+      <ProfilePhotoCard>
         <input
           ref={fileInputRef}
           type="file"
@@ -198,39 +77,204 @@ const StepPersonalInfo: React.FC<StepPersonalInfoProps> = ({
           onChange={onPhotoChange}
           style={{ display: "none" }}
         />
-        <PhotoCircle
-          $hasImage={!!form.photoUrl}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {form.photoUrl ? (
-            <img src={form.photoUrl} alt="Foto do aluno" />
-          ) : (
-            <Camera size={22} />
-          )}
-          <PhotoOverlay className="overlay">
-            <Camera size={24} />
-          </PhotoOverlay>
-        </PhotoCircle>
-        <PhotoTextBlock>
-          <h4>Adicione uma foto de perfil</h4>
-          <p>Opcional. JPG ou PNG, até 5MB.</p>
-        </PhotoTextBlock>
-        <ButtonRow>
-          <UploadBtn
+
+        <AvatarContainer>
+          <AvatarCircle
+            $hasImage={!!form.photoUrl}
+            onClick={() => fileInputRef.current?.click()}
+            title="Selecionar foto de perfil"
+          >
+            {form.photoUrl ? (
+              <img src={form.photoUrl} alt="Foto do aluno" />
+            ) : (
+              <User size={36} strokeWidth={1.8} />
+            )}
+          </AvatarCircle>
+          <CameraButton
             type="button"
             onClick={() => fileInputRef.current?.click()}
+            aria-label="Selecionar foto"
+            title="Selecionar foto"
           >
-            <Upload size={14} />
-            {form.photoUrl ? "Trocar foto" : "Selecionar foto"}
-          </UploadBtn>
-          {form.photoUrl && (
-            <RemovePhotoBtn type="button" onClick={handleRemovePhoto}>
-              <X size={14} />
-              Remover
-            </RemovePhotoBtn>
-          )}
-        </ButtonRow>
-      </ProfilePhotoArea>
+            <Camera size={15} />
+          </CameraButton>
+        </AvatarContainer>
+
+        <PhotoCardInfo>
+          <PhotoCardTitle>Foto de perfil</PhotoCardTitle>
+          <PhotoActionsGroup>
+            <SelectPhotoBtn
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload size={15} />
+              {form.photoUrl ? "Trocar foto" : "Selecionar foto"}
+            </SelectPhotoBtn>
+            {form.photoUrl && (
+              <RemovePhotoBtn type="button" onClick={handleRemovePhoto}>
+                <X size={15} />
+                Remover
+              </RemovePhotoBtn>
+            )}
+          </PhotoActionsGroup>
+        </PhotoCardInfo>
+      </ProfilePhotoCard>
+
+      {/* 2. Informações Pessoais - padrão idêntico ao perfil do aluno, campos organizados de dois em dois */}
+      <DetailSection>
+        <DetailSectionTitle $bg="#EEF2FF" $color="#4F46E5">
+          <div className="icon-box">
+            <User size={18} />
+          </div>
+          Informações Pessoais
+        </DetailSectionTitle>
+
+        <DetailGrid>
+          {/* Linha 1: Nome Completo */}
+          <DetailField>
+            <div className="field-icon">
+              <User size={20} />
+            </div>
+            <div className="field-content">
+              <DetailFieldLabel>
+                Nome Completo <span className="required">*</span>
+              </DetailFieldLabel>
+              <input
+                type="text"
+                placeholder="Ex: Maria da Silva"
+                value={form.name}
+                aria-invalid={!!errors.name}
+                className={errors.name ? "error" : ""}
+                onChange={(e) => {
+                  onClearError("name");
+                  onChange({ name: e.target.value });
+                }}
+              />
+              {errors.name && <FieldError>{errors.name}</FieldError>}
+            </div>
+          </DetailField>
+
+          {/* Linha 1: E-mail */}
+          <DetailField>
+            <div className="field-icon">
+              <Mail size={20} />
+            </div>
+            <div className="field-content">
+              <DetailFieldLabel>
+                E-mail <span className="required">*</span>
+              </DetailFieldLabel>
+              <input
+                type="email"
+                placeholder="aluno@email.com"
+                value={form.email}
+                aria-invalid={!!errors.email}
+                className={errors.email ? "error" : ""}
+                onChange={(e) => {
+                  onClearError("email");
+                  onChange({ email: e.target.value });
+                }}
+              />
+              {errors.email && <FieldError>{errors.email}</FieldError>}
+            </div>
+          </DetailField>
+
+          {/* Linha 2: Telefone / WhatsApp */}
+          <DetailField>
+            <div className="field-icon">
+              <Phone size={20} />
+            </div>
+            <div className="field-content">
+              <DetailFieldLabel>
+                Telefone / WhatsApp <span className="required">*</span>
+              </DetailFieldLabel>
+              <input
+                type="text"
+                placeholder="(00) 00000-0000"
+                value={form.phone}
+                aria-invalid={!!errors.phone}
+                className={errors.phone ? "error" : ""}
+                onChange={(e) => {
+                  onClearError("phone");
+                  onChange({ phone: formatPhone(e.target.value) });
+                }}
+              />
+              {errors.phone && <FieldError>{errors.phone}</FieldError>}
+            </div>
+          </DetailField>
+
+          {/* Linha 2: CPF */}
+          <DetailField>
+            <div className="field-icon">
+              <FileText size={20} />
+            </div>
+            <div className="field-content">
+              <DetailFieldLabel>
+                CPF <span className="required">*</span>
+              </DetailFieldLabel>
+              <input
+                type="text"
+                placeholder="000.000.000-00"
+                value={form.cpf_hash}
+                aria-invalid={!!errors.cpf_hash}
+                className={errors.cpf_hash ? "error" : ""}
+                onChange={(e) => {
+                  onClearError("cpf_hash");
+                  onChange({ cpf_hash: formatCPF(e.target.value) });
+                }}
+              />
+              {errors.cpf_hash && <FieldError>{errors.cpf_hash}</FieldError>}
+            </div>
+          </DetailField>
+
+          {/* Linha 3: Data de Nascimento */}
+          <DetailField>
+            <div className="field-icon">
+              <Calendar size={20} />
+            </div>
+            <div className="field-content">
+              <DetailFieldLabel>
+                Data de Nascimento <span className="required">*</span>
+              </DetailFieldLabel>
+              <ModernDatePicker
+                value={form.birthdate}
+                placeholder="DD/MM/AAAA"
+                error={!!errors.birthdate}
+                maxDate={new Date()}
+                showYearSelector={true}
+                placement="bottom"
+                allowClear={true}
+                onChange={(dateStr) => {
+                  onClearError("birthdate");
+                  onChange({ birthdate: dateStr });
+                }}
+              />
+              {errors.birthdate && <FieldError>{errors.birthdate}</FieldError>}
+            </div>
+          </DetailField>
+
+          {/* Linha 3: Gênero */}
+          <DetailField>
+            <div className="field-icon">
+              <Users size={20} />
+            </div>
+            <div className="field-content">
+              <DetailFieldLabel>Gênero</DetailFieldLabel>
+              <GenderSelector>
+                {GENDER_OPTIONS.map((option) => (
+                  <GenderOption
+                    key={option.value}
+                    type="button"
+                    $selected={form.gender === option.value}
+                    onClick={() => onChange({ gender: option.value })}
+                  >
+                    {option.label}
+                  </GenderOption>
+                ))}
+              </GenderSelector>
+            </div>
+          </DetailField>
+        </DetailGrid>
+      </DetailSection>
     </>
   );
 };

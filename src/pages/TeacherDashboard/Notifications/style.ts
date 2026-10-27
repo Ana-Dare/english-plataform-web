@@ -2,34 +2,43 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   display: flex;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 110px);
+  height: calc(100dvh - 110px);
+  min-height: 500px;
   background-color: #f1f5f9;
-  margin: -32px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
+  position: relative;
+  width: 100%;
+  min-width: 0;
 `;
 
 export const Sidebar = styled.div<{ $showInMobile: boolean }>`
-  width: 400px;
+  width: 380px;
+  max-width: 100%;
   background-color: #ffffff;
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   height: 100%;
   transition: transform 0.3s ease;
+  min-width: 0;
 
   @media (max-width: 900px) {
     width: 100%;
     position: absolute;
+    inset: 0;
     z-index: 10;
     transform: ${({ $showInMobile }) => ($showInMobile ? 'translateX(0)' : 'translateX(-100%)')};
   }
 `;
 
 export const SidebarHeader = styled.div`
-  padding: 24px 24px 16px 24px;
+  padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 1.5rem) 1rem;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 
   .title-row {
     display: flex;
@@ -38,7 +47,8 @@ export const SidebarHeader = styled.div`
 
     h2 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: clamp(1.25rem, 1.5vw + 0.9rem, 1.5rem);
+      line-height: 1.3;
       color: #0f172a;
       font-weight: 700;
       letter-spacing: -0.01em;

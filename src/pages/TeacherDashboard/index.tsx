@@ -38,7 +38,11 @@ const teacherMenuItems: SidebarMenuItem[] = [
 const TeacherDashboard: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [navStudentId] = useState<number | null>(null);
+  const [navStudentId, setNavStudentId] = useState<number | null>(null);
+  const [navStudentData, setNavStudentData] = useState<any>(null);
+  const [openRegisterStudent, setOpenRegisterStudent] = useState(false);
+  const [navTurmaId, setNavTurmaId] = useState<number | string | null>(null);
+  const [navTurmaName, setNavTurmaName] = useState<string | null>(null);
 
   return (
     <ProfileProvider>
@@ -69,15 +73,32 @@ const TeacherDashboard: React.FC = () => {
                 <PageTitle>Visão geral de suas atividades de hoje</PageTitle>
 
                 <TopStatsGrid>
-                  <OverviewCard title="Alunos ativos" value="87" />
-                  <OverviewCard title="Turmas ativas" value="12" />
-                  <OverviewCard title="Aulas hoje" value="6" />
+                  <OverviewCard
+                    title="Alunos ativos"
+                    value="87"
+                    onClick={() => setActiveTab("alunos")}
+                  />
+                  <OverviewCard
+                    title="Turmas ativas"
+                    value="12"
+                    onClick={() => setActiveTab("turmas")}
+                  />
+                  <OverviewCard
+                    title="Aulas hoje"
+                    value="6"
+                    onClick={() => setActiveTab("agenda")}
+                  />
                   <OverviewCard
                     title="Pendências"
                     value="14"
                     subtitle="atividades para corrigir"
+                    onClick={() => setActiveTab("turmas")}
                   />
-                  <OverviewCard title="Mensalidades pendentes" value="5" />
+                  <OverviewCard
+                    title="Mensalidades pendentes"
+                    value="5"
+                    onClick={() => setActiveTab("alunos")}
+                  />
                 </TopStatsGrid>
 
                 <ColumnsLayout>
@@ -85,7 +106,7 @@ const TeacherDashboard: React.FC = () => {
                     <div>
                       <SectionTitle>Agenda do dia</SectionTitle>
                       <SectionSubtitle>Hoje, 3 de junho</SectionSubtitle>
-                      <DailyAgenda />
+                      <DailyAgenda onSelect={() => setActiveTab("agenda")} />
                     </div>
                   </Column>
                   <Column>
@@ -95,7 +116,7 @@ const TeacherDashboard: React.FC = () => {
                     </div>
                     <div style={{ marginTop: "2rem" }}>
                       <SectionTitle>Pendências recentes</SectionTitle>
-                      <RecentPending />
+                      <RecentPending onSelect={(tab) => setActiveTab(tab)} />
                     </div>
                   </Column>
                 </ColumnsLayout>
@@ -103,12 +124,42 @@ const TeacherDashboard: React.FC = () => {
             )}
 
             {activeTab === "alunos" && (
-              <StudentsTab initialStudentId={navStudentId} />
+              <StudentsTab
+                initialStudentId={navStudentId}
+                initialStudentData={navStudentData}
+                initialShowRegister={openRegisterStudent}
+                initialTurmaId={navTurmaId}
+                initialTurmaName={navTurmaName}
+                onClearInitialState={() => {
+                  setOpenRegisterStudent(false);
+                  setNavStudentId(null);
+                  setNavStudentData(null);
+                  setNavTurmaId(null);
+                  setNavTurmaName(null);
+                }}
+              />
             )}
 
             {activeTab === "agenda" && <AgendaTab />}
 
-            {activeTab === "turmas" && <ClassesTab />}
+            {activeTab === "turmas" && (
+              <ClassesTab
+                onNavigateStudent={(studentId, studentData) => {
+                  setNavStudentId(studentId);
+                  setNavStudentData(studentData);
+                  setOpenRegisterStudent(false);
+                  setActiveTab("alunos");
+                }}
+                onNavigateRegisterStudent={(turmaId, turmaName) => {
+                  setNavStudentId(null);
+                  setNavStudentData(null);
+                  setNavTurmaId(turmaId || null);
+                  setNavTurmaName(turmaName || null);
+                  setOpenRegisterStudent(true);
+                  setActiveTab("alunos");
+                }}
+              />
+            )}
 
             {activeTab === "perfil" && <ProfileTab />}
 

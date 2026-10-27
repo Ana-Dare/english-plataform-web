@@ -2,18 +2,20 @@ import styled, { css } from "styled-components";
 
 export const ProfileWrapper = styled.div`
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
   padding-bottom: 2rem;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const ProfileContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
   width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  min-width: 0;
 `;
 
 export const LeftColumn = styled.div`
@@ -31,34 +33,39 @@ export const RightColumn = styled.div`
 `;
 
 export const ProfilePageTitle = styled.h1`
-  font-size: 1.75rem;
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  line-height: 1.25;
   color: #0f172a;
   font-weight: 800;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.375rem 0;
   letter-spacing: -0.02em;
 `;
 
 export const ProfilePageSubtitle = styled.p`
-  font-size: 0.95rem;
+  font-size: clamp(0.875rem, 0.25vw + 0.825rem, 0.9375rem);
+  line-height: 1.5;
   color: #64748b;
-  margin: 0 0 2.5rem 0;
+  margin: 0 0 clamp(1.25rem, 2.5vw, 2rem) 0;
 `;
 
 export const PhotoSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 2.5rem;
-  padding: 2.5rem;
-  background: rgba(255, 255, 255, 0.7);
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow:
     0 10px 40px -10px rgba(15, 23, 42, 0.08),
     0 1px 3px rgba(15, 23, 42, 0.05);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
   &:hover {
     transform: translateY(-2px);
@@ -66,18 +73,31 @@ export const PhotoSection = styled.div`
       0 20px 40px -10px rgba(15, 23, 42, 0.12),
       0 1px 3px rgba(15, 23, 42, 0.05);
   }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem 1.25rem;
+  }
 `;
 
 export const AvatarUpload = styled.div`
   position: relative;
-  width: 110px;
-  height: 110px;
+  width: 104px;
+  height: 104px;
   flex-shrink: 0;
+
+  @media (max-width: 479px) {
+    width: 96px;
+    height: 96px;
+  }
 `;
 
 export const AvatarImage = styled.div<{ $hasPhoto: boolean }>`
-  width: 110px;
-  height: 110px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   border: 4px solid #ffffff;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
@@ -100,8 +120,8 @@ export const UploadOverlay = styled.label`
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #1e293b;
   color: #ffffff;
@@ -115,7 +135,7 @@ export const UploadOverlay = styled.label`
 
   &:hover {
     background: #0f172a;
-    transform: scale(1.15) rotate(5deg);
+    transform: scale(1.12);
   }
 
   input {
@@ -127,10 +147,18 @@ export const PhotoInfo = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  min-width: 0;
+  flex: 1;
+
+  @media (max-width: 640px) {
+    align-items: center;
+    width: 100%;
+  }
 
   h3 {
-    font-size: 1.25rem;
+    font-size: clamp(1.125rem, 1vw + 0.875rem, 1.375rem);
+    line-height: 1.3;
     color: #0f172a;
     font-weight: 700;
     margin: 0;
@@ -138,7 +166,7 @@ export const PhotoInfo = styled.div`
   }
 
   p {
-    font-size: 0.85rem;
+    font-size: clamp(0.875rem, 0.25vw + 0.825rem, 0.9375rem);
     color: #64748b;
     margin: 0;
     line-height: 1.5;
@@ -147,21 +175,36 @@ export const PhotoInfo = styled.div`
 
 export const PhotoActions = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+
+  @media (max-width: 640px) {
+    justify-content: center;
+    width: 100%;
+  }
+
+  @media (max-width: 374px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 export const PhotoBtn = styled.button<{ $variant: "primary" | "danger" }>`
-  padding: 0.6rem 1.4rem;
+  padding: 0.65rem 1.35rem;
   border-radius: 10px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: "Rubik", sans-serif;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 
   ${({ $variant }) =>
     $variant === "primary"
@@ -189,38 +232,44 @@ export const PhotoBtn = styled.button<{ $variant: "primary" | "danger" }>`
 `;
 
 export const FormSection = styled.div`
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow:
     0 10px 40px -10px rgba(15, 23, 42, 0.08),
     0 1px 3px rgba(15, 23, 42, 0.05);
-  padding: 2.5rem;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const FormSectionTitle = styled.h3`
-  font-size: 1.1rem;
+  font-size: clamp(1.125rem, 1vw + 0.875rem, 1.5rem);
+  line-height: 1.3;
   color: #0f172a;
   font-weight: 700;
-  margin: 0 0 2rem 0;
+  margin: 0 0 clamp(1.25rem, 2vw, 1.75rem) 0;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding-bottom: 1.25rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 
   svg {
     color: #475569;
+    flex-shrink: 0;
   }
 `;
 
 export const FormGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.75rem);
+  width: 100%;
 
-  @media (max-width: 600px) {
+  @media (max-width: 767px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -228,33 +277,39 @@ export const FormGrid = styled.div`
 export const FormGroup = styled.div<{ $fullWidth?: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
+  min-width: 0;
+  width: 100%;
   grid-column: ${({ $fullWidth }) => ($fullWidth ? "1 / -1" : "auto")};
 `;
 
 export const FormLabel = styled.label`
-  font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #475569;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
 
   svg {
-    width: 14px;
-    height: 14px;
-    color: #94a3b8;
+    width: 15px;
+    height: 15px;
+    color: #64748b;
+    flex-shrink: 0;
   }
 `;
 
 export const FormInput = styled.input`
-  padding: 0.85rem 1.2rem;
-  padding-left: 3rem;
-  border: 1px solid #e2e8f0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem 0.85rem 2.85rem;
+  border: 1.5px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.5;
   color: #1e293b;
   background: #f8fafc;
   transition: all 0.2s ease;
@@ -262,9 +317,9 @@ export const FormInput = styled.input`
   outline: none;
 
   &:focus {
-    border-color: #64748b;
+    border-color: #1f2b45;
     background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1);
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.1);
   }
 
   &::placeholder {
@@ -272,7 +327,7 @@ export const FormInput = styled.input`
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.7;
     cursor: not-allowed;
     background: #f1f5f9;
   }
@@ -282,6 +337,8 @@ export const InputWrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
+  min-width: 0;
 
   svg.input-icon {
     position: absolute;
@@ -291,19 +348,19 @@ export const InputWrapper = styled.div`
     color: #94a3b8;
     pointer-events: none;
     transition: color 0.2s ease;
+    flex-shrink: 0;
   }
 
   &:focus-within svg.input-icon {
-    color: #64748b;
+    color: #1f2b45;
   }
 `;
 
 export const FormTextarea = styled.textarea`
-  padding: 0.85rem 1.2rem;
-  padding-left: 3rem;
-  border: 1px solid #e2e8f0;
+  padding: 0.85rem 1rem 0.85rem 2.85rem;
+  border: 1.5px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #1e293b;
   background: #f8fafc;
   transition: all 0.2s ease;
@@ -312,13 +369,14 @@ export const FormTextarea = styled.textarea`
   resize: vertical;
   min-height: 120px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   line-height: 1.5;
 
   &:focus {
-    border-color: #64748b;
+    border-color: #1f2b45;
     background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1);
+    box-shadow: 0 0 0 3px rgba(31, 43, 69, 0.1);
   }
 
   &::placeholder {
@@ -328,11 +386,13 @@ export const FormTextarea = styled.textarea`
 
 export const TextareaWrapper = styled.div`
   position: relative;
+  width: 100%;
+  min-width: 0;
 
   svg.input-icon {
     position: absolute;
     left: 1rem;
-    top: 1.1rem;
+    top: 1rem;
     width: 18px;
     height: 18px;
     color: #94a3b8;
@@ -341,36 +401,47 @@ export const TextareaWrapper = styled.div`
   }
 
   &:focus-within svg.input-icon {
-    color: #64748b;
+    color: #1f2b45;
   }
 `;
 
 export const SaveButton = styled.button`
-  padding: 1rem 3rem;
+  padding: 0.9rem 2.25rem;
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #ffffff;
   border: none;
   border-radius: 12px;
   font-size: 1rem;
+  line-height: 1.25;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   font-family: "Rubik", sans-serif;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  margin-top: 2rem;
+  margin-top: clamp(1.25rem, 2.5vw, 2rem);
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+  white-space: nowrap;
 
-  &:hover {
-    transform: translateY(-3px) scale(1.02);
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(15, 23, 42, 0.3);
     background: linear-gradient(135deg, #334155 0%, #0f172a 100%);
   }
 
-  &:active {
-    transform: translateY(0) scale(1);
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 600px) {
+    width: 100%;
   }
 `;
 
@@ -395,13 +466,13 @@ export const PasswordToggle = styled.button`
 
 export const SuccessToast = styled.div<{ $visible: boolean }>`
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
   background: #2b3a4e;
   color: #f0ebe7;
   padding: 1rem 1.5rem;
   border-radius: 12px;
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   display: flex;
   align-items: center;

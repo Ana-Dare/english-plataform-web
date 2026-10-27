@@ -4,11 +4,16 @@ import { motion } from "framer-motion";
 
 const Grid = styled(motion.div)`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1rem);
+  width: 100%;
 
   @media (max-width: 600px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 359px) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -17,6 +22,8 @@ const ActionBtn = styled(motion.button)<{ $colorType: "primary" | "secondary" }>
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  min-width: 0;
   gap: 0.6rem;
   border: none;
   background: ${({ $colorType }) =>
@@ -25,10 +32,11 @@ const ActionBtn = styled(motion.button)<{ $colorType: "primary" | "secondary" }>
     $colorType === "primary" ? "#ffffff" : "#334155"};
   border: 1px solid ${({ $colorType }) =>
     $colorType === "primary" ? "transparent" : "#e5dccf"};
-  padding: 1.2rem 1rem;
+  padding: clamp(1rem, 2vw, 1.25rem) 0.875rem;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.3;
   cursor: pointer;
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
   font-family: "Rubik", sans-serif;
@@ -37,6 +45,7 @@ const ActionBtn = styled(motion.button)<{ $colorType: "primary" | "secondary" }>
 
   svg {
     transition: transform 0.3s ease;
+    flex-shrink: 0;
     color: ${({ $colorType }) =>
       $colorType === "primary" ? "#ffffff" : "#94785c"};
   }

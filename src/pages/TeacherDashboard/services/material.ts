@@ -15,14 +15,139 @@ export interface Lesson {
   type: "online";
 }
 
-export type MaterialType = "pdf" | "image" | "document";
+export type MaterialType =
+  | "pdf"
+  | "image"
+  | "document"
+  | "link"
+  | "audio"
+  | "video"
+  | "presentation"
+  | "spreadsheet";
 
 export interface LessonMaterial {
   id: number;
-  lessonId: number;
+  lessonId: number; // 0 ou null para materiais gerais da turma
+  classId?: number;
+  title: string;
+  description?: string | null;
+  category: string;
   type: MaterialType;
   link: string;
   file: string;
+  fileSize?: number;
+  sizeFormatted?: string;
+  createdAt?: string;
+  isExternalLink?: boolean;
+}
+
+export function formatBytes(bytes?: number): string {
+  if (!bytes || bytes <= 0) return "--";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
+export function parseMaterialDateTime(
+  raw?: string,
+): { date: string; time?: string } | null {
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (Number.isNaN(d.valueOf())) {
+    return { date: raw };
+  }
+  const date = d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const hasTime = raw.includes("T") || raw.includes(":");
+  const time = hasTime
+    ? d.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : undefined;
+  return { date, time };
+}
+
+export function formatMaterialDateTime(raw?: string): string {
+  const parsed = parseMaterialDateTime(raw);
+  if (!parsed) return "";
+  return parsed.time ? `${parsed.date} às ${parsed.time}` : parsed.date;
+}
+
+export function detectMaterialType(filename: string): MaterialType {
+  const ext = filename.split(".").pop()?.toLowerCase() || "";
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "webp", "svg", "gif"].includes(ext)) return "image";
+  if (["ppt", "pptx", "key"].includes(ext)) return "presentation";
+  if (["xls", "xlsx", "csv"].includes(ext)) return "spreadsheet";
+  if (["mp3", "wav", "m4a", "ogg"].includes(ext)) return "audio";
+  if (["mp4", "mov", "avi", "webm"].includes(ext)) return "video";
+  return "document";
+}
+
+export const DEFAULT_MATERIAL_CATEGORIES = [
+  "Exercício / Atividade",
+  "Apostila / Leitura",
+  "Gramática",
+  "Vocabulário",
+  "Vídeo / Multimídia",
+  "Áudio / Listening",
+  "Conversação / Speaking",
+  "Pronúncia / Phonics",
+  "Redação / Writing",
+  "Outros",
+];
+
+const CATEGORIES_STORAGE_KEY = "@App:custom_material_categories";
+
+export function loadCustomCategories(): string[] {
+  try {
+    const raw = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+    if (!raw) return DEFAULT_MATERIAL_CATEGORIES;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return DEFAULT_MATERIAL_CATEGORIES;
+    const combined = Array.from(new Set([...DEFAULT_MATERIAL_CATEGORIES, ...parsed]));
+    return combined;
+  } catch {
+    return DEFAULT_MATERIAL_CATEGORIES;
+  }
+}
+
+export function saveCustomCategory(newCategory: string): string[] {
+  try {
+    const trimmed = newCategory.trim();
+    if (!trimmed) return loadCustomCategories();
+    const current = loadCustomCategories();
+    if (!current.includes(trimmed)) {
+      const updated = [...current, trimmed];
+      localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    }
+    return current;
+  } catch {
+    return DEFAULT_MATERIAL_CATEGORIES;
+  }
+}
+
+export function getYouTubeOrVimeoEmbed(url: string): string | null {
+  if (!url) return null;
+  const ytMatch = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
+  );
+  if (ytMatch && ytMatch[1]) {
+    return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  }
+  const vimeoMatch = url.match(
+    /vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|)(\d+)/,
+  );
+  if (vimeoMatch && vimeoMatch[1]) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  return null;
 }
 
 interface ListLessonsRes {

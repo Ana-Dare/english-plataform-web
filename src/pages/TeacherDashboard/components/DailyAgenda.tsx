@@ -43,13 +43,15 @@ const TimeBubble = styled.div`
 
 const ContentCard = styled.div`
   flex: 1;
+  min-width: 0;
   background-color: #ffffff;
   border: 1px solid #e8e0db;
-  border-radius: 8px;
-  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -62,23 +64,30 @@ const ContentCard = styled.div`
 const ClassInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
+  min-width: 0;
 
   h4 {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    line-height: 1.35;
     color: #2b3a4e;
     font-weight: 600;
   }
 
   p {
     margin: 0;
-    font-size: 0.75rem;
-    color: #7a8a9e;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #64748b;
   }
 `;
 
-const DailyAgenda = () => {
+interface DailyAgendaProps {
+  onSelect?: () => void;
+}
+
+const DailyAgenda = ({ onSelect }: DailyAgendaProps) => {
   const classes = [
     { time: "14:00", name: "Turma Beginner 1", students: "12 alunos" },
     { time: "16:00", name: "Aula VIP - Camila", students: "1 aluna" },
@@ -91,7 +100,7 @@ const DailyAgenda = () => {
       {classes.map((cls, idx) => (
         <AgendaItem key={idx}>
           <TimeBubble>{cls.time}</TimeBubble>
-          <ContentCard>
+          <ContentCard onClick={onSelect}>
             <ClassInfo>
               <h4>{cls.name}</h4>
               <p>{cls.students}</p>

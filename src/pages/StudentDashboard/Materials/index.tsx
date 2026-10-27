@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Download, CheckCircle2 } from "lucide-react";
+import MobileCarousel from "../../../components/MobileCarousel";
 import {
   Container,
   Header,
@@ -146,15 +147,17 @@ const Materials: React.FC = () => {
         </Header>
 
         <FilterContainer>
-          {categories.map((cat) => (
-            <FilterButton
-              key={cat}
-              $active={activeCategory === cat}
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat}
-            </FilterButton>
-          ))}
+          <MobileCarousel gap="0.75rem" mobileGap="0.5rem">
+            {categories.map((cat) => (
+              <FilterButton
+                key={cat}
+                $active={activeCategory === cat}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </FilterButton>
+            ))}
+          </MobileCarousel>
         </FilterContainer>
 
         <MaterialsGrid

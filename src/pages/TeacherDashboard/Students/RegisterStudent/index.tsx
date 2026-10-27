@@ -8,10 +8,14 @@ import {
   RegisterHeader,
   RegisterHeaderLeft,
   RegisterBody,
-  RegisterFooter,
-  DetailActionBtn,
 } from "../style";
-import { FooterNav, FooterActions } from "./style";
+import {
+  RegisterFooter,
+  FooterNav,
+  FooterActions,
+  PrimaryBtn,
+  SecondaryBtn,
+} from "./style";
 import Stepper, { type StepDefinition } from "./Stepper";
 import StepPersonalInfo from "./StepPersonalInfo";
 import StepClassInfo from "./StepClassInfo";
@@ -35,6 +39,8 @@ interface RegisterStudentProps {
   onBack: () => void;
   onSave: (student: RegisterStudentParams, photoBlob?: Blob) => void;
   isSaving?: boolean;
+  initialTurmaId?: number | string | null;
+  initialTurmaName?: string | null;
 }
 
 const STEPS: StepDefinition[] = [
@@ -58,14 +64,19 @@ const INITIAL_FORM: StudentFormState = {
   turma: "",
 };
 
-const RegisterStudent = ({
+const RegisterStudent: React.FC<RegisterStudentProps> = ({
   onBack,
   onSave,
   isSaving = false,
-}: RegisterStudentProps) => {
+  initialTurmaId,
+  initialTurmaName,
+}) => {
   const { addToast } = useToast();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<StudentFormState>(INITIAL_FORM);
+  const [form, setForm] = useState<StudentFormState>(() => ({
+    ...INITIAL_FORM,
+    turma: initialTurmaId ? String(initialTurmaId) : "",
+  }));
   const [levels, setLevels] = useState<LevelOption[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
 
@@ -82,61 +93,82 @@ const RegisterStudent = ({
     });
   };
 
-  //useQuery de níveis
-
+  // Carregar Níveis
   const { data: dataLevels } = useQuery({
     queryKey: ["levels"],
     queryFn: () => listLevels(),
   });
 
-  // Turmas reais para o dropdown de atribuição (opcional).
+  // Carregar Turmas
   const { data: dataClasses } = useQuery({
     queryKey: ["classes"],
     queryFn: () => listClasses(),
   });
 
-  const turmaOptions = React.useMemo(
-    () => [
-      { value: "", label: "Não atribuída" },
-      ...(dataClasses?.classes ?? []).map((c) => ({
-        value: String(c.id),
-        label: c.name,
-      })),
-    ],
-    [dataClasses],
-  );
-
-  // Mutation para criar novo nível
-  const createLevelMutation = useMutation({
-    mutationFn: (name: string) => createLevel(name, ""),
-    onSuccess: (newLevel) => {
-      const levelOption: LevelOption = {
-        id: newLevel.id,
-        name: newLevel.name,
-      };
-      setLevels((prev) => [...prev, levelOption]);
-      handleChange({ level_id: newLevel.id });
-      addToast(`Nível "${newLevel.name}" criado com sucesso!`, "success");
-    },
-    onError: () => {
-      addToast("Erro ao criar nível. Tente novamente.", "error");
-    },
-  });
-
-  // Atualiza níveis quando dados da API chegam
+  // Atualizar Níveis quando a requisição retornar
   useEffect(() => {
-    if (dataLevels?.levels && dataLevels.levels.length > 0) {
-      const mappedLevels: LevelOption[] = dataLevels.levels.map((level) => ({
-        id: level.id,
-        name: level.name,
+    if (dataLevels?.levels) {
+      const mappedLevels: LevelOption[] = dataLevels.levels.map((lvl) => ({
+        id: lvl.id,
+        name: lvl.name,
       }));
       setLevels(mappedLevels);
+
+      // Define o primeiro nível como padrão se form.level_id ainda não for válido
+      if (
+        mappedLevels.length > 0 &&
+        !mappedLevels.some((l) => l.id === form.level_id)
+      ) {
+        handleChange({ level_id: mappedLevels[0].id });
+      }
     }
   }, [dataLevels]);
 
-  // Manipular foto de perfil
+  // Mutation para cadastrar novo nível inline
+  const createLevelMutation = useMutation({
+    mutationFn: (name: string) => createLevel(name, `Nível ${name}`),
+    onSuccess: (res) => {
+      const createdLevel: LevelOption = {
+        id: res.id,
+        name: res.name,
+      };
+      setLevels((prev) => [...prev, createdLevel]);
+      handleChange({ level_id: createdLevel.id });
+      addToast("Nível criado com sucesso!", "success");
+    },
+    onError: (err: any) => {
+      const errorMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Não foi possível criar o nível.";
+      addToast(errorMsg, "error");
+    },
+  });
 
-  // Trocar prévia
+  const turmaOptions = [
+    { value: "", label: "Não atribuída" },
+    ...(dataClasses?.classes?.map((c) => ({
+      value: String(c.id),
+      label: c.name,
+    })) || []),
+  ];
+
+  if (
+    initialTurmaId &&
+    initialTurmaName &&
+    !turmaOptions.some((t) => t.value === String(initialTurmaId))
+  ) {
+    turmaOptions.push({
+      value: String(initialTurmaId),
+      label: initialTurmaName,
+    });
+  }
+
+  useEffect(() => {
+    if (initialTurmaId) {
+      handleChange({ turma: String(initialTurmaId) });
+    }
+  }, [initialTurmaId]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -148,24 +180,19 @@ const RegisterStudent = ({
     const reader = new FileReader();
     reader.onloadend = () => {
       handleChange({
-        photoUrl: reader.result as string, // para preview
-        photoBlob: file, // para envio
+        photoUrl: reader.result as string,
+        photoBlob: file,
       });
     };
     reader.readAsDataURL(file);
   };
 
-  // Remover prévia
   const handleRemovePhoto = () => {
     handleChange({ photoUrl: null, photoBlob: null });
   };
 
   const handleAddLevel = (name: string) => {
-    if (!name.trim()) {
-      addToast("O nome do nível é obrigatório.", "warning");
-      return;
-    }
-    createLevelMutation.mutate(name.trim());
+    createLevelMutation.mutate(name);
   };
 
   /** Valida a etapa 1 (dados pessoais). Retorna true se válida. */
@@ -219,18 +246,17 @@ const RegisterStudent = ({
       return;
     }
 
-    // Turma é opcional: valor vazio no dropdown => sem class_id.
     const classId = form.turma ? Number(form.turma) : null;
 
     const payload: RegisterStudentParams = {
-      name: form.name,
+      name: form.name.trim(),
       cpf_hash: form.cpf_hash,
-      email: form.email,
+      email: form.email.trim(),
       phone: form.phone,
       birthdate: form.birthdate,
       vip: form.vip,
       level_id: form.level_id,
-      notes: form.notes,
+      notes: form.notes?.trim() || "",
       active: form.active,
       class_id: classId,
     };
@@ -241,6 +267,7 @@ const RegisterStudent = ({
   return (
     <Container>
       <RegisterContainer>
+        {/* Cabeçalho do formulário com Título e Stepper alinhados */}
         <RegisterHeader>
           <RegisterHeaderLeft>
             <h2>Cadastrar Novo Aluno</h2>
@@ -253,6 +280,7 @@ const RegisterStudent = ({
           <Stepper steps={STEPS} current={step} />
         </RegisterHeader>
 
+        {/* Corpo do formulário */}
         <RegisterBody>
           {step === 1 ? (
             <StepPersonalInfo
@@ -275,32 +303,33 @@ const RegisterStudent = ({
           )}
         </RegisterBody>
 
+        {/* Rodapé com ações */}
         <RegisterFooter>
           <FooterNav>
             {step === 1 ? (
-              <DetailActionBtn $variant="secondary" onClick={onBack}>
+              <SecondaryBtn type="button" onClick={onBack}>
                 <ArrowLeft size={16} /> Cancelar
-              </DetailActionBtn>
+              </SecondaryBtn>
             ) : (
-              <DetailActionBtn $variant="secondary" onClick={handlePrev}>
+              <SecondaryBtn type="button" onClick={handlePrev}>
                 <ArrowLeft size={16} /> Voltar
-              </DetailActionBtn>
+              </SecondaryBtn>
             )}
 
             <FooterActions>
               {step === 1 ? (
-                <DetailActionBtn $variant="primary" onClick={handleNext}>
+                <PrimaryBtn type="button" onClick={handleNext}>
                   Avançar <ArrowRight size={16} />
-                </DetailActionBtn>
+                </PrimaryBtn>
               ) : (
-                <DetailActionBtn
-                  $variant="primary"
+                <PrimaryBtn
+                  type="button"
                   onClick={handleSubmit}
                   disabled={isSaving}
                 >
                   <Save size={16} />{" "}
                   {isSaving ? "Salvando..." : "Salvar Cadastro"}
-                </DetailActionBtn>
+                </PrimaryBtn>
               )}
             </FooterActions>
           </FooterNav>

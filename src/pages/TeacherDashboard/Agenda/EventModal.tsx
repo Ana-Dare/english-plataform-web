@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { X, User, Calendar, Clock, Video, StickyNote } from "lucide-react";
-import { format } from "date-fns";
+import { X, User, Video, StickyNote } from "lucide-react";
+import { format, startOfDay } from "date-fns";
+import ModernDatePicker from "../../../components/ModernDatePicker";
+import ModernTimePicker from "../../../components/ModernTimePicker";
 import {
   ModalOverlay,
   ModalContent,
@@ -79,6 +81,14 @@ const addHour = (time: string) => {
   return `${String(next).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 };
 
+const getNextQuarterTime = (d = new Date()) => {
+  const currentMinutes = d.getMinutes();
+  const roundedMinutes = Math.ceil(currentMinutes / 5) * 5;
+  const newDate = new Date(d);
+  newDate.setMinutes(roundedMinutes, 0, 0);
+  return format(newDate, "HH:mm");
+};
+
 const isEndAfterStart = (start: string, end: string) => {
   if (!start || !end) return false;
   return end > start;
@@ -98,6 +108,8 @@ const EventModal: React.FC<EventModalProps> = ({
   selectedDate,
 }) => {
   const { addToast } = useToast();
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+
   const [type, setType] = useState<EventType>("aula");
   const [title, setTitle] = useState("");
   const [dateStr, setDateStr] = useState("");
@@ -111,10 +123,23 @@ const EventModal: React.FC<EventModalProps> = ({
   const [weekdays, setWeekdays] = useState<number[]>([1, 3]);
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
 
+  const isToday = dateStr === todayStr;
+  const currentNowHHMM = format(new Date(), "HH:mm");
+  const minStartTime = isToday ? currentNowHHMM : undefined;
+  const minEndTime = isToday && (!time || time < currentNowHHMM) ? currentNowHHMM : time;
+
   useEffect(() => {
     if (!isOpen) return;
 
-    const fallbackDate = selectedDate || new Date();
+    const today = new Date();
+    const currentTodayStr = format(today, "yyyy-MM-dd");
+    const currentNow = format(today, "HH:mm");
+    const fallbackDate =
+      selectedDate && format(selectedDate, "yyyy-MM-dd") >= currentTodayStr
+        ? selectedDate
+        : today;
+    const isTargetToday = format(fallbackDate, "yyyy-MM-dd") === currentTodayStr;
+
     if (eventToEdit) {
       setType(eventToEdit.type);
       setTitle(eventToEdit.title);
@@ -128,11 +153,12 @@ const EventModal: React.FC<EventModalProps> = ({
       setRepeat(eventToEdit.repeat || false);
       setWeekdays(eventToEdit.weekdays?.length ? eventToEdit.weekdays : [1, 3]);
     } else {
+      const defaultStartTime = isTargetToday && currentNow > "09:00" ? getNextQuarterTime() : "09:00";
       setType("aula");
       setTitle("");
       setDateStr(format(fallbackDate, "yyyy-MM-dd"));
-      setTime("09:00");
-      setEndTime("10:00");
+      setTime(defaultStartTime);
+      setEndTime(addHour(defaultStartTime));
       setDescription("");
       setClassMode("individual");
       setMeetLink("");
@@ -164,14 +190,28 @@ const EventModal: React.FC<EventModalProps> = ({
   const validate = () => {
     const next: Partial<Record<FieldKey, string>> = {};
 
+    const currentCheckHHMM = format(new Date(), "HH:mm");
+
     if (!title.trim()) {
       next.title =
         type === "aula" ? "Selecione a turma ou o aluno." : "Informe o título.";
     }
-    if (!dateStr) next.date = "Informe a data.";
-    if (!time) next.time = "Informe o horário de início.";
-    if (!endTime) next.endTime = "Informe o horário de término.";
-    else if (time && !isEndAfterStart(time, endTime)) {
+    if (!dateStr) {
+      next.date = "Informe a data.";
+    } else if (dateStr < todayStr) {
+      next.date = "Não é permitido agendar para datas passadas.";
+    }
+    if (!time) {
+      next.time = "Informe o horário de início.";
+    } else if (dateStr === todayStr && time < currentCheckHHMM) {
+      next.time = "Não é permitido selecionar um horário que já passou hoje.";
+    }
+
+    if (!endTime) {
+      next.endTime = "Informe o horário de término.";
+    } else if (dateStr === todayStr && endTime <= currentCheckHHMM) {
+      next.endTime = "Não é permitido selecionar um horário que já passou hoje.";
+    } else if (time && !isEndAfterStart(time, endTime)) {
       next.endTime = "O término deve ser depois do início.";
     }
     if (type === "aula" && !generateMeet && !meetLink.trim()) {
@@ -312,17 +352,25 @@ const EventModal: React.FC<EventModalProps> = ({
             <label>
               Data <span>*</span>
             </label>
-            <FieldIconWrap>
-              <Calendar size={16} />
-              <input
-                type="date"
-                value={dateStr}
-                onChange={(e) => {
-                  clearError("date");
-                  setDateStr(e.target.value);
-                }}
-              />
-            </FieldIconWrap>
+            <ModernDatePicker
+              value={dateStr}
+              placeholder="Selecione a data..."
+              minDate={startOfDay(new Date())}
+              error={!!errors.date}
+              showYearSelector={false}
+              onChange={(val) => {
+                clearError("date");
+                setDateStr(val);
+                if (val === todayStr) {
+                  const checkNow = format(new Date(), "HH:mm");
+                  if (time < checkNow) {
+                    const newStart = getNextQuarterTime();
+                    setTime(newStart);
+                    setEndTime(addHour(newStart));
+                  }
+                }
+              }}
+            />
             {errors.date && <FieldError>{errors.date}</FieldError>}
           </FormGroup>
 
@@ -331,39 +379,34 @@ const EventModal: React.FC<EventModalProps> = ({
               <label>
                 Início <span>*</span>
               </label>
-              <FieldIconWrap>
-                <Clock size={16} />
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => {
-                    clearError("time");
-                    clearError("endTime");
-                    const next = e.target.value;
-                    setTime(next);
-                    if (!endTime || !isEndAfterStart(next, endTime)) {
-                      setEndTime(addHour(next));
-                    }
-                  }}
-                />
-              </FieldIconWrap>
+              <ModernTimePicker
+                value={time}
+                error={!!errors.time}
+                minTime={minStartTime}
+                onChange={(next) => {
+                  clearError("time");
+                  clearError("endTime");
+                  setTime(next);
+                  if (!endTime || !isEndAfterStart(next, endTime)) {
+                    setEndTime(addHour(next));
+                  }
+                }}
+              />
               {errors.time && <FieldError>{errors.time}</FieldError>}
             </FormGroup>
             <FormGroup $error={!!errors.endTime}>
               <label>
                 Término <span>*</span>
               </label>
-              <FieldIconWrap>
-                <Clock size={16} />
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => {
-                    clearError("endTime");
-                    setEndTime(e.target.value);
-                  }}
-                />
-              </FieldIconWrap>
+              <ModernTimePicker
+                value={endTime}
+                error={!!errors.endTime}
+                minTime={minEndTime}
+                onChange={(nextEnd) => {
+                  clearError("endTime");
+                  setEndTime(nextEnd);
+                }}
+              />
               {errors.endTime && <FieldError>{errors.endTime}</FieldError>}
             </FormGroup>
           </TimeRow>

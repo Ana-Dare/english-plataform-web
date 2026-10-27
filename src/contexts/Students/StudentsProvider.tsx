@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   StudentsContext,
@@ -20,6 +20,25 @@ import { listClasses } from "../../pages/TeacherDashboard/services/class";
 import { listLevels } from "../../pages/TeacherDashboard/services/level";
 
 const STUDENTS_QUERY_KEY = ["studentsList"] as const;
+
+const LOCAL_STORAGE_OVERRIDES_KEY = "@App:students_overrides";
+
+const loadOverridesFromStorage = (): Record<number, Partial<Student>> => {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_OVERRIDES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const saveOverridesToStorage = (overrides: Record<number, Partial<Student>>) => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_OVERRIDES_KEY, JSON.stringify(overrides));
+  } catch (e) {
+    console.error("Failed to save student overrides to localStorage", e);
+  }
+};
 
 const avatarColors = [
   "#3165e3",
@@ -73,7 +92,7 @@ const toStudent = (
     email: student.email,
     phone: student.phone ?? "",
     birthdate: toDateInputValue(student.birthdate),
-    isActive: student.active,
+    isActive: Boolean(student.active),
     avatarColor: avatarColors[student.id % avatarColors.length],
     avatar_url: photoUrl,
     level: formatLevel(student.profile.levelId, levelMap),
@@ -144,10 +163,26 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   );
 
   // Mock data para visualização quando a API não retorna alunos
-  // Mock data para visualização quando a API não retorna alunos
   const [localOverrides, setLocalOverrides] = useState<
     Record<number, Partial<Student>>
-  >({});
+  >(loadOverridesFromStorage);
+
+  const applyOverride = useCallback(
+    (userId: number, patch: Partial<Student>) => {
+      setLocalOverrides((prev) => {
+        const next = {
+          ...prev,
+          [userId]: {
+            ...prev[userId],
+            ...patch,
+          },
+        };
+        saveOverridesToStorage(next);
+        return next;
+      });
+    },
+    [],
+  );
 
   const mockStudents: Student[] = useMemo(
     () => [
@@ -546,25 +581,26 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
       userId: number;
       params: UpdateStudentParams;
     }) => {
-      // Optimistic update for mock UI
-      setLocalOverrides((prev) => ({
-        ...prev,
-        [userId]: {
-          ...prev[userId],
-          ...(params.active !== undefined
-            ? { isActive: params.active === 1 }
-            : {}),
-          ...(params.name ? { name: params.name } : {}),
-          ...(params.email ? { email: params.email } : {}),
-        },
-      }));
+      // Optimistic update for mock UI + persistent storage
+      applyOverride(userId, {
+        ...(params.active !== undefined
+          ? { isActive: params.active === 1 }
+          : {}),
+        ...(params.name ? { name: params.name } : {}),
+        ...(params.email ? { email: params.email } : {}),
+        ...(params.phone !== undefined ? { phone: params.phone || "" } : {}),
+        ...(params.birthdate !== undefined
+          ? { birthdate: params.birthdate || "" }
+          : {}),
+        ...(params.notes !== undefined ? { observations: params.notes } : {}),
+      });
 
       try {
         await updateStudentService(userId, params);
       } catch (err) {
         // Fallback silently if no backend is running
         console.warn(
-          `Backend not running, relying on optimistic update. ${err}`,
+          `Backend not running, relying on persistent local override. ${err}`,
         );
       }
     },
@@ -572,7 +608,32 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   });
 
   const deactivateMutation = useMutation({
-    mutationFn: desactive,
+    mutationFn: async (userId: number) => {
+      applyOverride(userId, { isActive: false });
+
+      try {
+        await desactive(userId);
+      } catch (err) {
+        console.warn(
+          `Backend not running, relying on persistent local override. ${err}`,
+        );
+      }
+    },
+    onSuccess: invalidateStudents,
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      applyOverride(userId, { isActive: true });
+
+      try {
+        await updateStudentService(userId, { active: 1 });
+      } catch (err) {
+        console.warn(
+          `Backend not running, relying on persistent local override. ${err}`,
+        );
+      }
+    },
     onSuccess: invalidateStudents,
   });
 
@@ -622,6 +683,16 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
     [deactivateMutation],
   );
 
+  const activateStudent = useCallback(
+    (id: number, callbacks?: MutationCallbacks) => {
+      activateMutation.mutate(id, {
+        onSuccess: () => callbacks?.onSuccess?.({ student_id: id }),
+        onError: () => callbacks?.onError?.(),
+      });
+    },
+    [activateMutation],
+  );
+
   const getStudentById = useCallback(
     (id: number) => students.find((student) => student.id === id),
     [students],
@@ -639,6 +710,8 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
       isUpdating: updateMutation.isPending,
       deactivateStudent,
       isDeactivating: deactivateMutation.isPending,
+      activateStudent,
+      isActivating: activateMutation.isPending,
       getStudentById,
     }),
     [
@@ -652,6 +725,8 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
       updateMutation.isPending,
       deactivateStudent,
       deactivateMutation.isPending,
+      activateStudent,
+      activateMutation.isPending,
       getStudentById,
     ],
   );

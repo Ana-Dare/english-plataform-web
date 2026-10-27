@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   MessageSquare,
   FileText,
@@ -15,8 +15,31 @@ import {
   Trash2,
   AlertTriangle,
   Edit2,
-  Plus
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  AlertCircle,
+  FolderOpen,
+  CalendarCheck,
+  FileCheck2,
+  BookOpen,
+  Folder,
+  Eye,
+  Search,
+  Tag,
+  Presentation,
+  FileSpreadsheet,
+  Image as ImageIcon,
+  Film,
+  Music,
+  Bookmark
 } from 'lucide-react';
+import CustomDropdown from '../../../components/CustomDropdown';
+import MobileCarousel from '../../../components/MobileCarousel';
+import DocumentViewerModal from '../../TeacherDashboard/Classes/DocumentViewerModal';
+import type { LessonMaterial, Lesson } from '../../TeacherDashboard/services/material';
+import { formatMaterialDateTime } from '../../TeacherDashboard/services/material';
 import {
   TurmaContainer,
   Banner,
@@ -34,6 +57,28 @@ import {
   FilterGroup,
   FilterButton,
   StatusTag,
+  NavyButton,
+  OutlineNavyButton,
+  EmptyAtestadosState,
+  StudentMaterialsStatusStrip,
+  StudentMaterialsControlsRow,
+  StudentMaterialsSearchBarWrapper,
+  StudentStatusCarouselWrapper,
+  StudentMaterialSearchBox,
+  StudentLessonBlock,
+  StudentMaterialCard,
+  StudentMaterialCardLeft,
+  StudentMaterialCardGlyph,
+  StudentMaterialCardContent,
+  StudentMaterialSecondaryContent,
+  StudentMaterialMobileSecondaryActions,
+  StudentMaterialDesktopActions,
+  StudentMaterialMobileFooter,
+  MobileExpandBtn,
+  StudentBookmarkBtn,
+  StudentToggleReadBtn,
+  StudentViewDocPill,
+  StudentDownloadDocBtn,
   ModalOverlay,
   ModalContent,
   ModalHeader,
@@ -45,6 +90,157 @@ import {
   ToastCard,
   ErrorMessage
 } from './style';
+
+const DEFAULT_CLASS_LESSONS: Lesson[] = [
+  {
+    id: 101,
+    classId: 1,
+    teacherId: 1,
+    classTeacherId: 1,
+    title: "Aula 01: Modal Verbs & Present Perfect",
+    description: "Revisão prática dos verbos modais e estruturas do Present Perfect.",
+    startTime: "2026-09-01T18:30:00",
+    duration: "01:00:00",
+    status: "completed",
+    type: "online",
+  },
+  {
+    id: 102,
+    classId: 1,
+    teacherId: 1,
+    classTeacherId: 1,
+    title: "Aula 02: Vocabulary Unit 3 & Phrasal Verbs",
+    description: "Expansão de vocabulário e conversação ativa.",
+    startTime: "2026-09-03T18:30:00",
+    duration: "01:00:00",
+    status: "completed",
+    type: "online",
+  },
+  {
+    id: 103,
+    classId: 1,
+    teacherId: 1,
+    classTeacherId: 1,
+    title: "Aula 03: Business Communication & Email Writing",
+    description: "Prática de e-mails corporativos e apresentações.",
+    startTime: "2026-09-08T18:30:00",
+    duration: "01:00:00",
+    status: "scheduled",
+    type: "online",
+  },
+];
+
+const formatCleanTitle = (title?: string) => {
+  if (!title) return 'Material';
+  return title.replace(/\.(pdf|pptx|ppt|xlsx|xls|docx|doc|zip|rar|mp4|mp3|png|jpg|jpeg)$/i, '').trim();
+};
+
+const DEFAULT_CLASS_MATERIALS: LessonMaterial[] = [
+  {
+    id: 1,
+    lessonId: 0,
+    classId: 1,
+    title: "Course Syllabus & Grammar Guide B2",
+    description: "Plano pedagógico semestral da turma e guia de referência rápida com tabelas gramaticais.",
+    category: "Apostila / Leitura",
+    type: "pdf",
+    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    file: "Course_Syllabus_B2.pdf",
+    fileSize: 3200000,
+    sizeFormatted: "3.2 MB",
+    createdAt: "2026-08-20T10:00:00",
+    isExternalLink: false,
+  },
+  {
+    id: 2,
+    lessonId: 0,
+    classId: 1,
+    title: "Cambridge English Dictionary & Pronunciation Portal",
+    description: "Portal interativo oficial para consulta de vocabulário e transcrição fonética.",
+    category: "Pronúncia / Phonics",
+    type: "link",
+    link: "https://dictionary.cambridge.org",
+    file: "https://dictionary.cambridge.org",
+    sizeFormatted: "Link externo",
+    createdAt: "2026-08-22T14:30:00",
+    isExternalLink: true,
+  },
+  {
+    id: 3,
+    lessonId: 101,
+    classId: 1,
+    title: "Review - Modal Verbs (Can, Could, Should, Must)",
+    description: "Resumo teórico dos verbos modais com exemplos contextuais e exercícios resolvidos.",
+    category: "Gramática",
+    type: "pdf",
+    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    file: "Review_Modal_Verbs.pdf",
+    fileSize: 2400000,
+    sizeFormatted: "2.4 MB",
+    createdAt: "2026-09-01T17:00:00",
+    isExternalLink: false,
+  },
+  {
+    id: 4,
+    lessonId: 101,
+    classId: 1,
+    title: "Exercícios Práticos de Fixação - Unit 1",
+    description: "Folha de exercícios com gabarito comentado para estudo autônomo.",
+    category: "Exercício / Atividade",
+    type: "pdf",
+    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    file: "Exercicios_Fixacao_Unit_1.pdf",
+    fileSize: 850000,
+    sizeFormatted: "850 KB",
+    createdAt: "2026-09-01T17:15:00",
+    isExternalLink: false,
+  },
+  {
+    id: 5,
+    lessonId: 102,
+    classId: 1,
+    title: "Vocabulary List & Phrasal Verbs - Unit 3",
+    description: "Lista completa de expressões idiomáticas da Unidade 3 com frases de exemplo.",
+    category: "Vocabulário",
+    type: "pdf",
+    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    file: "Vocabulary_List_Unit_3.pdf",
+    fileSize: 1100000,
+    sizeFormatted: "1.1 MB",
+    createdAt: "2026-09-03T16:45:00",
+    isExternalLink: false,
+  },
+  {
+    id: 6,
+    lessonId: 102,
+    classId: 1,
+    title: "Slides da Aula - Presentation & Speaking Unit 3",
+    description: "Apresentação visual utilizada pela professora durante a aula interativa.",
+    category: "Conversação / Speaking",
+    type: "presentation",
+    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    file: "Unit_3_Presentation.pptx",
+    fileSize: 4800000,
+    sizeFormatted: "4.8 MB",
+    createdAt: "2026-09-03T17:00:00",
+    isExternalLink: false,
+  },
+  {
+    id: 7,
+    lessonId: 103,
+    classId: 1,
+    title: "Business Email Templates & Worksheets",
+    description: "Modelos editáveis de comunicação profissional formal para simulações.",
+    category: "Exercício / Atividade",
+    type: "spreadsheet",
+    link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    file: "Business_Email_Templates.xlsx",
+    fileSize: 920000,
+    sizeFormatted: "920 KB",
+    createdAt: "2026-09-07T11:20:00",
+    isExternalLink: false,
+  },
+];
 
 const TABS = [
   { id: 'mural', label: 'Mural de Avisos', icon: <MessageSquare /> },
@@ -58,11 +254,511 @@ const Turma: React.FC = () => {
   const [activeTab, setActiveTab] = useState('mural');
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [atestadoFilter, setAtestadoFilter] = useState('todos');
+  const [expandedAtestadoIds, setExpandedAtestadoIds] = useState<number[]>([]);
+
+  const toggleExpandAtestado = (id: number) => {
+    setExpandedAtestadoIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  // Estados para Materiais & Atividades (igual à professora + visualizador)
+  const [materialSearchQuery, setMaterialSearchQuery] = useState('');
+  const [materialFilterLesson, setMaterialFilterLesson] = useState('all');
+  const [materialFilterCategory, setMaterialFilterCategory] = useState('all');
+  const [materialStatusFilter, setMaterialStatusFilter] = useState<'all' | 'pending' | 'viewed' | 'bookmarked'>('all');
+
+  // Controle de Visualização e Marcadores do Aluno com Persistência
+  const [viewedMaterialIds, setViewedMaterialIds] = useState<number[]>(() => {
+    try {
+      const stored = localStorage.getItem('@App:student_viewed_materials_1');
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    // Padrão inicial: 2 visualizados para demonstrar o indicador de progresso e itens pendentes
+    return [1, 2];
+  });
+
+  const [bookmarkedMaterialIds, setBookmarkedMaterialIds] = useState<number[]>(() => {
+    try {
+      const stored = localStorage.getItem('@App:student_bookmarked_materials_1');
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return [3]; // Padrão: 1 marcado para estudo
+  });
+
+  // Controle de cards expandidos no celular (seguindo o mesmo padrão de Alunos)
+  const [expandedMaterialIds, setExpandedMaterialIds] = useState<number[]>([]);
+
+  const toggleMaterialExpand = (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setExpandedMaterialIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  // Estados para Visualizador de Documentos
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerMaterials, setViewerMaterials] = useState<LessonMaterial[]>([]);
+  const [viewerInitialId, setViewerInitialId] = useState<number | undefined>(undefined);
+
+  const [materials, setMaterials] = useState<LessonMaterial[]>(() => {
+    try {
+      const stored = localStorage.getItem('@App:class_materials_1');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map<number, LessonMaterial>();
+          DEFAULT_CLASS_MATERIALS.forEach(m => map.set(m.id, m));
+          parsed.forEach((m: LessonMaterial) => map.set(m.id, m));
+          return Array.from(map.values());
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_CLASS_MATERIALS;
+  });
+
+  const [lessons] = useState<Lesson[]>(() => {
+    try {
+      const stored = localStorage.getItem('@App:class_lessons_1');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map<number, Lesson>();
+          DEFAULT_CLASS_LESSONS.forEach(l => map.set(l.id, l));
+          parsed.forEach((l: Lesson) => map.set(l.id, l));
+          return Array.from(map.values());
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_CLASS_LESSONS;
+  });
+
+  // Listener para sincronizar materiais se a professora publicar algo
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const stored = localStorage.getItem('@App:class_materials_1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            const map = new Map<number, LessonMaterial>();
+            DEFAULT_CLASS_MATERIALS.forEach(m => map.set(m.id, m));
+            parsed.forEach((m: LessonMaterial) => map.set(m.id, m));
+            setMaterials(Array.from(map.values()));
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const markAsViewed = (id: number) => {
+    setViewedMaterialIds(prev => {
+      if (prev.includes(id)) return prev;
+      const updated = [...prev, id];
+      try {
+        localStorage.setItem('@App:student_viewed_materials_1', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleToggleBookmark = (id: number, title?: string) => {
+    setBookmarkedMaterialIds(prev => {
+      const isBookmarked = prev.includes(id);
+      const updated = isBookmarked ? prev.filter(item => item !== id) : [...prev, id];
+      try {
+        localStorage.setItem('@App:student_bookmarked_materials_1', JSON.stringify(updated));
+      } catch {}
+      const cleanName = formatCleanTitle(title);
+      addToast(
+        isBookmarked ? 'Lembrete removido' : 'Salvo para rever!',
+        isBookmarked
+          ? `"${cleanName}" foi removido dos seus lembretes.`
+          : `"${cleanName}" foi salvo na sua lista de revisão.`
+      );
+      return updated;
+    });
+  };
+
+  const handleToggleViewed = (id: number, title?: string) => {
+    setViewedMaterialIds(prev => {
+      const isViewed = prev.includes(id);
+      const updated = isViewed ? prev.filter(item => item !== id) : [...prev, id];
+      try {
+        localStorage.setItem('@App:student_viewed_materials_1', JSON.stringify(updated));
+      } catch {}
+      const cleanName = formatCleanTitle(title);
+      addToast(
+        isViewed ? 'Marcado como pendente' : 'Marcado como visualizado!',
+        isViewed
+          ? `O material "${cleanName}" foi marcado como pendente.`
+          : `O material "${cleanName}" foi marcado como visualizado.`
+      );
+      return updated;
+    });
+  };
+
+  const handleMarkAllAsViewed = () => {
+    const allIds = materials.map(m => m.id);
+    setViewedMaterialIds(allIds);
+    try {
+      localStorage.setItem('@App:student_viewed_materials_1', JSON.stringify(allIds));
+    } catch {}
+    addToast('Todos visualizados!', 'Todos os materiais da turma foram marcados como visualizados.');
+  };
+
+  const handleOpenViewer = (items: LessonMaterial[], initialId?: number) => {
+    const targetId = initialId ?? items[0]?.id;
+    if (targetId) {
+      markAsViewed(targetId);
+    }
+    setViewerMaterials(items);
+    setViewerInitialId(targetId);
+    setViewerOpen(true);
+  };
+
+  const handleDownloadMaterial = (mat: LessonMaterial) => {
+    const cleanName = formatCleanTitle(mat.title || mat.file);
+    addToast(
+      'Download iniciado',
+      `O arquivo "${cleanName}" está sendo baixado no seu dispositivo.`
+    );
+    if (mat.link && mat.link !== '#') {
+      const link = document.createElement('a');
+      link.href = mat.link;
+      link.download = mat.file || 'material';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const totalMaterialsCount = materials.length;
+  const viewedCount = useMemo(() => {
+    return materials.filter(m => viewedMaterialIds.includes(m.id)).length;
+  }, [materials, viewedMaterialIds]);
+  const pendingCount = totalMaterialsCount - viewedCount;
+  const bookmarkedCount = useMemo(() => {
+    return materials.filter(m => bookmarkedMaterialIds.includes(m.id)).length;
+  }, [materials, bookmarkedMaterialIds]);
+  const progressPercent = totalMaterialsCount > 0 ? Math.round((viewedCount / totalMaterialsCount) * 100) : 0;
+
+  const filteredMaterials = useMemo(() => {
+    return materials.filter(m => {
+      // Filtro por Status (Não visualizado / Visualizado / Marcado)
+      if (materialStatusFilter === 'pending' && viewedMaterialIds.includes(m.id)) {
+        return false;
+      }
+      if (materialStatusFilter === 'viewed' && !viewedMaterialIds.includes(m.id)) {
+        return false;
+      }
+      if (materialStatusFilter === 'bookmarked' && !bookmarkedMaterialIds.includes(m.id)) {
+        return false;
+      }
+
+      if (materialFilterLesson === 'general' && m.lessonId !== 0) return false;
+      if (
+        materialFilterLesson !== 'all' &&
+        materialFilterLesson !== 'general' &&
+        String(m.lessonId) !== materialFilterLesson
+      ) {
+        return false;
+      }
+      if (
+        materialFilterCategory !== 'all' &&
+        m.category !== materialFilterCategory
+      ) {
+        return false;
+      }
+      if (materialSearchQuery.trim()) {
+        const q = materialSearchQuery.toLowerCase().trim();
+        const matchTitle = (m.title || '').toLowerCase().includes(q);
+        const matchFile = (m.file || '').toLowerCase().includes(q);
+        const matchDesc = (m.description || '').toLowerCase().includes(q);
+        const matchCat = (m.category || '').toLowerCase().includes(q);
+        if (!matchTitle && !matchFile && !matchDesc && !matchCat) return false;
+      }
+      return true;
+    });
+  }, [
+    materials,
+    materialStatusFilter,
+    viewedMaterialIds,
+    bookmarkedMaterialIds,
+    materialFilterLesson,
+    materialFilterCategory,
+    materialSearchQuery
+  ]);
+
+  const generalMaterials = useMemo(() => {
+    return filteredMaterials.filter(m => !m.lessonId || m.lessonId === 0);
+  }, [filteredMaterials]);
+
+  const lessonsWithMaterials = useMemo(() => {
+    return lessons.map(lesson => ({
+      lesson,
+      items: filteredMaterials.filter(m => m.lessonId === lesson.id),
+    }));
+  }, [lessons, filteredMaterials]);
+
+  const renderMaterialGlyph = (type: string) => {
+    switch (type) {
+      case 'pdf':
+        return (
+          <StudentMaterialCardGlyph $type="pdf" title="Documento PDF">
+            <FileText size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      case 'presentation':
+        return (
+          <StudentMaterialCardGlyph $type="presentation" title="Apresentação PPT / Slides">
+            <Presentation size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      case 'spreadsheet':
+        return (
+          <StudentMaterialCardGlyph $type="spreadsheet" title="Planilha Excel">
+            <FileSpreadsheet size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      case 'image':
+        return (
+          <StudentMaterialCardGlyph $type="image" title="Imagem">
+            <ImageIcon size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      case 'video':
+        return (
+          <StudentMaterialCardGlyph $type="video" title="Vídeo">
+            <Film size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      case 'audio':
+        return (
+          <StudentMaterialCardGlyph $type="audio" title="Áudio">
+            <Music size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      case 'link':
+        return (
+          <StudentMaterialCardGlyph $type="link" title="Link externo">
+            <ExternalLink size={20} />
+          </StudentMaterialCardGlyph>
+        );
+      default:
+        return (
+          <StudentMaterialCardGlyph $type="document" title="Documento">
+            <FileText size={20} />
+          </StudentMaterialCardGlyph>
+        );
+    }
+  };
+
+  const renderMaterialItem = (mat: LessonMaterial, batchList: LessonMaterial[]) => {
+    const isViewed = viewedMaterialIds.includes(mat.id);
+    const isBookmarked = bookmarkedMaterialIds.includes(mat.id);
+    const isExpanded = expandedMaterialIds.includes(mat.id);
+
+    return (
+      <StudentMaterialCard
+        key={mat.id}
+        $isViewed={isViewed}
+        $isExpanded={isExpanded}
+        onClick={() => {
+          if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+            toggleMaterialExpand(mat.id);
+          } else {
+            handleOpenViewer(batchList, mat.id);
+          }
+        }}
+        title="Clique para visualizar o material"
+      >
+        <StudentMaterialCardLeft>
+          {renderMaterialGlyph(mat.type)}
+          <StudentMaterialCardContent>
+            <div className="card-primary-row">
+              <h4 title={mat.title || mat.file}>{formatCleanTitle(mat.title || mat.file)}</h4>
+              <div className="status-badge-inline">
+                {isViewed ? (
+                  <span className="badge-item status-viewed" title="Você já visualizou este material">
+                    <Check size={11} /> Visualizado
+                  </span>
+                ) : (
+                  <span className="badge-item status-unviewed" title="Material pendente de visualização">
+                    Não visualizado
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Conteúdo Secundário (Oculto no celular inicialmente; exibido no desktop ou ao expandir) */}
+            <StudentMaterialSecondaryContent $isExpanded={isExpanded}>
+              {mat.description && <p className="desc">{mat.description}</p>}
+
+              <div className="badges-line">
+                {isBookmarked && (
+                  <span className="badge-item status-bookmarked" title="Marcado nos seus lembretes de estudo">
+                    <Bookmark size={11} /> Marcado
+                  </span>
+                )}
+                <span className="badge-item category">
+                  <Tag size={11} /> {mat.category || 'Geral'}
+                </span>
+                <span className="badge-item format">{mat.type.toUpperCase()}</span>
+                {mat.sizeFormatted && (
+                  <span className="badge-item size">{mat.sizeFormatted}</span>
+                )}
+                {mat.createdAt && (
+                  <span className="badge-item date">
+                    • {formatMaterialDateTime(mat.createdAt)}
+                  </span>
+                )}
+                {mat.isExternalLink && (
+                  <span className="badge-item external">
+                    <ExternalLink size={11} /> Link externo
+                  </span>
+                )}
+              </div>
+
+              {/* Ações secundárias expandidas no celular */}
+              <StudentMaterialMobileSecondaryActions onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className={`secondary-action-pill ${isBookmarked ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleBookmark(mat.id, mat.title || mat.file);
+                  }}
+                  title={isBookmarked ? "Remover dos lembretes" : "Marcar para rever"}
+                >
+                  <Bookmark size={13} fill={isBookmarked ? "currentColor" : "none"} />
+                  <span>{isBookmarked ? 'Marcado para rever' : 'Marcar para rever'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`secondary-action-pill ${isViewed ? 'viewed' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleViewed(mat.id, mat.title || mat.file);
+                  }}
+                  title={isViewed ? "Marcar como pendente" : "Marcar como visualizado"}
+                >
+                  {isViewed ? <CheckCircle2 size={13} /> : <Check size={13} />}
+                  <span>{isViewed ? 'Visualizado' : 'Marcar como lido'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="secondary-action-pill"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownloadMaterial(mat);
+                  }}
+                  title="Baixar material"
+                >
+                  <Download size={13} />
+                  <span>Baixar arquivo</span>
+                </button>
+              </StudentMaterialMobileSecondaryActions>
+            </StudentMaterialSecondaryContent>
+          </StudentMaterialCardContent>
+        </StudentMaterialCardLeft>
+
+        {/* Ações no Desktop */}
+        <StudentMaterialDesktopActions onClick={(e) => e.stopPropagation()}>
+          <StudentBookmarkBtn
+            type="button"
+            $active={isBookmarked}
+            title={isBookmarked ? "Remover dos lembretes" : "Salvar nos lembretes"}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleBookmark(mat.id, mat.title || mat.file);
+            }}
+          >
+            <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
+          </StudentBookmarkBtn>
+
+          <StudentToggleReadBtn
+            type="button"
+            $isViewed={isViewed}
+            title={isViewed ? "Marcar como pendente" : "Marcar como visualizado"}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleViewed(mat.id, mat.title || mat.file);
+            }}
+          >
+            {isViewed ? <CheckCircle2 size={16} /> : <Check size={16} />}
+          </StudentToggleReadBtn>
+
+          <StudentViewDocPill
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenViewer(batchList, mat.id);
+            }}
+          >
+            <Eye size={14} /> Abrir
+          </StudentViewDocPill>
+
+          <StudentDownloadDocBtn
+            type="button"
+            title="Baixar material"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDownloadMaterial(mat);
+            }}
+          >
+            <Download size={16} />
+          </StudentDownloadDocBtn>
+        </StudentMaterialDesktopActions>
+
+        {/* Rodapé Mobile com Botão de Expansão (padrão da página de Alunos) + Botão Abrir */}
+        <StudentMaterialMobileFooter onClick={(e) => e.stopPropagation()}>
+          <MobileExpandBtn
+            type="button"
+            onClick={(e) => toggleMaterialExpand(mat.id, e)}
+            aria-label={isExpanded ? "Ocultar detalhes" : "Ver mais detalhes"}
+          >
+            {isExpanded ? (
+              <>
+                <span>Menos detalhes</span>
+                <ChevronUp size={14} />
+              </>
+            ) : (
+              <>
+                <span>Ver detalhes</span>
+                <ChevronDown size={14} />
+              </>
+            )}
+          </MobileExpandBtn>
+
+          <StudentViewDocPill
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenViewer(batchList, mat.id);
+            }}
+          >
+            <Eye size={14} /> Abrir
+          </StudentViewDocPill>
+        </StudentMaterialMobileFooter>
+      </StudentMaterialCard>
+    );
+  };
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'new' | 'edit'>('new');
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [makeupDay, setMakeupDay] = useState('sexta');
   const [fileUploaded, setFileUploaded] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -178,47 +874,195 @@ const Turma: React.FC = () => {
           </>
         );
 
-      case 'materiais':
+      case 'materiais': {
+        const isFiltering =
+          materialStatusFilter !== 'all' ||
+          materialFilterLesson !== 'all' ||
+          materialFilterCategory !== 'all' ||
+          materialSearchQuery.trim() !== '';
+
+        const handleClearFilters = () => {
+          setMaterialStatusFilter('all');
+          setMaterialFilterLesson('all');
+          setMaterialFilterCategory('all');
+          setMaterialSearchQuery('');
+        };
+
         return (
           <>
-            <SectionHeader>
-              <h3>Materiais & atividades</h3>
-            </SectionHeader>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
-                    <FileText size={24} />
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 4px 0', color: '#1E293B' }}>Review - Modal Verbs.pdf</h4>
-                    <span style={{ fontSize: '0.85rem', color: '#64748B' }}>PDF • 2.4 MB • Adicionado ontem</span>
-                  </div>
+            {/* Linha de Controles: Barra de Busca primeiro e Filtros de Status depois */}
+            <StudentMaterialsControlsRow>
+              <StudentMaterialsSearchBarWrapper>
+                <StudentMaterialSearchBox>
+                  <Search size={16} />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar material, apostila, exercício..."
+                    value={materialSearchQuery}
+                    onChange={(e) => setMaterialSearchQuery(e.target.value)}
+                  />
+                  {materialSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setMaterialSearchQuery('')}
+                      title="Limpar busca"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </StudentMaterialSearchBox>
+              </StudentMaterialsSearchBarWrapper>
+
+              <StudentStatusCarouselWrapper>
+                <div className="carousel-scroll">
+                  <button
+                    type="button"
+                    className={`seg-btn ${materialStatusFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setMaterialStatusFilter('all')}
+                  >
+                    Todos <span className="count-chip">{totalMaterialsCount}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`seg-btn ${materialStatusFilter === 'viewed' ? 'active' : ''}`}
+                    onClick={() => setMaterialStatusFilter('viewed')}
+                  >
+                    <Check size={13} /> Visualizados
+                    <span className="count-chip">{viewedCount}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`seg-btn pending-btn ${materialStatusFilter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setMaterialStatusFilter('pending')}
+                  >
+                    Não visualizados
+                    <span className="count-chip pending-chip">{pendingCount}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`seg-btn bookmark-btn ${materialStatusFilter === 'bookmarked' ? 'active' : ''}`}
+                    onClick={() => setMaterialStatusFilter('bookmarked')}
+                  >
+                    <Bookmark size={13} fill={materialStatusFilter === 'bookmarked' ? 'currentColor' : 'none'} />
+                    <span>Marcados</span>
+                    <span className="count-chip">{bookmarkedCount}</span>
+                  </button>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <Button $variant="outline" onClick={() => addToast('Abrindo...', 'Iniciando visualização segura')}><ExternalLink size={16} /> Abrir</Button>
-                  <Button onClick={() => addToast('Download iniciado', 'O arquivo está sendo baixado no seu dispositivo')}><Download size={16} /> Baixar</Button>
+              </StudentStatusCarouselWrapper>
+            </StudentMaterialsControlsRow>
+
+            {/* 3. Faixa de Progresso e Estatísticas de Estudo (Desktop) */}
+            <StudentMaterialsStatusStrip>
+              <div className="status-left">
+                <div className="icon-box">
+                  <BookOpen size={18} />
+                </div>
+                <div className="info-col">
+                  <h4>Materiais da Turma</h4>
+                  <span className="progress-text">
+                    {viewedCount} de {totalMaterialsCount} visualizados ({progressPercent}%)
+                  </span>
+                  {pendingCount > 0 ? (
+                    <span className="pending-pill">
+                      {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
+                    </span>
+                  ) : (
+                    <span className="all-done-pill">
+                      <Check size={11} /> Todos visualizados!
+                    </span>
+                  )}
+                  {bookmarkedCount > 0 && (
+                    <span className="bookmarked-pill">
+                      <Bookmark size={11} />
+                      {bookmarkedCount} {bookmarkedCount === 1 ? 'marcado' : 'marcados'}
+                    </span>
+                  )}
                 </div>
               </div>
-              
-              <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
-                    <FileText size={24} />
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 4px 0', color: '#1E293B' }}>Vocabulary List - Unit 3.pdf</h4>
-                    <span style={{ fontSize: '0.85rem', color: '#64748B' }}>PDF • 1.1 MB • Adicionado 25 ago 2026</span>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <Button $variant="outline" onClick={() => addToast('Abrindo...', 'Iniciando visualização segura')}><ExternalLink size={16} /> Abrir</Button>
-                  <Button onClick={() => addToast('Download iniciado', 'O arquivo está sendo baixado no seu dispositivo')}><Download size={16} /> Baixar</Button>
-                </div>
+
+              <div className="status-actions">
+                {pendingCount > 0 && (
+                  <button
+                    type="button"
+                    className="quick-action-btn"
+                    onClick={handleMarkAllAsViewed}
+                    title="Marcar todos os materiais da turma como visualizados"
+                  >
+                    <Check size={14} /> Marcar todos como visualizados
+                  </button>
+                )}
               </div>
-            </div>
+            </StudentMaterialsStatusStrip>
+
+            {/* Listagem de Materiais */}
+            {filteredMaterials.length === 0 ? (
+              <EmptyAtestadosState>
+                <div className="empty-icon">
+                  <Search size={24} />
+                </div>
+                <h4>Nenhum material encontrado</h4>
+                <p>Nenhum conteúdo corresponde aos critérios ou termos de busca selecionados.</p>
+                {isFiltering && (
+                  <OutlineNavyButton onClick={handleClearFilters} style={{ marginTop: '8px' }}>
+                    <X size={14} /> Limpar filtros de busca
+                  </OutlineNavyButton>
+                )}
+              </EmptyAtestadosState>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {/* 1. Materiais Gerais da Turma */}
+                {(materialFilterLesson === 'all' || materialFilterLesson === 'general') &&
+                  generalMaterials.length > 0 && (
+                    <StudentLessonBlock>
+                      <div className="block-header">
+                        <h3>
+                          <Folder size={18} color="#0F172A" />
+                          Materiais Gerais da Turma
+                          <span className="badge-doc-count">
+                            ({generalMaterials.length} {generalMaterials.length === 1 ? 'documento' : 'documentos'})
+                          </span>
+                        </h3>
+                      </div>
+
+                      {generalMaterials.map((mat) => renderMaterialItem(mat, generalMaterials))}
+                    </StudentLessonBlock>
+                  )}
+
+                {/* 2. Blocos por Aula */}
+                {lessonsWithMaterials
+                  .filter(({ lesson, items }) => {
+                    if (materialFilterLesson === 'general') return false;
+                    if (
+                      materialFilterLesson !== 'all' &&
+                      String(lesson.id) !== materialFilterLesson
+                    ) {
+                      return false;
+                    }
+                    return items.length > 0 || materialFilterLesson === String(lesson.id);
+                  })
+                  .map(({ lesson, items }) => (
+                    <StudentLessonBlock key={lesson.id}>
+                      <div className="block-header">
+                        <h3>
+                          <BookOpen size={18} color="#0F172A" />
+                          {lesson.title}
+                          <span className="badge-doc-count">
+                            ({items.length} {items.length === 1 ? 'material' : 'materiais'})
+                          </span>
+                        </h3>
+                      </div>
+
+                      {items.map((mat) => renderMaterialItem(mat, items))}
+                    </StudentLessonBlock>
+                  ))}
+              </div>
+            )}
           </>
         );
+      }
 
       case 'agenda':
         return (
@@ -308,119 +1152,275 @@ const Turma: React.FC = () => {
           </>
         );
 
-      case 'atestados':
+      case 'atestados': {
+        const MOCK_ATESTADOS = [
+          {
+            id: 1,
+            file: 'atestado_medico_02-09.pdf',
+            format: 'PDF',
+            size: '1.8 MB',
+            date: '03 set 2026 - 14:20',
+            justifiedDate: '02 set 2026',
+            justifiedFull: '02 set 2026 (Terça-feira • 18:30)',
+            desc: 'Consulta médica de rotina agendada no horário da aula com especialista ortopedista.',
+            status: 'aprovado' as const,
+            teacherFeedback: 'Justificativa aceita pela professora Lara Charantola. Falta abonada e reposição agendada.',
+            repositionInfo: 'Sexta, 11/09 às 19:00'
+          },
+          {
+            id: 2,
+            file: 'atestado_gripe.pdf',
+            format: 'PDF',
+            size: '840 KB',
+            date: '06 set 2026 - 09:42',
+            justifiedDate: '05 set 2026',
+            justifiedFull: '05 set 2026 (Quinta-feira • 18:30)',
+            desc: 'Apresento quadro de virose e indisposição física com orientação médica de repouso.',
+            status: 'pendente' as const,
+            teacherFeedback: 'Documento recebido e em análise pela professora Lara Charantola.',
+            repositionInfo: 'Quarta, 16/09 às 19:00'
+          },
+          {
+            id: 3,
+            file: 'declaracao_trabalho.jpg',
+            format: 'JPG',
+            size: '2.1 MB',
+            date: '25 ago 2026 - 18:00',
+            justifiedDate: '25 ago 2026',
+            justifiedFull: '25 ago 2026 (Terça-feira • 18:30)',
+            desc: 'Fiquei preso no trabalho para atendimento presencial emergencial de clientes.',
+            status: 'rejeitado' as const,
+            teacherFeedback: 'Atestado enviado fora do prazo limite regulamentar de 48h para abono de falta.',
+            repositionInfo: 'Não aplicável'
+          },
+        ];
+
+        const countTodos = MOCK_ATESTADOS.length;
+        const countPendente = MOCK_ATESTADOS.filter(a => a.status === 'pendente').length;
+        const countAprovado = MOCK_ATESTADOS.filter(a => a.status === 'aprovado').length;
+        const countRejeitado = MOCK_ATESTADOS.filter(a => a.status === 'rejeitado').length;
+
+        const filteredAtestados = atestadoFilter === 'todos' 
+          ? MOCK_ATESTADOS 
+          : MOCK_ATESTADOS.filter(a => a.status === atestadoFilter);
+
         return (
           <>
             <SectionHeader>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0 }}>Atestados Médicos</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h3 style={{ margin: 0, color: '#0F172A', fontWeight: 800 }}>Atestados Médicos</h3>
+                    <span style={{ 
+                      background: '#0F172A', 
+                      color: '#FFFFFF', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 700, 
+                      padding: '2px 8px', 
+                      borderRadius: '9999px' 
+                    }}>
+                      {countTodos}
+                    </span>
+                  </div>
+
                   <FilterGroup>
                     <FilterButton 
                       $active={atestadoFilter === 'todos'} 
                       onClick={() => setAtestadoFilter('todos')}
                     >
-                      Todos
+                      Todos <span className="count-pill">{countTodos}</span>
                     </FilterButton>
                     <FilterButton 
                       $active={atestadoFilter === 'pendente'} 
                       onClick={() => setAtestadoFilter('pendente')}
                     >
-                      Pendente
+                      Pendente <span className="count-pill">{countPendente}</span>
                     </FilterButton>
                     <FilterButton 
                       $active={atestadoFilter === 'aprovado'} 
                       onClick={() => setAtestadoFilter('aprovado')}
                     >
-                      Aprovado
+                      Aprovado <span className="count-pill">{countAprovado}</span>
                     </FilterButton>
                     <FilterButton 
                       $active={atestadoFilter === 'rejeitado'} 
                       onClick={() => setAtestadoFilter('rejeitado')}
                     >
-                      Rejeitado
+                      Rejeitado <span className="count-pill">{countRejeitado}</span>
                     </FilterButton>
                   </FilterGroup>
                 </div>
-                <Button onClick={() => handleOpenModal('new')}>
-                  <Plus size={18} /> Enviar Atestado
-                </Button>
+
+                <NavyButton onClick={() => handleOpenModal('new')}>
+                  <Plus size={16} /> Enviar Atestado
+                </NavyButton>
               </div>
             </SectionHeader>
 
-            {(() => {
-              const MOCK_ATESTADOS = [
-                { id: 1, file: 'atestado_medico_02-09.pdf', date: '03 set 2026 - 14:20', justifiedDate: '02 set 2026', desc: 'Consulta médica de rotina agendada no horário da aula.', status: 'aprovado' },
-                { id: 2, file: 'atestado_gripe.pdf', date: '06 set 2026 - 09:42', justifiedDate: '05 set 2026', desc: 'apresento quadro de virose e preciso me ausentar hoje', status: 'pendente' },
-                { id: 3, file: 'declaracao_trabalho.jpg', date: '25 ago 2026 - 18:00', justifiedDate: '25 ago 2026', desc: 'Fiquei preso no trabalho para uma reunião emergencial. Documento anexado.', status: 'rejeitado' },
-              ];
-
-              const filteredAtestados = atestadoFilter === 'todos' 
-                ? MOCK_ATESTADOS 
-                : MOCK_ATESTADOS.filter(a => a.status === atestadoFilter);
-
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {filteredAtestados.map(atestado => (
-                  <AtestadoCard key={atestado.id} $status={atestado.status as 'aprovado' | 'pendente' | 'rejeitado'}>
-                    <div className="header-row">
-                      <div className="file-info">
-                        <div className="icon-box">
-                          <FileCheck />
-                        </div>
-                        <div>
-                          <h5>{atestado.file}</h5>
-                          <p>Enviado em {atestado.date}</p>
-                        </div>
-                      </div>
-                      <StatusTag $status={atestado.status as 'aprovado' | 'pendente' | 'rejeitado'}>
-                        {atestado.status === 'aprovado' && <><Check size={14} /> Aprovado</>}
-                        {atestado.status === 'pendente' && 'Pendente'}
-                        {atestado.status === 'rejeitado' && <><X size={14} /> Rejeitado</>}
-                      </StatusTag>
-                    </div>
-
-                    <div className="justified-class">
-                      <div>
-                        <span>AULA JUSTIFICADA</span>
-                        <strong>{atestado.justifiedDate}</strong>
-                      </div>
-                      <Button $variant="outline" style={{ backgroundColor: '#1F2B45', color: 'white' }} onClick={() => addToast('Abrindo...', 'Iniciando visualização do documento')}>
-                        <ExternalLink size={16} /> Visualizar Atestado
-                      </Button>
-                    </div>
-
-                    <div className="desc-row">
-                    <div className="desc-content">
-                      <span>Descrição</span>
-                      <p>{atestado.desc}</p>
-                      {atestado.status === 'pendente' && (
-                        <div className="status-msg pendente">
-                          <Clock size={16} /> Aguardando aprovação da professora
-                        </div>
-                      )}
-                      {atestado.status === 'rejeitado' && (
-                        <div className="status-msg rejeitado">
-                          <AlertTriangle size={16} /> Atestado inválido ou enviado fora do prazo
-                        </div>
-                      )}
-                      {atestado.status === 'aprovado' && (
-                        <div className="status-msg aprovado">
-                          <Check size={16} /> Justificativa aceita
-                        </div>
-                      )}
-                    </div>
-                    <Button $variant="outline" onClick={() => handleOpenModal('edit')}>
-                      <Edit2 size={16} /> Editar
-                    </Button>
-                  </div>
-                </AtestadoCard>
-                  ))}
+            {filteredAtestados.length === 0 ? (
+              <EmptyAtestadosState>
+                <div className="empty-icon">
+                  <FolderOpen size={24} />
                 </div>
-              );
-            })()}
+                <h4>Nenhum atestado encontrado</h4>
+                <p>Não encontramos nenhum atestado com o status "{atestadoFilter}" nesta turma.</p>
+              </EmptyAtestadosState>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {filteredAtestados.map(atestado => {
+                  const isExpanded = expandedAtestadoIds.includes(atestado.id);
+
+                  return (
+                    <AtestadoCard 
+                      key={atestado.id} 
+                      $status={atestado.status}
+                      $isExpanded={isExpanded}
+                    >
+                      {/* Linha Resumida (Sempre Visível) */}
+                      <div 
+                        className="card-summary"
+                        onClick={() => toggleExpandAtestado(atestado.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleExpandAtestado(atestado.id);
+                          }
+                        }}
+                      >
+                        <div className="left-section">
+                          <div className="icon-box">
+                            <FileCheck size={22} />
+                          </div>
+                          <div className="text-info">
+                            <div className="file-title-row">
+                              <h4>{atestado.file}</h4>
+                              <span className="format-pill">{atestado.format}</span>
+                            </div>
+                            <div className="meta-chips">
+                              <span className="chip">
+                                <Calendar size={13} color="#0F172A" />
+                                Aula: <strong>{atestado.justifiedDate}</strong>
+                              </span>
+                              <span className="chip-divider">•</span>
+                              <span className="chip">
+                                <Clock size={13} color="#64748B" />
+                                Enviado em {atestado.date}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="right-section">
+                          <StatusTag $status={atestado.status}>
+                            {atestado.status === 'aprovado' && <><CheckCircle2 size={13} /> Aprovado</>}
+                            {atestado.status === 'pendente' && <><Clock size={13} /> Pendente</>}
+                            {atestado.status === 'rejeitado' && <><AlertCircle size={13} /> Rejeitado</>}
+                          </StatusTag>
+
+                          <button 
+                            type="button" 
+                            className="toggle-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleExpandAtestado(atestado.id);
+                            }}
+                            title={isExpanded ? "Ocultar detalhes" : "Ver todos os detalhes"}
+                          >
+                            {isExpanded ? 'Ocultar' : 'Ver detalhes'}
+                            <ChevronDown size={15} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Informações Completas (Exibidas somente ao clicar) */}
+                      {isExpanded && (
+                        <div className="card-expanded-content">
+                          <div className="info-metrics-grid">
+                            <div className="metric-box">
+                              <div className="icon-circle">
+                                <CalendarDays size={16} />
+                              </div>
+                              <div className="metric-texts">
+                                <span className="label">Aula Justificada</span>
+                                <span className="value">{atestado.justifiedFull}</span>
+                                <span className="subtext">Turma Intermediate A</span>
+                              </div>
+                            </div>
+
+                            <div className="metric-box">
+                              <div className="icon-circle">
+                                <CalendarCheck size={16} />
+                              </div>
+                              <div className="metric-texts">
+                                <span className="label">Reposição Sugerida</span>
+                                <span className="value">{atestado.repositionInfo}</span>
+                                <span className="subtext">Agendamento de reposição</span>
+                              </div>
+                            </div>
+
+                            <div className="metric-box">
+                              <div className="icon-circle">
+                                <FileCheck2 size={16} />
+                              </div>
+                              <div className="metric-texts">
+                                <span className="label">Documento Enviado</span>
+                                <span className="value">{atestado.size} • {atestado.format}</span>
+                                <span className="subtext">Anexo verificado</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="desc-section">
+                            <div className="desc-title">
+                              <MessageSquare size={13} />
+                              Motivo / Justificativa informada
+                            </div>
+                            <p>{atestado.desc}</p>
+                          </div>
+
+                          <div className={`status-feedback-box ${atestado.status}`}>
+                            <div className="feedback-icon">
+                              {atestado.status === 'aprovado' && <CheckCircle2 size={18} />}
+                              {atestado.status === 'pendente' && <Clock size={18} />}
+                              {atestado.status === 'rejeitado' && <AlertCircle size={18} />}
+                            </div>
+                            <div className="feedback-text">
+                              <strong>
+                                {atestado.status === 'aprovado' && 'Justificativa Aceita'}
+                                {atestado.status === 'pendente' && 'Aguardando Avaliação'}
+                                {atestado.status === 'rejeitado' && 'Justificativa Não Aceita'}
+                              </strong>
+                              <span>{atestado.teacherFeedback}</span>
+                            </div>
+                          </div>
+
+                          <div className="card-actions-bar">
+                            <OutlineNavyButton onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenModal('edit');
+                            }}>
+                              <Edit2 size={15} /> Editar Justificativa
+                            </OutlineNavyButton>
+
+                            <NavyButton onClick={(e) => {
+                              e.stopPropagation();
+                              addToast('Abrindo...', 'Iniciando visualização do documento em nova aba segura');
+                            }}>
+                              <ExternalLink size={15} /> Visualizar Documento
+                            </NavyButton>
+                          </div>
+                        </div>
+                      )}
+                    </AtestadoCard>
+                  );
+                })}
+              </div>
+            )}
           </>
         );
+      }
 
       default:
         return null;
@@ -462,16 +1462,26 @@ const Turma: React.FC = () => {
       </Banner>
 
       <TabsList>
-        {TABS.map(tab => (
-          <TabItem 
-            key={tab.id} 
-            $active={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.icon}
-            {tab.label}
-          </TabItem>
-        ))}
+        <MobileCarousel gap="32px" mobileGap="18px">
+          {TABS.map(tab => {
+            const hasPending = tab.id === 'materiais' && pendingCount > 0;
+            return (
+              <TabItem 
+                key={tab.id} 
+                $active={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.icon}
+                {tab.label}
+                {hasPending && (
+                  <span className="tab-badge" title={`${pendingCount} materiais não visualizados`}>
+                    {pendingCount}
+                  </span>
+                )}
+              </TabItem>
+            );
+          })}
+        </MobileCarousel>
       </TabsList>
 
       <ContentArea>
@@ -508,27 +1518,34 @@ const Turma: React.FC = () => {
             <ModalBody>
               <div className="form-group">
                 <label>Qual aula deseja justificar?</label>
-                <select 
-                  value={selectedClassId ?? 'terca'} 
-                  onChange={(e) => {
-                    setSelectedClassId(Number(e.target.value) || 0);
+                <CustomDropdown
+                  value={String(selectedClassId ?? 0)}
+                  onChange={(val) => {
+                    setSelectedClassId(Number(val) || 0);
                     setDateError(null);
                   }}
-                >
-                  <option value={0}>Terça, 01/09 - 19:00 - Turma Intermediate A</option>
-                  <option value={1}>Quinta, 03/09 - 19:00 - Turma Intermediate A</option>
-                  <option value={2}>Terça, 08/09 - 19:00 - Turma Intermediate A</option>
-                  <option value="terca">Terça, 02/09 - 19:00 - Turma Intermediate A</option>
-                </select>
+                  fullWidth
+                  options={[
+                    { value: "0", label: "Terça, 01/09 - 19:00 - Turma Intermediate A" },
+                    { value: "1", label: "Quinta, 03/09 - 19:00 - Turma Intermediate A" },
+                    { value: "2", label: "Terça, 08/09 - 19:00 - Turma Intermediate A" },
+                    { value: "3", label: "Terça, 02/09 - 19:00 - Turma Intermediate A" },
+                  ]}
+                />
                 {dateError && <ErrorMessage><AlertTriangle size={14} /> {dateError}</ErrorMessage>}
               </div>
 
               <div className="form-group">
                 <label>Quando deseja realizar a reposição?</label>
-                <select defaultValue="sexta">
-                  <option value="sexta">Sexta, 11/09 - 19:00</option>
-                  <option value="quarta">Quarta, 16/09 - 19:00</option>
-                </select>
+                <CustomDropdown
+                  value={makeupDay}
+                  onChange={(val) => setMakeupDay(val)}
+                  fullWidth
+                  options={[
+                    { value: "sexta", label: "Sexta, 11/09 - 19:00" },
+                    { value: "quarta", label: "Quarta, 16/09 - 19:00" },
+                  ]}
+                />
               </div>
 
               {!fileUploaded ? (
@@ -571,14 +1588,23 @@ const Turma: React.FC = () => {
             <ModalFooter>
               <p><Clock size={16} /> A professora será notificada e irá analisar o atestado enviado.</p>
               <div className="buttons">
-                <Button onClick={handleSubmitModal}>
+                <NavyButton onClick={handleSubmitModal}>
                   {modalType === 'new' ? <><FileCheck size={16} /> Enviar Atestado</> : <><Edit2 size={16} /> Salvar alterações</>}
-                </Button>
+                </NavyButton>
               </div>
             </ModalFooter>
           </ModalContent>
         </ModalOverlay>
       )}
+
+      {/* Modal de Visualização de Documentos (igual ao da professora) */}
+      <DocumentViewerModal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        materials={viewerMaterials}
+        initialMaterialId={viewerInitialId}
+        onDownload={handleDownloadMaterial}
+      />
     </TurmaContainer>
   );
 };
