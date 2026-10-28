@@ -11,6 +11,7 @@ interface IResponseLogin {
     name: string;
     email: string;
     role: "student" | "teacher" | "admin";
+    avatar_url?: string | null;
   };
 }
 
@@ -21,7 +22,14 @@ export const postLogin = async (params: ILogin): Promise<IResponseLogin> => {
   if (data.accessToken && data.refreshToken) {
     localStorage.setItem("@App:accessToken", data.accessToken);
     localStorage.setItem("@App:refreshToken", data.refreshToken);
-    localStorage.setItem("@App:user", JSON.stringify(data.user));
+    const persistedUser = {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role,
+      avatarUrl: data.user.avatar_url ?? null,
+    };
+    localStorage.setItem("@App:user", JSON.stringify(persistedUser));
   }
 
   return res.data;

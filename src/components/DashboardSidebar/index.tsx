@@ -57,6 +57,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
   const displayText = user ? user.name.split(" ").slice(-1)[0] : "Aulas";
   const avatarInitials = user ? getInitials(user.name) : "LC";
   const avatarColor = user ? getAvatarColorByName(user.name) : "#C57A67";
+  const avatarUrl = user?.avatarUrl ?? null;
 
   return (
     <SidebarWrapper $collapsed={collapsed}>
@@ -69,7 +70,22 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
       </ToggleButton>
 
       <LogoContainer $collapsed={collapsed}>
-        <LogoCircle $color={avatarColor}>{avatarInitials}</LogoCircle>
+        <LogoCircle $color={avatarColor}>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayText}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "50%",
+              }}
+            />
+          ) : (
+            avatarInitials
+          )}
+        </LogoCircle>
         <LogoText $collapsed={collapsed}>{displayText}</LogoText>
       </LogoContainer>
 

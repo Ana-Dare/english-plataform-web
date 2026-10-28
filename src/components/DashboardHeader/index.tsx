@@ -99,6 +99,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const displayEmail = user?.email || profile.email || userEmail;
   const avatarColor = user ? getAvatarColorByName(user.name) : "#1F2B45";
   const avatarInitials = user ? getInitials(user.name) : "US";
+  const avatarUrl = user?.avatarUrl || profile.photoUrl || null;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -236,9 +237,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               }}
             >
               <Avatar $color={avatarColor}>
-                {profile.photoUrl ? (
+                {avatarUrl ? (
                   <img
-                    src={profile.photoUrl}
+                    src={avatarUrl}
                     alt="Perfil"
                     style={{
                       width: "100%",
@@ -269,9 +270,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       $color={avatarColor}
                       style={{ width: "48px", height: "48px" }}
                     >
-                      {profile.photoUrl ? (
+                      {avatarUrl ? (
                         <img
-                          src={profile.photoUrl}
+                          src={avatarUrl}
                           alt="Perfil"
                           style={{
                             width: "100%",

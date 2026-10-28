@@ -28,7 +28,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   const [user, setUser] = useState<IUserData | null>(() => {
     const storedUser = localStorage.getItem("@App:user");
-    return storedUser ? JSON.parse(storedUser) : null;
+    if (!storedUser) return null;
+    const parsed = JSON.parse(storedUser);
+    return {
+      ...parsed,
+      avatarUrl: parsed.avatarUrl ?? parsed.avatar_url ?? null,
+    };
   });
 
   const login = async ({ email: user, password }: ILogin) => {
@@ -42,9 +47,16 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         setRole(data.user.role);
         localStorage.setItem("@App:userRole", data.user.role);
 
-        // Persistir dados completos do usuário
-        setUser(data.user);
-        localStorage.setItem("@App:user", JSON.stringify(data.user));
+        const userData: IUserData = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          avatarUrl: data.user.avatar_url ?? null,
+        };
+
+        setUser(userData);
+        localStorage.setItem("@App:user", JSON.stringify(userData));
       }
     }
   };

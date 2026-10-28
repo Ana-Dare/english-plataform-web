@@ -73,6 +73,7 @@ export const LogoCircle = styled.div<{ $color?: string }>`
   font-family: serif;
   font-size: 1.1rem;
   box-shadow: 0 2px 8px rgba(197, 122, 103, 0.3);
+  overflow: hidden;
 `;
 
 export const LogoText = styled.span<{ $collapsed: boolean }>`
