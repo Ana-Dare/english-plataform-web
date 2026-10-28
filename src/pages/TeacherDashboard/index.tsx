@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import DashboardLayout from "../../components/DashboardLayout";
 import DashboardSidebar, {
   type SidebarMenuItem,
@@ -26,6 +29,9 @@ import NotificationsTab from "./Notifications";
 import { ProfileProvider } from "../../contexts/ProfileContext";
 import StudentsProvider from "../../contexts/Students/StudentsProvider";
 import ClassesProvider from "../../contexts/Classes/ClassesProvider";
+import { useStudents } from "../../contexts/Students/hooks/useStudents";
+import { useClasses } from "../../contexts/Classes";
+import { listLessons } from "./services/material";
 
 const teacherMenuItems: SidebarMenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: <Home /> },
@@ -34,6 +40,69 @@ const teacherMenuItems: SidebarMenuItem[] = [
   { id: "turmas", label: "Turmas", icon: <BookOpen /> },
   { id: "certificados", label: "Certificados", icon: <Award /> },
 ];
+
+const TeacherOverview: React.FC<{
+  onOpenTab: (tab: string) => void;
+}> = ({ onOpenTab }) => {
+  const { students } = useStudents();
+  const { classes } = useClasses();
+  const today = format(new Date(), "yyyy-MM-dd");
+  const { data: todayLessons = [] } = useQuery({
+    queryKey: ["lessons", "today", today],
+    queryFn: () => listLessons({ start_date: today, end_date: today }),
+  });
+  const activeStudents = students.filter((student) => student.isActive).length;
+  const activeClasses = classes.filter((cls) => cls.status === "active").length;
+  const scheduledToday = todayLessons.filter(
+    (lesson) => lesson.status === "scheduled",
+  ).length;
+
+  return (
+    <>
+      <PageTitle>Visão geral de suas atividades de hoje</PageTitle>
+
+      <TopStatsGrid>
+        <OverviewCard
+          title="Alunos ativos"
+          value={String(activeStudents)}
+          onClick={() => onOpenTab("alunos")}
+        />
+        <OverviewCard
+          title="Turmas ativas"
+          value={String(activeClasses)}
+          onClick={() => onOpenTab("turmas")}
+        />
+        <OverviewCard
+          title="Aulas hoje"
+          value={String(scheduledToday)}
+          onClick={() => onOpenTab("agenda")}
+        />
+      </TopStatsGrid>
+
+      <ColumnsLayout>
+        <Column>
+          <div>
+            <SectionTitle>Agenda do dia</SectionTitle>
+            <SectionSubtitle>
+              {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
+            </SectionSubtitle>
+            <DailyAgenda onSelect={() => onOpenTab("agenda")} />
+          </div>
+        </Column>
+        <Column>
+          <div>
+            <SectionTitle>Ações rápidas</SectionTitle>
+            <QuickActions onAction={(tab) => onOpenTab(tab)} />
+          </div>
+          <div style={{ marginTop: "2rem" }}>
+            <SectionTitle>Pendências recentes</SectionTitle>
+            <RecentPending onSelect={(tab) => onOpenTab(tab)} />
+          </div>
+        </Column>
+      </ColumnsLayout>
+    </>
+  );
+};
 
 const TeacherDashboard: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -69,58 +138,7 @@ const TeacherDashboard: React.FC = () => {
             }
           >
             {activeTab === "dashboard" && (
-              <>
-                <PageTitle>Visão geral de suas atividades de hoje</PageTitle>
-
-                <TopStatsGrid>
-                  <OverviewCard
-                    title="Alunos ativos"
-                    value="87"
-                    onClick={() => setActiveTab("alunos")}
-                  />
-                  <OverviewCard
-                    title="Turmas ativas"
-                    value="12"
-                    onClick={() => setActiveTab("turmas")}
-                  />
-                  <OverviewCard
-                    title="Aulas hoje"
-                    value="6"
-                    onClick={() => setActiveTab("agenda")}
-                  />
-                  <OverviewCard
-                    title="Pendências"
-                    value="14"
-                    subtitle="atividades para corrigir"
-                    onClick={() => setActiveTab("turmas")}
-                  />
-                  <OverviewCard
-                    title="Mensalidades pendentes"
-                    value="5"
-                    onClick={() => setActiveTab("alunos")}
-                  />
-                </TopStatsGrid>
-
-                <ColumnsLayout>
-                  <Column>
-                    <div>
-                      <SectionTitle>Agenda do dia</SectionTitle>
-                      <SectionSubtitle>Hoje, 3 de junho</SectionSubtitle>
-                      <DailyAgenda onSelect={() => setActiveTab("agenda")} />
-                    </div>
-                  </Column>
-                  <Column>
-                    <div>
-                      <SectionTitle>Ações rápidas</SectionTitle>
-                      <QuickActions onAction={(tab) => setActiveTab(tab)} />
-                    </div>
-                    <div style={{ marginTop: "2rem" }}>
-                      <SectionTitle>Pendências recentes</SectionTitle>
-                      <RecentPending onSelect={(tab) => setActiveTab(tab)} />
-                    </div>
-                  </Column>
-                </ColumnsLayout>
-              </>
+              <TeacherOverview onOpenTab={setActiveTab} />
             )}
 
             {activeTab === "alunos" && (

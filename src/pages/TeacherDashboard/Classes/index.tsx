@@ -57,10 +57,17 @@ import {
 } from "./style";
 import CreateClassModal from "./CreateClassModal";
 import ClassDetail from "./ClassDetail";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 import { useClasses } from "../../../contexts/Classes";
 import { useStudents } from "../../../contexts/Students/hooks/useStudents";
 import { getInitials } from "../../../utils/avatar";
 import useToast from "../../../contexts/Toast/useToast";
+
+function apiErrorMessage(error: unknown, fallback: string) {
+  const response = (error as { response?: { data?: { error?: string } } })
+    ?.response;
+  return response?.data?.error || fallback;
+}
 
 interface TurmaItem {
   id: number;
@@ -119,7 +126,14 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
   onNavigateStudent,
   onNavigateRegisterStudent,
 }) => {
-  const { classes, addClass, isAdding } = useClasses();
+  const {
+    classes,
+    addClass,
+    isAdding,
+    updateClassStatus,
+    deleteClass,
+    isDeleting,
+  } = useClasses();
   const { students } = useStudents();
   const { addToast } = useToast();
   const { data: levelsData } = useQuery({
@@ -137,6 +151,10 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [classToDeactivate, setClassToDeactivate] = useState<TurmaItem | null>(
+    null,
+  );
 
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -202,7 +220,7 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
           bg: s.avatarColor || "#4A72FF",
           color: "#ffffff",
         })),
-        status: (c.status as any) === "paused" ? "paused" : "active",
+        status: c.status === "inactive" ? "paused" : "active",
         progress: (c as any).progress ?? 0,
         next_lesson: (c as any).next_lesson || "Sem aulas agendadas",
         vip: c.vip,
@@ -297,6 +315,44 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
         },
       },
     );
+  };
+
+  const handleToggleClassStatus = (turma: TurmaItem) => {
+    const nextStatus = turma.status === "active" ? "inactive" : "active";
+    updateClassStatus(turma.id, nextStatus, {
+      onSuccess: () => {
+        addToast(
+          nextStatus === "inactive"
+            ? "Turma pausada com sucesso."
+            : "Turma reativada com sucesso.",
+          "success",
+        );
+        setOpenMenuId(null);
+      },
+      onError: (error) => {
+        addToast(
+          apiErrorMessage(error, "Não foi possível alterar o status da turma."),
+          "error",
+        );
+      },
+    });
+  };
+
+  const handleConfirmDeactivate = () => {
+    if (!classToDeactivate) return;
+    deleteClass(classToDeactivate.id, {
+      onSuccess: () => {
+        addToast("Turma desativada com sucesso.", "success");
+        setClassToDeactivate(null);
+        setOpenMenuId(null);
+      },
+      onError: (error) => {
+        addToast(
+          apiErrorMessage(error, "Não foi possível desativar a turma."),
+          "error",
+        );
+      },
+    });
   };
 
   // Se uma turma foi selecionada para ver detalhes
@@ -524,17 +580,76 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
                 >
                   Ver turma <ArrowRight size={15} />
                 </span>
-                <button
-                  type="button"
-                  className="more-btn"
-                  title="Mais opções"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToast(`Opções da turma: ${turma.name}`, "info");
-                  }}
+                <div
+                  style={{ position: "relative" }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <MoreHorizontal size={18} />
-                </button>
+                  <button
+                    type="button"
+                    className="more-btn"
+                    title="Mais opções"
+                    onClick={() =>
+                      setOpenMenuId((current) =>
+                        current === turma.id ? null : turma.id,
+                      )
+                    }
+                  >
+                    <MoreHorizontal size={18} />
+                  </button>
+                  {openMenuId === turma.id && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        bottom: "2.2rem",
+                        background: "#fff",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 10,
+                        boxShadow: "0 10px 24px rgba(15,23,42,0.12)",
+                        minWidth: 180,
+                        zIndex: 5,
+                        padding: "0.35rem",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          background: "transparent",
+                          border: "none",
+                          padding: "0.55rem 0.7rem",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          fontSize: "0.85rem",
+                          color: "#0f172a",
+                        }}
+                        onClick={() => handleToggleClassStatus(turma)}
+                      >
+                        {turma.status === "active"
+                          ? "Pausar turma"
+                          : "Reativar turma"}
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          background: "transparent",
+                          border: "none",
+                          padding: "0.55rem 0.7rem",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          fontSize: "0.85rem",
+                          color: "#b91c1c",
+                        }}
+                        onClick={() => setClassToDeactivate(turma)}
+                      >
+                        Desativar turma
+                      </button>
+                    </div>
+                  )}
+                </div>
               </TurmaCardFooter>
             </TurmaCard>
           ))
@@ -622,6 +737,15 @@ const ClassesTab: React.FC<ClassesTabProps> = ({
           isLoading={isAdding}
         />
       )}
+
+      <DeleteConfirmModal
+        isOpen={Boolean(classToDeactivate)}
+        title="Desativar turma"
+        message={`A turma "${classToDeactivate?.name ?? ""}" será desativada. Turmas com aulas agendadas não podem ser desativadas.`}
+        onConfirm={handleConfirmDeactivate}
+        onCancel={() => setClassToDeactivate(null)}
+        isDeleting={isDeleting}
+      />
     </Container>
   );
 };

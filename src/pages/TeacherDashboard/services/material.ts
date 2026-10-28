@@ -174,6 +174,15 @@ export interface CreateLessonParams {
   startTime: string;
   // Horário de término no formato HH:MM.
   endTime: string;
+  description?: string | null;
+}
+
+export interface ListLessonsFilters {
+  class_id?: number;
+  teacher_id?: number;
+  start_date?: string;
+  end_date?: string;
+  status?: LessonStatus;
 }
 
 // Monta o start_time e a duração HH:MM:SS exigidos pela API a partir dos
@@ -188,6 +197,7 @@ function buildLessonPayload(params: CreateLessonParams): {
   title: string;
   start_time: string;
   duration: string;
+  description?: string | null;
 } {
   const toMinutes = (time: string): number => {
     const [h, m] = time.split(":");
@@ -205,20 +215,38 @@ function buildLessonPayload(params: CreateLessonParams): {
   const startSeconds =
     params.startTime.length === 5 ? `${params.startTime}:00` : params.startTime;
 
-  return {
+  const payload: {
+    title: string;
+    start_time: string;
+    duration: string;
+    description?: string | null;
+  } = {
     title: params.title,
     start_time: `${params.date}T${startSeconds}`,
     duration: `${hours}:${minutes}:00`,
   };
+  if (params.description !== undefined) {
+    const trimmed = params.description?.trim() ?? "";
+    payload.description = trimmed ? trimmed.slice(0, 100) : null;
+  }
+  return payload;
+}
+
+export async function listLessons(
+  filters: ListLessonsFilters = {},
+): Promise<Lesson[]> {
+  const res = await api.get<ListLessonsRes>("/lessons", { params: filters });
+  return res.data?.lessons ?? [];
+}
+
+export async function getLesson(lessonId: number): Promise<Lesson> {
+  const res = await api.get<{ lesson: Lesson }>(`/lessons/${lessonId}`);
+  return res.data.lesson;
 }
 
 // Lista as aulas de uma turma, ordenadas por data de início.
 export async function listClassLessons(classId: number): Promise<Lesson[]> {
-  const res = await api.get<ListLessonsRes>("/lessons", {
-    params: { class_id: classId },
-  });
-
-  return res.data?.lessons ?? [];
+  return listLessons({ class_id: classId });
 }
 
 // Lista os materiais cadastrados para uma aula.
@@ -227,7 +255,13 @@ export async function listLessonMaterials(
 ): Promise<LessonMaterial[]> {
   const res = await api.get<ListMaterialsRes>(`/lessons/${lessonId}/materials`);
 
-  return res.data?.materials ?? [];
+  return (res.data?.materials ?? []).map((material) => ({
+    ...material,
+    title: material.title || material.file,
+    category: material.category || "Geral",
+    file: material.file,
+    link: material.link,
+  }));
 }
 
 // Envia um arquivo de material para uma aula (multipart/form-data).
@@ -265,5 +299,36 @@ export async function createClassLesson(
     buildLessonPayload(params),
   );
 
+  return res.data.lesson;
+}
+
+export async function updateClassLesson(
+  lessonId: number,
+  params: Partial<CreateLessonParams> & { title?: string; status?: LessonStatus },
+): Promise<Lesson> {
+  const payload: Record<string, string | null> = {};
+  if (params.title) payload.title = params.title;
+  if (params.status) payload.status = params.status;
+  if (params.description !== undefined) {
+    const trimmed = params.description?.trim() ?? "";
+    payload.description = trimmed ? trimmed.slice(0, 100) : null;
+  }
+  if (params.date && params.startTime) {
+    const built = buildLessonPayload({
+      title: params.title ?? "",
+      date: params.date,
+      startTime: params.startTime,
+      endTime: params.endTime ?? params.startTime,
+      description: params.description,
+    });
+    payload.start_time = built.start_time;
+    payload.duration = built.duration;
+  }
+  const res = await api.patch<{ lesson: Lesson }>(`/lessons/${lessonId}`, payload);
+  return res.data.lesson;
+}
+
+export async function cancelClassLesson(lessonId: number): Promise<Lesson> {
+  const res = await api.delete<{ lesson: Lesson }>(`/lessons/${lessonId}`);
   return res.data.lesson;
 }

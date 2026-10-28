@@ -33,6 +33,8 @@ export type ClassMode = "individual" | "grupo";
 
 export interface CalendarEvent {
   id: string;
+  lessonId?: number;
+  classId?: number;
   date: Date;
   type: EventType;
   title: string;
@@ -104,11 +106,12 @@ const EventModal: React.FC<EventModalProps> = ({
   const { classes } = useClasses();
   const turmaOptions = classes
     .filter((c) => c.id > 0)
-    .map((c) => ({ value: c.name, label: c.name }));
+    .map((c) => ({ value: String(c.id), label: c.name }));
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
   const [type, setType] = useState<EventType>("aula");
   const [title, setTitle] = useState("");
+  const [selectedClassId, setSelectedClassId] = useState("");
   const [dateStr, setDateStr] = useState("");
   const [time, setTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
@@ -140,6 +143,9 @@ const EventModal: React.FC<EventModalProps> = ({
     if (eventToEdit) {
       setType(eventToEdit.type);
       setTitle(eventToEdit.title);
+      setSelectedClassId(
+        eventToEdit.classId ? String(eventToEdit.classId) : "",
+      );
       setDateStr(format(eventToEdit.date, "yyyy-MM-dd"));
       setTime(eventToEdit.time || "09:00");
       setEndTime(eventToEdit.endTime || addHour(eventToEdit.time || "09:00"));
@@ -153,6 +159,7 @@ const EventModal: React.FC<EventModalProps> = ({
       const defaultStartTime = isTargetToday && currentNow > "09:00" ? getNextQuarterTime() : "09:00";
       setType("aula");
       setTitle("");
+      setSelectedClassId("");
       setDateStr(format(fallbackDate, "yyyy-MM-dd"));
       setTime(defaultStartTime);
       setEndTime(addHour(defaultStartTime));
@@ -189,9 +196,10 @@ const EventModal: React.FC<EventModalProps> = ({
 
     const currentCheckHHMM = format(new Date(), "HH:mm");
 
-    if (!title.trim()) {
-      next.title =
-        type === "aula" ? "Selecione a turma ou o aluno." : "Informe o título.";
+    if (type === "aula" && !selectedClassId) {
+      next.title = "Selecione a turma.";
+    } else if (type !== "aula" && !title.trim()) {
+      next.title = "Informe o título.";
     }
     if (!dateStr) {
       next.date = "Informe a data.";
@@ -247,10 +255,18 @@ const EventModal: React.FC<EventModalProps> = ({
           : meetLink.trim()
         : undefined;
 
+    const selectedClass = classes.find(
+      (cls) => String(cls.id) === selectedClassId,
+    );
     onSave({
       date: eventDate,
       type,
-      title: title.trim(),
+      title:
+        type === "aula"
+          ? selectedClass?.name || title.trim()
+          : title.trim(),
+      classId: type === "aula" ? Number(selectedClassId) : undefined,
+      lessonId: eventToEdit?.lessonId,
       time,
       endTime,
       description: description.trim() || undefined,
@@ -260,7 +276,6 @@ const EventModal: React.FC<EventModalProps> = ({
       repeat: type === "aula" ? repeat : undefined,
       weekdays: type === "aula" && repeat ? weekdays : undefined,
     });
-    onClose();
   };
 
   const isAula = type === "aula";
@@ -315,12 +330,14 @@ const EventModal: React.FC<EventModalProps> = ({
                 Aluno / Turma <span>*</span>
               </label>
               <CustomSelect
-                value={title}
+                value={selectedClassId}
                 error={!!errors.title}
                 icon={<User size={16} />}
                 onChange={(val) => {
                   clearError("title");
-                  setTitle(val);
+                  setSelectedClassId(val);
+                  const match = classes.find((cls) => String(cls.id) === val);
+                  setTitle(match?.name ?? "");
                 }}
                 options={turmaOptions}
                 placeholder="Selecione uma turma..."

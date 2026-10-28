@@ -13,6 +13,8 @@ import type {
 import {
   createClass,
   listClasses,
+  updateClass as updateClassService,
+  updateClassStatus as updateClassStatusService,
   deleteClass as deleteClassService,
 } from "../../pages/TeacherDashboard/services/class";
 
@@ -59,6 +61,17 @@ export default function ClassesProvider({ children }: ClassesProviderProps) {
     onSuccess: invalidateClasses,
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      params,
+    }: {
+      id: number;
+      params: Partial<CreateClassParams>;
+    }) => updateClassService(id, params),
+    onSuccess: invalidateClasses,
+  });
+
   // Mutation para deletar turma
   const deleteMutation = useMutation({
     mutationFn: deleteClassService,
@@ -72,12 +85,57 @@ export default function ClassesProvider({ children }: ClassesProviderProps) {
         onSuccess: (data) => {
           callbacks?.onSuccess?.({ id: data.id });
         },
-        onError: () => {
-          callbacks?.onError?.();
+        onError: (error) => {
+          callbacks?.onError?.(error);
         },
       });
     },
     [createMutation],
+  );
+
+  const updateClass = useCallback(
+    (
+      id: number,
+      params: Partial<CreateClassParams>,
+      callbacks?: ClassMutationCallbacks,
+    ) => {
+      updateMutation.mutate(
+        { id, params },
+        {
+          onSuccess: () => callbacks?.onSuccess?.({ id }),
+          onError: (error) => callbacks?.onError?.(error),
+        },
+      );
+    },
+    [updateMutation],
+  );
+
+  const statusMutation = useMutation({
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: number;
+      status: "active" | "inactive";
+    }) => updateClassStatusService(id, status),
+    onSuccess: invalidateClasses,
+  });
+
+  const updateClassStatus = useCallback(
+    (
+      id: number,
+      status: "active" | "inactive",
+      callbacks?: ClassMutationCallbacks,
+    ) => {
+      statusMutation.mutate(
+        { id, status },
+        {
+          onSuccess: () => callbacks?.onSuccess?.({ id }),
+          onError: (error) => callbacks?.onError?.(error),
+        },
+      );
+    },
+    [statusMutation],
   );
 
   // Callback para deletar turma
@@ -87,8 +145,8 @@ export default function ClassesProvider({ children }: ClassesProviderProps) {
         onSuccess: () => {
           callbacks?.onSuccess?.({ id });
         },
-        onError: () => {
-          callbacks?.onError?.();
+        onError: (error) => {
+          callbacks?.onError?.(error);
         },
       });
     },
@@ -108,6 +166,9 @@ export default function ClassesProvider({ children }: ClassesProviderProps) {
     isError,
     addClass,
     isAdding: createMutation.isPending,
+    updateClass,
+    isUpdating: updateMutation.isPending,
+    updateClassStatus,
     deleteClass,
     isDeleting: deleteMutation.isPending,
     getClassById,

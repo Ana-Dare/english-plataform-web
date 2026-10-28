@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -47,19 +47,13 @@ import useToast from "../../../contexts/Toast/useToast";
 import { useStudents } from "../../../contexts/Students/hooks/useStudents";
 import { getInitials } from "../../../utils/avatar";
 import {
-  listClassLessons,
-  listLessonMaterials,
-  uploadLessonMaterial,
-  deleteLessonMaterial,
-  createClassLesson,
   formatMaterialDateTime,
   loadCustomCategories,
   type Lesson,
   type LessonMaterial,
   type LessonStatus,
 } from "../services/material";
-import { listClassStudents, type ClassStudent } from "../services/class";
-import { listLevels } from "../services/level";
+import { useClassDetail } from "./hooks/useClassDetail";
 import MobileCarousel from "../../../components/MobileCarousel";
 import {
   JustificationList,
@@ -281,13 +275,6 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [materials, setMaterials] = useState<LessonMaterial[]>([]);
-  const [classStudents, setClassStudents] = useState<ClassStudent[]>([]);
-  const [materialsLoading, setMaterialsLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [creatingLesson, setCreatingLesson] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Estados para Visualizador de Documentos, Edição, Exclusão e Filtros
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -336,9 +323,34 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
 
   const cefr = CEFR_BY_LEVEL[classData.level_id || 2] || "A2";
   const className = classData.name || "Turma";
-  const [levelName, setLevelName] = useState<string | null>(null);
   const effectiveClassId = classData.id && classData.id > 0 ? classData.id : 0;
   const canManageLessons = effectiveClassId > 0;
+  const {
+    lessons,
+    materials,
+    classStudents,
+    levels,
+    isLoading: materialsLoading,
+    isError: isClassDetailError,
+    createLesson,
+    isCreatingLesson: creatingLesson,
+    uploadMaterials,
+    isUploading: uploading,
+    deleteMaterial,
+    deletingId,
+    removeStudent,
+    isRemovingStudent,
+    updateLesson,
+    isUpdatingLesson,
+    cancelLesson,
+    isCancellingLesson,
+  } = useClassDetail(effectiveClassId);
+
+  const levelName = useMemo(() => {
+    const levelId = classData.level_id;
+    if (!levelId) return null;
+    return levels.find((level) => level.id === levelId)?.name ?? null;
+  }, [classData.level_id, levels]);
 
   const displayLevel =
     levelName ||
@@ -357,6 +369,7 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
 
   interface DisplayStudent {
     id: number;
+    studentId?: number;
     name: string;
     email: string;
     color: string;
@@ -370,7 +383,6 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
   const [studentToRemove, setStudentToRemove] = useState<DisplayStudent | null>(
     null,
   );
-  const [isRemovingStudent, setIsRemovingStudent] = useState(false);
   const [teacherToRemove, setTeacherToRemove] = useState<{
     name: string;
     email: string;
@@ -391,7 +403,8 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
       );
       const studentName = s.name || matching?.name || "Aluno";
       return {
-        id: s.studentId || s.userId || s.id || matching?.id || i + 1,
+        id: s.userId || matching?.id || s.id || i + 1,
+        studentId: s.studentId || matching?.studentId || undefined,
         name: studentName,
         email: s.email || matching?.email || "",
         color: matching?.avatarColor || AVATAR_COLORS[i % AVATAR_COLORS.length],
@@ -431,68 +444,45 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
     }
   };
 
-  const handleStudentEnrolled = (enrolledStudent: any) => {
-    setClassStudents((prev) => {
-      const baseList = prev.length > 0 ? prev : (displayStudents as any[]);
-      const exists = baseList.some(
-        (s: any) =>
-          s.id === enrolledStudent.id ||
-          (s.studentId && s.studentId === enrolledStudent.id) ||
-          s.name.toLowerCase() === enrolledStudent.name.toLowerCase(),
-      );
-      if (exists) {
-        return prev;
-      }
-      const newEntry: ClassStudent = {
-        id: enrolledStudent.id,
-        studentId: enrolledStudent.id,
-        userId: enrolledStudent.id,
-        name: enrolledStudent.name,
-        email: enrolledStudent.email,
-      };
-      return [...baseList, newEntry];
-    });
+  const handleStudentEnrolled = () => {
+    // A lista é atualizada pela invalidação do React Query após o POST.
   };
 
   const handleConfirmRemoveStudent = () => {
     if (!studentToRemove) return;
-    setIsRemovingStudent(true);
-    try {
-      const studentId = studentToRemove.id;
-      const studentName = studentToRemove.name;
-
-      // 1. Desvincular no contexto geral de estudantes (se existir)
-      const matchingContextStudent = students.find(
-        (std) =>
-          std.id === studentId ||
-          std.name.toLowerCase() === studentName.toLowerCase(),
-      );
-      if (matchingContextStudent) {
-        updateStudent(matchingContextStudent.id, {
-          class_id: null,
-        });
-      }
-
-      setClassStudents((prev) =>
-        prev.filter(
-          (s: any) =>
-            s.id !== studentId &&
-            s.studentId !== studentId &&
-            s.name.toLowerCase() !== studentName.toLowerCase(),
-        ),
-      );
-
+    const academicId = studentToRemove.studentId;
+    if (!academicId) {
       addToast(
-        `Aluno(a) "${studentName}" foi removido(a) da turma com sucesso!`,
-        "success",
+        "Não foi possível identificar o perfil acadêmico deste aluno.",
+        "error",
       );
-      setStudentToRemove(null);
-    } catch (e) {
-      console.error("Erro ao remover aluno da turma:", e);
-      addToast("Não foi possível remover o aluno da turma.", "error");
-    } finally {
-      setIsRemovingStudent(false);
+      return;
     }
+
+    const studentName = studentToRemove.name;
+    removeStudent(academicId, {
+      onSuccess: () => {
+        const matchingContextStudent = students.find(
+          (std) =>
+            std.id === studentToRemove.id ||
+            std.studentId === academicId ||
+            std.name.toLowerCase() === studentName.toLowerCase(),
+        );
+        if (matchingContextStudent) {
+          updateStudent(matchingContextStudent.id, {
+            class_id: null,
+          });
+        }
+        addToast(
+          `Aluno(a) "${studentName}" foi removido(a) da turma com sucesso!`,
+          "success",
+        );
+        setStudentToRemove(null);
+      },
+      onError: () => {
+        addToast("Não foi possível remover o aluno da turma.", "error");
+      },
+    });
   };
 
   const handleConfirmRemoveTeacher = () => {
@@ -638,105 +628,28 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
       });
   }, [lessons]);
 
-  const loadLessonsAndMaterials = useCallback(
-    async (classId: number) => {
-      if (!classId) {
-        setLessons([]);
-        setClassStudents([]);
-        setMaterials([]);
-        return;
-      }
-
-      setMaterialsLoading(true);
-      try {
-        const [classLessons, apiStudents] = await Promise.all([
-          listClassLessons(classId),
-          listClassStudents(classId),
-        ]);
-
-        const sortedLessons = [...classLessons].sort(
-          (a, b) =>
-            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-        );
-        setLessons(sortedLessons);
-        setClassStudents(apiStudents);
-
-        const perLesson = await Promise.all(
-          sortedLessons.map((lesson) => listLessonMaterials(lesson.id)),
-        );
-        setMaterials(perLesson.flat());
-      } catch {
-        setLessons([]);
-        setClassStudents([]);
-        setMaterials([]);
-        addToast("Não foi possível carregar os dados da turma.", "error");
-      } finally {
-        setMaterialsLoading(false);
-      }
-    },
-    [addToast],
-  );
-
-  // Busca o nome real do nível da turma para exibir no banner.
-  useEffect(() => {
-    const levelId = classData.level_id;
-    if (!levelId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLevelName(null);
-      return;
-    }
-    let active = true;
-    (async () => {
-      try {
-        const { levels } = await listLevels();
-        if (!active) return;
-        const match = levels.find((l) => l.id === levelId);
-        setLevelName(match?.name ?? null);
-      } catch {
-        if (active) setLevelName(null);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [classData.level_id]);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      if (active) await loadLessonsAndMaterials(effectiveClassId);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [effectiveClassId, loadLessonsAndMaterials]);
-
-  const handleCreateLesson = async (data: ClassEventData) => {
+  const handleCreateLesson = (data: ClassEventData) => {
     if (!canManageLessons) {
       addToast("Não foi possível identificar a turma para agendar a aula.", "error");
       return;
     }
-    setCreatingLesson(true);
-    try {
-      const lesson = await createClassLesson(effectiveClassId, {
+    createLesson(
+      {
         title: data.title,
         date: data.date,
         startTime: data.startTime,
         endTime: data.endTime,
-      });
-      setLessons((prev) =>
-        [...prev, lesson].sort(
-          (a, b) =>
-            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-        ),
-      );
-      addToast("Aula agendada com sucesso!", "success");
-      setShowLessonModal(false);
-    } catch {
-      addToast("Não foi possível agendar a aula. Tente novamente.", "error");
-    } finally {
-      setCreatingLesson(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          addToast("Aula agendada com sucesso!", "success");
+          setShowLessonModal(false);
+        },
+        onError: () => {
+          addToast("Não foi possível agendar a aula. Tente novamente.", "error");
+        },
+      },
+    );
   };
 
   const handleOpenViewer = (
@@ -779,26 +692,30 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
     setMaterialToDelete(material);
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (!materialToDelete) return;
     if (!materialToDelete.lessonId) {
       addToast("Não foi possível excluir o material.", "error");
       return;
     }
-    setDeletingId(materialToDelete.id);
-    try {
-      await deleteLessonMaterial(materialToDelete.lessonId, materialToDelete.id);
-      setMaterials((prev) => prev.filter((m) => m.id !== materialToDelete.id));
-      addToast("Material excluído com sucesso.", "success");
-    } catch {
-      addToast("Não foi possível excluir o material.", "error");
-    } finally {
-      setDeletingId(null);
-      setMaterialToDelete(null);
-    }
+    deleteMaterial(
+      {
+        lessonId: materialToDelete.lessonId,
+        materialId: materialToDelete.id,
+      },
+      {
+        onSuccess: () => {
+          addToast("Material excluído com sucesso.", "success");
+          setMaterialToDelete(null);
+        },
+        onError: () => {
+          addToast("Não foi possível excluir o material.", "error");
+        },
+      },
+    );
   };
 
-  const handleSaveMaterial = async (data: MaterialSubmitData) => {
+  const handleSaveMaterial = (data: MaterialSubmitData) => {
     if (!canManageLessons || data.lessonId <= 0) {
       addToast("Selecione uma aula para publicar o material.", "warning");
       return;
@@ -810,26 +727,24 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
       return;
     }
 
-    setUploading(true);
-    try {
-      for (const file of files) {
-        await uploadLessonMaterial(data.lessonId, file);
-      }
-      await loadLessonsAndMaterials(effectiveClassId);
-      addToast(
-        files.length > 1
-          ? `${files.length} conteúdos publicados com sucesso!`
-          : "Material publicado com sucesso!",
-        "success",
-      );
-      setShowMaterialModal(false);
-      setEditingMaterial(null);
-    } catch (error) {
-      console.error("Error saving material:", error);
-      addToast("Erro ao salvar material. Tente novamente.", "error");
-    } finally {
-      setUploading(false);
-    }
+    uploadMaterials(
+      { lessonId: data.lessonId, files },
+      {
+        onSuccess: () => {
+          addToast(
+            files.length > 1
+              ? `${files.length} conteúdos publicados com sucesso!`
+              : "Material publicado com sucesso!",
+            "success",
+          );
+          setShowMaterialModal(false);
+          setEditingMaterial(null);
+        },
+        onError: () => {
+          addToast("Erro ao salvar material. Tente novamente.", "error");
+        },
+      },
+    );
   };
 
   const renderMaterialGlyph = (type: string) => {
@@ -1141,6 +1056,12 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
                   }}
                 >
                   <Loader2 size={16} className="spin" /> Carregando materiais...
+                </p>
+              </LessonBlock>
+            ) : isClassDetailError ? (
+              <LessonBlock>
+                <p style={{ color: "#b91c1c" }}>
+                  Não foi possível carregar os dados da turma. Tente novamente.
                 </p>
               </LessonBlock>
             ) : lessons.length === 0 && materials.length === 0 ? (
@@ -1669,6 +1590,10 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
               <StatusHint $tone="wait">
                 <Loader2 size={14} className="spin" /> Carregando aulas...
               </StatusHint>
+            ) : isClassDetailError ? (
+              <StatusHint $tone="wait">
+                Não foi possível carregar as aulas desta turma.
+              </StatusHint>
             ) : upcoming.length === 0 ? (
               <StatusHint $tone="wait">
                 {canManageLessons
@@ -1693,6 +1618,46 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
                       <StatusHint $tone="ok">
                         <Video size={14} /> Agendada
                       </StatusHint>
+                      <AddPill
+                        type="button"
+                        disabled={isUpdatingLesson}
+                        onClick={() =>
+                          updateLesson(
+                            {
+                              lessonId: ev.id,
+                              params: { status: "completed" },
+                            },
+                            {
+                              onSuccess: () =>
+                                addToast("Aula marcada como concluída.", "success"),
+                              onError: () =>
+                                addToast(
+                                  "Não foi possível concluir a aula.",
+                                  "error",
+                                ),
+                            },
+                          )
+                        }
+                      >
+                        Concluir
+                      </AddPill>
+                      <AddPill
+                        type="button"
+                        disabled={isCancellingLesson}
+                        onClick={() =>
+                          cancelLesson(ev.id, {
+                            onSuccess: () =>
+                              addToast("Aula cancelada com sucesso.", "success"),
+                            onError: () =>
+                              addToast(
+                                "Não foi possível cancelar a aula.",
+                                "error",
+                              ),
+                          })
+                        }
+                      >
+                        Cancelar
+                      </AddPill>
                     </UpcomingActions>
                   </UpcomingRow>
                 ))}
@@ -1801,6 +1766,10 @@ const ClassDetail: React.FC<ClassDetailProps> = ({
             {materialsLoading ? (
               <StatusHint $tone="wait">
                 <Loader2 size={14} className="spin" /> Carregando alunos...
+              </StatusHint>
+            ) : isClassDetailError ? (
+              <StatusHint $tone="wait">
+                Não foi possível carregar os alunos desta turma.
               </StatusHint>
             ) : displayStudents.length === 0 ? (
               <StatusHint $tone="wait">

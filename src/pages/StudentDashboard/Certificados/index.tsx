@@ -15,11 +15,7 @@ import {
   CustomDropdown
 } from './style';
 import CertificateViewer from './CertificateViewer';
-
-const MOCK_COURSES = [
-  { id: 1, name: 'English Intermediate B', status: 'in-progress', progress: 72 },
-  { id: 2, name: 'English Intermediate A', status: 'completed', progress: 100 },
-];
+import { useStudentClass } from '../hooks/useStudentClass';
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os Status' },
@@ -28,6 +24,7 @@ const STATUS_OPTIONS = [
 ];
 
 const Certificados: React.FC = () => {
+  const { currentClass, lessons, isLoading } = useStudentClass();
   const [viewState, setViewState] = useState<'list' | 'viewer'>('list');
   const [selectedCourse, setSelectedCourse] = useState<string>('');
   
@@ -47,7 +44,23 @@ const Certificados: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredCourses = MOCK_COURSES.filter(course => {
+  const completedLessons = lessons.filter((lesson) => lesson.status === 'completed').length;
+  const progress =
+    lessons.length > 0
+      ? Math.round((completedLessons / lessons.length) * 100)
+      : 0;
+  const courses = currentClass
+    ? [
+        {
+          id: currentClass.id,
+          name: currentClass.name,
+          status: progress >= 100 ? 'completed' : 'in-progress',
+          progress,
+        },
+      ]
+    : [];
+
+  const filteredCourses = courses.filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || course.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -168,8 +181,14 @@ const Certificados: React.FC = () => {
       {filteredCourses.length === 0 && (
         <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748B', backgroundColor: 'white', borderRadius: '8px', border: '1px dashed #E2E8F0' }}>
           <Search size={32} style={{ opacity: 0.2, marginBottom: '12px' }} />
-          <h3 style={{ margin: '0 0 6px 0', color: '#1E293B', fontSize: '1rem' }}>Nenhum curso encontrado</h3>
-          <p style={{ margin: 0, fontSize: '0.85rem' }}>Tente buscar por um nome diferente ou limpar os filtros.</p>
+          <h3 style={{ margin: '0 0 6px 0', color: '#1E293B', fontSize: '1rem' }}>
+            {isLoading ? 'Carregando cursos...' : 'Nenhum curso encontrado'}
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.85rem' }}>
+            {isLoading
+              ? 'Buscando sua turma e progresso.'
+              : 'Tente buscar por um nome diferente ou limpar os filtros.'}
+          </p>
         </div>
       )}
     </CertificadosContainer>

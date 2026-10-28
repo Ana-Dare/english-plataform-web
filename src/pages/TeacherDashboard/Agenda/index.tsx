@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { addMonths, subMonths, addWeeks, subWeeks, startOfWeek, endOfWeek, format, isSameDay, isAfter, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Clock, CalendarDays, Search } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   AgendaPageLayout, AgendaContainer, AgendaHeader, MonthTitle, HeaderControls, 
   IconButton, PrimaryButton, SearchWrapper, ViewToggle, ViewToggleButton,
@@ -13,21 +14,16 @@ import CalendarGrid from './CalendarGrid';
 import EventModal from './EventModal';
 import type { CalendarEvent } from './EventModal';
 import useToast from '../../../contexts/Toast/useToast';
+import { useClasses } from '../../../contexts/Classes';
+import {
+  cancelClassLesson,
+  createClassLesson,
+  listLessons,
+  updateClassLesson,
+  type Lesson,
+} from '../services/material';
 
 type ViewMode = 'mensal' | 'semanal';
-
-// Initial Mock Data
-const today = new Date();
-const initialEvents: CalendarEvent[] = [
-  { id: '1', date: today, type: 'aula', title: 'Turma Beginner 1', time: '14:00' },
-  { id: '2', date: today, type: 'aula', title: 'Particular - Camila', time: '16:00' },
-  { id: '3', date: today, type: 'reuniao', title: 'Reunião Pedagógica', time: '10:00' },
-  { id: '4', date: addDays(today, 1), type: 'aula', title: 'Turma Advanced', time: '09:00' },
-  { id: '5', date: addDays(today, 1), type: 'pessoal', title: 'Preparar materiais', time: '15:00' },
-  { id: '6', date: addDays(today, 2), type: 'reuniao', title: 'Reunião de pais', time: '18:00' },
-  { id: '7', date: addDays(today, 3), type: 'aula', title: 'Particular - Marcos', time: '10:00' },
-  { id: '8', date: addDays(today, 5), type: 'aula', title: 'Turma Intermediate', time: '14:00' },
-];
 
 const typeLabels: Record<string, string> = {
   'aula': 'Aula',
@@ -35,13 +31,115 @@ const typeLabels: Record<string, string> = {
   'pessoal': 'Pessoal',
 };
 
+function apiErrorMessage(error: unknown, fallback: string) {
+  const response = (error as { response?: { data?: { error?: string } } })?.response;
+  return response?.data?.error || fallback;
+}
+
+function lessonToEvent(lesson: Lesson, className?: string): CalendarEvent {
+  const start = new Date(lesson.startTime);
+  const [hours = '0', minutes = '0'] = lesson.duration.split(':');
+  const end = new Date(start.getTime() + (Number(hours) * 60 + Number(minutes)) * 60000);
+  const timeFmt = (value: Date) =>
+    value.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return {
+    id: String(lesson.id),
+    lessonId: lesson.id,
+    classId: lesson.classId,
+    date: start,
+    type: 'aula',
+    title: className || lesson.title,
+    time: Number.isNaN(start.valueOf()) ? '00:00' : timeFmt(start),
+    endTime: Number.isNaN(end.valueOf()) ? undefined : timeFmt(end),
+    description: lesson.description ?? undefined,
+  };
+}
+
 const AgendaTab: React.FC = () => {
   const { addToast } = useToast();
+  const { classes } = useClasses();
+  const queryClient = useQueryClient();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('mensal');
-  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: lessons = [] } = useQuery({
+    queryKey: ['lessons'],
+    queryFn: () => listLessons(),
+  });
+
+  const events = useMemo(
+    () =>
+      lessons
+        .filter((lesson) => lesson.status !== 'cancelled')
+        .map((lesson) => {
+          const className = classes.find((cls) => cls.id === lesson.classId)?.name;
+          return lessonToEvent(lesson, className);
+        }),
+    [lessons, classes],
+  );
+
+  const invalidateLessons = () => {
+    void queryClient.invalidateQueries({ queryKey: ['lessons'] });
+    void queryClient.invalidateQueries({ queryKey: ['classLessons'] });
+  };
+
+  const createMutation = useMutation({
+    mutationFn: ({
+      classId,
+      title,
+      date,
+      startTime,
+      endTime,
+      description,
+    }: {
+      classId: number;
+      title: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+      description?: string;
+    }) =>
+      createClassLesson(classId, {
+        title,
+        date,
+        startTime,
+        endTime,
+        description,
+      }),
+    onSuccess: invalidateLessons,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      lessonId,
+      title,
+      date,
+      startTime,
+      endTime,
+      description,
+    }: {
+      lessonId: number;
+      title: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+      description?: string;
+    }) =>
+      updateClassLesson(lessonId, {
+        title,
+        date,
+        startTime,
+        endTime,
+        description,
+      }),
+    onSuccess: invalidateLessons,
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: cancelClassLesson,
+    onSuccess: invalidateLessons,
+  });
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,15 +202,57 @@ const AgendaTab: React.FC = () => {
   };
 
   const handleSaveEvent = (eventData: Omit<CalendarEvent, 'id'>) => {
-    if (eventToEdit) {
-      setEvents(prev => prev.map(e => e.id === eventToEdit.id ? { ...eventData, id: e.id } : e));
-    } else {
-      setEvents(prev => [...prev, { ...eventData, id: Date.now().toString() }]);
+    if (eventData.type !== 'aula' || !eventData.classId) {
+      addToast('A agenda da plataforma salva apenas aulas vinculadas a uma turma.', 'warning');
+      return;
     }
+
+    const date = format(eventData.date, 'yyyy-MM-dd');
+    const payload = {
+      classId: eventData.classId,
+      title: eventData.title,
+      date,
+      startTime: eventData.time,
+      endTime: eventData.endTime || eventData.time,
+      description: eventData.description,
+    };
+
+    if (eventToEdit?.lessonId) {
+      updateMutation.mutate(
+        { lessonId: eventToEdit.lessonId, ...payload },
+        {
+          onSuccess: () => {
+            addToast('Aula atualizada com sucesso!', 'success');
+            setIsModalOpen(false);
+          },
+          onError: (error) => {
+            addToast(apiErrorMessage(error, 'Não foi possível atualizar a aula.'), 'error');
+          },
+        },
+      );
+      return;
+    }
+
+    createMutation.mutate(payload, {
+      onSuccess: () => {
+        addToast('Aula agendada com sucesso!', 'success');
+        setIsModalOpen(false);
+      },
+      onError: (error) => {
+        addToast(apiErrorMessage(error, 'Não foi possível agendar a aula.'), 'error');
+      },
+    });
   };
 
   const handleDeleteEvent = (id: string) => {
-    setEvents(prev => prev.filter(e => e.id !== id));
+    const lessonId = Number(id);
+    if (!lessonId) return;
+    cancelMutation.mutate(lessonId, {
+      onSuccess: () => addToast('Aula cancelada com sucesso.', 'success'),
+      onError: (error) => {
+        addToast(apiErrorMessage(error, 'Não foi possível cancelar a aula.'), 'error');
+      },
+    });
   };
 
   const openNewEventModal = () => {

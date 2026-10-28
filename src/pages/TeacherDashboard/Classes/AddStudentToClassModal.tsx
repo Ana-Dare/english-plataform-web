@@ -12,8 +12,10 @@ import {
   Mail,
   GraduationCap,
 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useToast from "../../../contexts/Toast/useToast";
 import { useStudents } from "../../../contexts/Students/hooks/useStudents";
+import { addStudentToClass } from "../services/class";
 
 interface AddStudentToClassModalProps {
   isOpen: boolean;
@@ -60,6 +62,23 @@ export const AddStudentToClassModal: React.FC<AddStudentToClassModalProps> = ({
 }) => {
   const { addToast } = useToast();
   const { students, updateStudent } = useStudents();
+  const queryClient = useQueryClient();
+  const enrollMutation = useMutation({
+    mutationFn: async (payload: { classId: number; studentIds: number[] }) => {
+      await Promise.all(
+        payload.studentIds.map((studentId) =>
+          addStudentToClass(payload.classId, studentId),
+        ),
+      );
+    },
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: ["classStudents", variables.classId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["classesList"] });
+      void queryClient.invalidateQueries({ queryKey: ["studentsList"] });
+    },
+  });
 
   const [searchExisting, setSearchExisting] = useState("");
   const [selectedExistingIds, setSelectedExistingIds] = useState<number[]>([]);
@@ -117,35 +136,58 @@ export const AddStudentToClassModal: React.FC<AddStudentToClassModalProps> = ({
     }
   };
 
-  const handleLinkExistingStudents = () => {
-    if (selectedExistingIds.length === 0) return;
+  const handleLinkExistingStudents = async () => {
+    if (selectedExistingIds.length === 0 || !targetClassId) {
+      addToast("Selecione ao menos um aluno e uma turma válida.", "warning");
+      return;
+    }
 
     const toLink = availableExistingStudents.filter((s) =>
       selectedExistingIds.includes(s.id),
     );
+    const missingAcademicId = toLink.filter((std) => !std.studentId);
+    if (missingAcademicId.length > 0) {
+      addToast(
+        "Não foi possível identificar o perfil acadêmico de um dos alunos.",
+        "error",
+      );
+      return;
+    }
 
-    toLink.forEach((std) => {
-      updateStudent(std.id, {
-        class_id: targetClassId,
-      });
-
-      onStudentEnrolled({
-        id: std.id,
-        name: std.name,
-        email: std.email,
-        phone: std.phone,
-        level: std.level,
-        turma: targetClassName,
-        isActive: std.isActive,
-        color: std.avatarColor,
-      });
-    });
-
-    addToast(
-      `${toLink.length} aluno${toLink.length > 1 ? "s" : ""} vinculado${toLink.length > 1 ? "s" : ""} com sucesso à turma!`,
-      "success",
+    enrollMutation.mutate(
+      {
+        classId: targetClassId,
+        studentIds: toLink.map((std) => std.studentId!),
+      },
+      {
+        onSuccess: () => {
+          toLink.forEach((std) => {
+            updateStudent(std.id, { class_id: targetClassId });
+            onStudentEnrolled({
+              id: std.id,
+              name: std.name,
+              email: std.email,
+              phone: std.phone,
+              level: std.level,
+              turma: targetClassName,
+              isActive: std.isActive,
+              color: std.avatarColor,
+            });
+          });
+          addToast(
+            `${toLink.length} aluno${toLink.length > 1 ? "s" : ""} vinculado${toLink.length > 1 ? "s" : ""} com sucesso à turma!`,
+            "success",
+          );
+          onClose();
+        },
+        onError: () => {
+          addToast(
+            "Não foi possível vincular os alunos à turma. Tente novamente.",
+            "error",
+          );
+        },
+      },
     );
-    onClose();
   };
 
   const handleGoToOfficialRegister = () => {
@@ -323,9 +365,12 @@ export const AddStudentToClassModal: React.FC<AddStudentToClassModalProps> = ({
                 <PrimaryButton
                   type="button"
                   onClick={handleLinkExistingStudents}
-                  disabled={selectedExistingIds.length === 0}
+                  disabled={
+                    selectedExistingIds.length === 0 || enrollMutation.isPending
+                  }
                 >
-                  <Plus size={16} /> Vincular à Turma
+                  <Plus size={16} />{" "}
+                  {enrollMutation.isPending ? "Vinculando..." : "Vincular à Turma"}
                 </PrimaryButton>
               </div>
             </FooterActionsRow>

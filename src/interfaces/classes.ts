@@ -7,6 +7,8 @@ export interface CreateClassParams {
 
 export interface Class extends CreateClassParams {
   id: number;
+  teacher_id?: number;
+  students_count?: number;
   created_at?: string;
   updated_at?: string;
 }

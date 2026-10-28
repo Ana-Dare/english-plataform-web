@@ -41,29 +41,81 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import useToast from "../../../contexts/Toast/useToast";
 import { getInitials, getAvatarColorByName } from "../../../utils/avatar";
-import { updateUser } from "../../../services/auth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getMe, updateProfileImage, updateUser } from "../../../services/user";
 
 const ProfileTab: React.FC = () => {
   const { addToast } = useToast();
   const { profile, updateProfile, updatePhoto } = useProfile();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: getMe,
+  });
 
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
   const [phone, setPhone] = useState(profile.phone);
   const [description, setDescription] = useState(profile.description);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Sincronizar com dados do usuário autenticado
   useEffect(() => {
-    if (user) {
-      const nameParts = user.name.split(" ");
-      setFirstName(nameParts[0] || "");
-      setLastName(nameParts.slice(1).join(" ") || "");
-    }
-  }, [user]);
+    const source = me ?? user;
+    if (!source) return;
+    const nameParts = source.name.split(" ");
+    setFirstName(nameParts[0] || "");
+    setLastName(nameParts.slice(1).join(" ") || "");
+    if (me?.phone) setPhone(me.phone);
+    if (me?.avatar_url) updatePhoto(me.avatar_url);
+  }, [me, user, updatePhoto]);
+
+  const saveMutation = useMutation({
+    mutationFn: (payload: { name: string; phone: string }) =>
+      updateUser((me ?? user)!.id, payload),
+    onSuccess: (updated) => {
+      const nameParts = updated.name.split(" ");
+      const nextUser = {
+        ...user!,
+        name: updated.name,
+        avatarUrl: updated.avatar_url ?? user?.avatarUrl,
+      };
+      setUser(nextUser);
+      localStorage.setItem("@App:user", JSON.stringify(nextUser));
+      updateProfile({
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        email: updated.email,
+        phone: updated.phone ?? "",
+        description,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+      addToast("Perfil atualizado com sucesso!", "success");
+    },
+    onError: () => {
+      addToast("Erro ao atualizar perfil. Tente novamente.", "error");
+    },
+  });
+
+  const photoMutation = useMutation({
+    mutationFn: (file: File) =>
+      updateProfileImage((me ?? user)!.id, file),
+    onSuccess: (avatarUrl) => {
+      updatePhoto(avatarUrl);
+      if (user) {
+        const nextUser = { ...user, avatarUrl };
+        setUser(nextUser);
+        localStorage.setItem("@App:user", JSON.stringify(nextUser));
+      }
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+      addToast("Foto de perfil atualizada!", "success");
+    },
+    onError: () => {
+      addToast("Não foi possível enviar a foto. Tente novamente.", "error");
+    },
+  });
 
   const validateProfile = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -93,12 +145,7 @@ const ProfileTab: React.FC = () => {
         addToast("Formato inválido. Use JPG ou PNG.", "error");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updatePhoto(reader.result as string);
-        addToast("Foto de perfil atualizada!", "success");
-      };
-      reader.readAsDataURL(file);
+      photoMutation.mutate(file);
     }
   };
 
@@ -116,45 +163,15 @@ const ProfileTab: React.FC = () => {
       return;
     }
 
-    if (!user) {
+    if (!(me ?? user)) {
       addToast("Usuário não encontrado.", "error");
       return;
     }
 
-    setIsSaving(true);
-    try {
-      // Combine nome e sobrenome
-      const fullName = `${firstName} ${lastName}`.trim();
-
-      // Chamar API para atualizar usuário
-      await updateUser(user.id, {
-        name: fullName,
-        email: user.email,
-        phone,
-      });
-
-      // Atualizar dados do usuário no contexto de autenticação
-      const updatedUserData = {
-        ...user,
-        name: fullName,
-      };
-      localStorage.setItem("@App:user", JSON.stringify(updatedUserData));
-
-      // Atualizar profile local também
-      updateProfile({
-        firstName,
-        lastName,
-        email: user.email,
-        phone,
-        description,
-      });
-
-      addToast("Perfil atualizado com sucesso!", "success");
-    } catch {
-      addToast("Erro ao atualizar perfil. Tente novamente.", "error");
-    } finally {
-      setIsSaving(false);
-    }
+    saveMutation.mutate({
+      name: `${firstName} ${lastName}`.trim(),
+      phone,
+    });
   };
 
   const containerVariants = {
@@ -442,9 +459,9 @@ const ProfileTab: React.FC = () => {
               </FormGroup>
             </FormGrid>
 
-            <SaveButton onClick={handleSaveProfile} disabled={isSaving}>
+            <SaveButton onClick={handleSaveProfile} disabled={saveMutation.isPending}>
               <Save size={18} />
-              {isSaving ? "Salvando..." : "Salvar alterações"}
+              {saveMutation.isPending ? "Salvando..." : "Salvar alterações"}
             </SaveButton>
           </FormSection>
         </ProfileContainer>

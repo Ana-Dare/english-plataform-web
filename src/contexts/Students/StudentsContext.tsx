@@ -27,6 +27,7 @@ export interface Student {
   observations: string;
   progress?: number;
   classId?: number | null;
+  studentId?: number | null;
 }
 
 /** Callbacks opcionais para reagir ao resultado de uma operação assíncrona. */

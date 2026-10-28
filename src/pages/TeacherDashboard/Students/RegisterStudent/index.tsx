@@ -101,7 +101,7 @@ const RegisterStudent: React.FC<RegisterStudentProps> = ({
 
   // Carregar Turmas
   const { data: dataClasses } = useQuery({
-    queryKey: ["classes"],
+    queryKey: ["classesList"],
     queryFn: () => listClasses(),
   });
 

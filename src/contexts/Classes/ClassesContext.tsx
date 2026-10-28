@@ -16,7 +16,7 @@ export interface ClassViewModel extends Class {
 /** Callbacks opcionais para reagir ao resultado de uma operação assíncrona. */
 export interface ClassMutationCallbacks {
   onSuccess?: (data: { id: number }) => void;
-  onError?: () => void;
+  onError?: (error?: unknown) => void;
 }
 
 export interface IClassesContext {
@@ -36,6 +36,22 @@ export interface IClassesContext {
   ) => void;
   /** Indica criação em andamento. */
   isAdding: boolean;
+
+  /** Atualiza uma turma (persiste via API). */
+  updateClass: (
+    id: number,
+    params: Partial<CreateClassParams>,
+    callbacks?: ClassMutationCallbacks,
+  ) => void;
+  /** Indica atualização em andamento. */
+  isUpdating: boolean;
+
+  /** Altera somente o status da turma (PATCH /classes/:id/status). */
+  updateClassStatus: (
+    id: number,
+    status: "active" | "inactive",
+    callbacks?: ClassMutationCallbacks,
+  ) => void;
 
   /** Deleta uma turma (persiste via API). */
   deleteClass: (id: number, callbacks?: ClassMutationCallbacks) => void;

@@ -78,6 +78,7 @@ const toStudent = (
     plan: student.profile.vip ? 1 : 0,
     turma: turmaName ? truncateText(turmaName) : "Não atribuída",
     classId: classId,
+    studentId: student.profile.studentId ?? null,
     enrollDate: formatDate(student.createdAt),
     rawEnrollDate: student.createdAt,
     observations: student.profile.notes ?? "",
@@ -98,7 +99,7 @@ const StudentsProvider: React.FC<StudentsProviderProps> = ({ children }) => {
   });
 
   const { data: classesData } = useQuery({
-    queryKey: ["classes"],
+    queryKey: ["classesList"],
     queryFn: listClasses,
   });
 

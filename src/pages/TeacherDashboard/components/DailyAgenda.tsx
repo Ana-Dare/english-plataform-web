@@ -1,5 +1,8 @@
 import styled from "styled-components";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { listLessons } from "../services/material";
 
 const AgendaContainer = styled.div`
   display: flex;
@@ -88,27 +91,61 @@ interface DailyAgendaProps {
 }
 
 const DailyAgenda = ({ onSelect }: DailyAgendaProps) => {
-  const classes = [
-    { time: "14:00", name: "Turma Beginner 1", students: "12 alunos" },
-    { time: "16:00", name: "Aula VIP - Camila", students: "1 aluna" },
-    { time: "19:00", name: "Turma Beginner 2", students: "9 alunos" },
-  ];
+  const today = format(new Date(), "yyyy-MM-dd");
+  const { data: lessons = [], isLoading } = useQuery({
+    queryKey: ["lessons", "today", today],
+    queryFn: () => listLessons({ start_date: today, end_date: today }),
+  });
+
+  const scheduled = lessons.filter((lesson) => lesson.status === "scheduled");
 
   return (
     <AgendaContainer>
       <TimelineLine />
-      {classes.map((cls, idx) => (
-        <AgendaItem key={idx}>
-          <TimeBubble>{cls.time}</TimeBubble>
+      {isLoading && (
+        <AgendaItem>
+          <TimeBubble>--</TimeBubble>
+          <ContentCard>
+            <ClassInfo>
+              <h4>Carregando aulas de hoje...</h4>
+              <p>Buscando a agenda na API</p>
+            </ClassInfo>
+          </ContentCard>
+        </AgendaItem>
+      )}
+      {!isLoading && scheduled.length === 0 && (
+        <AgendaItem>
+          <TimeBubble>--</TimeBubble>
           <ContentCard onClick={onSelect}>
             <ClassInfo>
-              <h4>{cls.name}</h4>
-              <p>{cls.students}</p>
+              <h4>Nenhuma aula hoje</h4>
+              <p>Abra a agenda para agendar uma nova aula</p>
             </ClassInfo>
             <ChevronDown size={20} color="#7a8a9e" />
           </ContentCard>
         </AgendaItem>
-      ))}
+      )}
+      {scheduled.map((lesson) => {
+        const start = new Date(lesson.startTime);
+        const time = Number.isNaN(start.valueOf())
+          ? "--"
+          : start.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+        return (
+          <AgendaItem key={lesson.id}>
+            <TimeBubble>{time}</TimeBubble>
+            <ContentCard onClick={onSelect}>
+              <ClassInfo>
+                <h4>{lesson.title}</h4>
+                <p>{lesson.status === "scheduled" ? "Aula agendada" : lesson.status}</p>
+              </ClassInfo>
+              <ChevronDown size={20} color="#7a8a9e" />
+            </ContentCard>
+          </AgendaItem>
+        );
+      })}
     </AgendaContainer>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   MessageSquare,
   FileText,
@@ -38,13 +38,10 @@ import {
 import CustomDropdown from '../../../components/CustomDropdown';
 import MobileCarousel from '../../../components/MobileCarousel';
 import DocumentViewerModal from '../../TeacherDashboard/Classes/DocumentViewerModal';
-import type { LessonMaterial, Lesson } from '../../TeacherDashboard/services/material';
-import {
-  formatMaterialDateTime,
-  listClassLessons,
-  listLessonMaterials,
-} from '../../TeacherDashboard/services/material';
-import { listClasses } from '../../TeacherDashboard/services/class';
+import type { LessonMaterial } from '../../TeacherDashboard/services/material';
+import { formatMaterialDateTime } from '../../TeacherDashboard/services/material';
+import { useStudentClass } from '../hooks/useStudentClass';
+import { getInitials } from '../../../utils/avatar';
 import {
   TurmaContainer,
   Banner,
@@ -159,40 +156,14 @@ const Turma: React.FC = () => {
   const [viewerMaterials, setViewerMaterials] = useState<LessonMaterial[]>([]);
   const [viewerInitialId, setViewerInitialId] = useState<number | undefined>(undefined);
 
-  const [materials, setMaterials] = useState<LessonMaterial[]>([]);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const { classes } = await listClasses();
-        const classId = classes.find((c) => c.id > 0)?.id;
-        if (!classId || !active) {
-          if (active) {
-            setLessons([]);
-            setMaterials([]);
-          }
-          return;
-        }
-        const classLessons = await listClassLessons(classId);
-        const perLesson = await Promise.all(
-          classLessons.map((lesson) => listLessonMaterials(lesson.id)),
-        );
-        if (!active) return;
-        setLessons(classLessons);
-        setMaterials(perLesson.flat());
-      } catch {
-        if (active) {
-          setLessons([]);
-          setMaterials([]);
-        }
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
+  const {
+    currentClass,
+    lessons,
+    materials,
+    classmates,
+    isLoading: isClassLoading,
+    isError: isClassError,
+  } = useStudentClass();
 
   const markAsViewed = (id: number) => {
     setViewedMaterialIds(prev => {
@@ -961,30 +932,33 @@ const Turma: React.FC = () => {
           <>
             <SectionHeader>
               <h3>Alunos da Turma</h3>
-              <span style={{ color: '#64748B', fontWeight: 500 }}>2 alunos matriculados</span>
+              <span style={{ color: '#64748B', fontWeight: 500 }}>
+                {classmates.length} aluno{classmates.length === 1 ? '' : 's'} matriculado{classmates.length === 1 ? '' : 's'}
+              </span>
             </SectionHeader>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <StudentRow>
-                <div className="student-avatar" style={{ backgroundColor: '#4F46E5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>AS</div>
-                <div className="student-info" style={{ flex: 1 }}>
-                  <span className="student-name">Ana Silva</span>
-                  <span className="student-email">ana.silva@email.com</span>
-                </div>
-                <div className="student-status" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: '#10B981' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} /> Ativo
-                </div>
-              </StudentRow>
-              <StudentRow>
-                <div className="student-avatar" style={{ backgroundColor: '#D97757', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>LP</div>
-                <div className="student-info" style={{ flex: 1 }}>
-                  <span className="student-name">Lucas Pereira</span>
-                  <span className="student-email">lucas.pereira@email.com</span>
-                </div>
-                <div className="student-status" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: '#10B981' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} /> Ativo
-                </div>
-              </StudentRow>
+              {classmates.length === 0 && (
+                <p style={{ color: '#64748B' }}>
+                  {isClassLoading
+                    ? 'Carregando alunos da turma...'
+                    : 'Nenhum aluno vinculado a esta turma ainda.'}
+                </p>
+              )}
+              {classmates.map((student) => (
+                <StudentRow key={student.id}>
+                  <div className="student-avatar" style={{ backgroundColor: '#4F46E5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                    {getInitials(student.name)}
+                  </div>
+                  <div className="student-info" style={{ flex: 1 }}>
+                    <span className="student-name">{student.name}</span>
+                    <span className="student-email">{student.email}</span>
+                  </div>
+                  <div className="student-status" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: '#10B981' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} /> Ativo
+                  </div>
+                </StudentRow>
+              ))}
             </div>
           </>
         );
@@ -1285,15 +1259,18 @@ const Turma: React.FC = () => {
   return (
     <TurmaContainer>
       <Banner>
-        <h2>Turma Intermediate A</h2>
+        <h2>{currentClass?.name || (isClassLoading ? 'Carregando turma...' : 'Você ainda não está em uma turma')}</h2>
         <BannerInfo>
-          <BannerBadge>Intermediate</BannerBadge>
+          <BannerBadge>{isClassError ? 'Erro ao carregar' : 'Turma'}</BannerBadge>
           <AvatarsGroup onClick={() => setActiveTab('alunos')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div className="avatar">AS</div>
-              <div className="avatar orange">LP</div>
+              {classmates.slice(0, 3).map((student) => (
+                <div className="avatar" key={student.id}>
+                  {getInitials(student.name)}
+                </div>
+              ))}
             </div>
-            <StudentsCount>2 alunos</StudentsCount>
+            <StudentsCount>{classmates.length} alunos</StudentsCount>
           </AvatarsGroup>
         </BannerInfo>
       </Banner>

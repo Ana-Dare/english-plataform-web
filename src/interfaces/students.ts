@@ -28,6 +28,7 @@ export interface IStudents {
   createdAt: string;
   avatar_url?: string | null;
   profile: {
+    studentId?: number | null;
     levelId: number | null;
     vip: boolean;
     notes: string | null;
